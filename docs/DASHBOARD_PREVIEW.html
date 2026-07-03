@@ -1,0 +1,40 @@
+<html>
+<head>
+  <title>MLB Draft 2026 Tracker Dashboard Preview</title>
+  <style>
+    body { font-family: Arial, sans-serif; margin: 20px; background: #0f172a; color: #e2e8f0; }
+    h1,h2,h3 { color: #f8fafc; }
+    .cards { display: flex; gap: 16px; flex-wrap: wrap; margin-bottom: 24px; }
+    .card { background: #1e293b; padding: 16px; border-radius: 10px; min-width: 220px; }
+    table { border-collapse: collapse; width: 100%; margin-bottom: 28px; background: #111827; }
+    th, td { border: 1px solid #334155; padding: 8px; text-align: left; font-size: 14px; }
+    th { background: #1d4ed8; color: white; }
+  </style>
+</head>
+<body>
+  <h1>MLB Draft 2026 Tracker Dashboard</h1>
+  <div class="cards">
+    <div class="card"><h3>Prospects Loaded</h3><div>10</div></div>
+    <div class="card"><h3>Actual Picks Loaded</h3><div>0</div></div>
+    <div class="card"><h3>Predictions Loaded</h3><div>102</div></div>
+    <div class="card"><h3>Top Available</h3><div>Grady Emerson</div></div>
+  </div>
+  <h2>Best Available</h2>
+  <table><thead><tr><th>rank</th><th>full_name</th><th>position_name</th><th>school_name</th></tr></thead><tbody>
+    <tr><td>1</td><td>Grady Emerson</td><td>Shortstop</td><td>Fort Worth Christian (TX)</td></tr>
+    <tr><td>2</td><td>Roch Cholowsky</td><td>Shortstop</td><td>UCLA</td></tr>
+    <tr><td>3</td><td>Vahn Lackey</td><td>Catcher</td><td>Georgia Tech</td></tr>
+    <tr><td>4</td><td>Jackson Flora</td><td>Pitcher</td><td>UC Santa Barbara</td></tr>
+    <tr><td>5</td><td>Jacob Lombard</td><td>Shortstop</td><td>Gulliver Prep (FL)</td></tr>
+  </tbody></table>
+  <h2>Predictions (sample)</h2>
+  <table><thead><tr><th>pick_number</th><th>team_name</th><th>player_name</th><th>predicted_probability</th><th>model_version</th></tr></thead><tbody>
+    <tr><td>1</td><td>Chicago White Sox</td><td>Roch Cholowsky</td><td>1.0000</td><td>mock_consensus_v1</td></tr>
+    <tr><td>2</td><td>Tampa Bay Rays</td><td>Grady Emerson</td><td>0.6667</td><td>mock_consensus_v1</td></tr>
+    <tr><td>2</td><td>Tampa Bay Rays</td><td>Vahn Lackey</td><td>0.3333</td><td>mock_consensus_v1</td></tr>
+    <tr><td>3</td><td>Minnesota Twins</td><td>Vahn Lackey</td><td>0.6667</td><td>mock_consensus_v1</td></tr>
+    <tr><td>3</td><td>Minnesota Twins</td><td>Grady Emerson</td><td>0.3333</td><td>mock_consensus_v1</td></tr>
+    <tr><td>4</td><td>San Francisco Giants</td><td>Jacob Lombard</td><td>1.0000</td><td>mock_consensus_v1</td></tr>
+  </tbody></table>
+</body>
+</html>

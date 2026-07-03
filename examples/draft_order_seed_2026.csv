@@ -1,0 +1,20 @@
+round_label,round_pick_number,pick_number,team_id,team_name,team_abbrev,slot_type,pick_value,bonus_pool_value,compensation_for,acquired_from,notes
+Round 1,1,1,145,Chicago White Sox,CWS,round_1,,,,,Confirmed via MLB 2026 draft order coverage / live source
+Round 1,2,2,139,Tampa Bay Rays,TB,round_1,,,,,Confirmed via MLB 2026 draft order coverage / live source
+Round 1,3,3,142,Minnesota Twins,MIN,round_1,,,,,Confirmed via MLB 2026 draft order coverage / live source
+Round 1,4,4,137,San Francisco Giants,SF,round_1,,,,,Confirmed via MLB 2026 draft order coverage / live source
+Round 1,5,5,134,Pittsburgh Pirates,PIT,round_1,,,,,Confirmed via MLB 2026 draft order coverage / live source
+Round 1,6,6,118,Kansas City Royals,KC,round_1,,,,,Confirmed via MLB 2026 draft order coverage / live source
+Round 1,7,7,110,Baltimore Orioles,BAL,round_1,,,,,Confirmed via MLB 2026 draft order coverage / live source
+Round 1,8,8,133,Athletics,ATH,round_1,,,,,Confirmed via MLB 2026 draft order coverage / live source
+Round 1,9,9,144,Atlanta Braves,ATL,round_1,,,,,Confirmed via MLB 2026 draft order coverage / live source
+Round 1,10,10,115,Colorado Rockies,COL,round_1,,,,,Confirmed via MLB 2026 draft order coverage / live source
+Round 1,11,11,120,Washington Nationals,WSH,round_1,,,,,Confirmed via MLB 2026 draft order coverage / live source
+Round 1,12,12,108,Los Angeles Angels,LAA,round_1,,,,,Confirmed via MLB 2026 draft order coverage / live source
+Round 1,13,13,138,St. Louis Cardinals,STL,round_1,,,,,Confirmed via MLB 2026 draft order coverage / live source
+Round 1,14,14,146,Miami Marlins,MIA,round_1,,,,,Confirmed via MLB 2026 draft order coverage / live source
+Round 1,15,15,112,Chicago Cubs,CHC,round_1,,,,,Seeded from available order summary; verify with official MLB page before draft day
+Compensation,16,16,121,New York Mets,NYM,compensation,,,,,Placeholder compensation row - replace with official data
+Competitive Balance Round A,17,17,137,San Francisco Giants,SFG,competitive_balance_a,,,,,Placeholder comp A row - replace with official data
+Competitive Balance Round A,18,18,158,Milwaukee Brewers,MIL,competitive_balance_a,,,,,Placeholder comp A row - replace with official data
+Competitive Balance Round B,19,40,111,Boston Red Sox,BOS,competitive_balance_b,,,,,Placeholder comp B row - replace with official data

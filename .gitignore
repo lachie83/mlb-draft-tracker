@@ -1,0 +1,41 @@
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+.python-version
+.venv/
+venv/
+
+# R
+.Rhistory
+.RData
+.Rproj.user/
+
+# Env / secrets
+.env
+.env.*
+!.env.example
+
+# Databases and runtime data
+*.db
+*.sqlite
+*.sqlite3
+data/
+
+# OS / editors
+.DS_Store
+.vscode/
+.idea/
+
+# Logs / generated artifacts
+*.log
+dist/
+build/
+coverage/
+.pytest_cache/
+.mypy_cache/
+
+# Temporary files
+*.tmp
+*.bak
