@@ -1,0 +1,14 @@
+version: "3.9"
+
+services:
+  mlb-draft-tracker:
+    build: .
+    container_name: mlb-draft-tracker
+    ports:
+      - "8000:8000"
+    volumes:
+      - ./data:/app/data
+    env_file:
+      - .env
+    working_dir: /app/python_app
+    command: python3 dashboard.py --host 0.0.0.0 --port 8000
