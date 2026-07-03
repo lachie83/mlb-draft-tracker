@@ -8,7 +8,12 @@ from mlb_tracker.live_monitor import reconcile_live_picks
 from mlb_tracker.mock_ingest import ingest_mock_assignments, seed_curated_mock_assignments
 from mlb_tracker.no_r_ingest import build_no_r_seed
 from mlb_tracker.predictions import generate_predictions
-from mlb_tracker.sources import fetch_baseballr_prospects_csv, normalize_prospect_row, seed_draft_slots_from_csv
+from mlb_tracker.sources import (
+    fetch_baseballr_prospects_csv,
+    normalize_prospect_row,
+    seed_draft_slots_from_csv,
+    verify_baseballr_setup,
+)
 from mlb_tracker.telegram import TelegramNotifier
 
 
@@ -84,6 +89,14 @@ def cmd_live_monitor(args):
     print(f"Observed {len(new_picks)} new picks")
 
 
+def cmd_verify_baseballr(_args):
+    ok, message = verify_baseballr_setup()
+    if ok:
+        print(message)
+        return
+    raise RuntimeError(message)
+
+
 def build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(description="MLB Draft 2026 tracker")
     parser.add_argument("--db", default=str(DEFAULT_DB_PATH))
@@ -118,10 +131,16 @@ def build_parser() -> argparse.ArgumentParser:
     p = sub.add_parser("live-monitor")
     p.add_argument("--year", type=int, default=2026)
     p.set_defaults(func=cmd_live_monitor)
+
+    p = sub.add_parser("verify-baseballr")
+    p.set_defaults(func=cmd_verify_baseballr)
     return parser
 
 
 if __name__ == "__main__":
     parser = build_parser()
     args = parser.parse_args()
-    args.func(args)
+    try:
+        args.func(args)
+    except RuntimeError as exc:
+        parser.exit(status=1, message=f"ERROR: {exc}\n")

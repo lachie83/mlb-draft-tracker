@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import csv
 import json
+import re
 import subprocess
 from datetime import datetime, timezone
 from pathlib import Path
@@ -13,6 +14,7 @@ from .db import dump_json
 
 PROJECT_ROOT = Path(__file__).resolve().parents[2]
 EXAMPLES_DIR = PROJECT_ROOT / "examples"
+REQUIRED_R_PACKAGES = ("baseballr", "DBI", "RSQLite", "jsonlite")
 
 
 def utc_now() -> str:
@@ -28,18 +30,96 @@ def has_rscript() -> bool:
 
 
 def run_rscript(code: str) -> str:
-    result = subprocess.run(
-        ["Rscript", "-e", code],
-        text=True,
-        capture_output=True,
-        check=True,
+    try:
+        result = subprocess.run(
+            ["Rscript", "-e", code],
+            text=True,
+            capture_output=True,
+            check=True,
+        )
+        return result.stdout
+    except FileNotFoundError as exc:
+        raise RuntimeError(
+            "Rscript was not found on PATH. Install R first, then install required packages "
+            "(baseballr, DBI, RSQLite, jsonlite). You can still use no-R mode with "
+            "`python3 main.py seed-no-r-prospects --year 2026`."
+        ) from exc
+    except subprocess.CalledProcessError as exc:
+        stderr = (exc.stderr or "").strip()
+        match = re.search(r"there is no package called [\"'‘`](.+?)[\"'’`]", stderr)
+        if match:
+            pkg = match.group(1)
+            raise RuntimeError(
+                f"R package '{pkg}' is missing. Install required packages with:\n"
+                "Rscript -e \"install.packages(c('baseballr','DBI','RSQLite','jsonlite'))\""
+            ) from exc
+        raise RuntimeError(
+            "Rscript command failed while running baseballr integration. "
+            "Run `python3 main.py verify-baseballr` to diagnose setup.\n"
+            f"R error output:\n{stderr or '(no stderr output)'}"
+        ) from exc
+
+
+def verify_baseballr_setup() -> tuple[bool, str]:
+    if not has_rscript():
+        return (
+            False,
+            "Rscript not found on PATH.\n"
+            "Install R, then install required packages:\n"
+            "Rscript -e \"install.packages(c('baseballr','DBI','RSQLite','jsonlite'))\"",
+        )
+
+    package_list = ",".join(f"'{pkg}'" for pkg in REQUIRED_R_PACKAGES)
+    check_code = f"""
+    pkgs <- c({package_list})
+    missing <- pkgs[!vapply(pkgs, requireNamespace, logical(1), quietly = TRUE)]
+    if (length(missing) > 0) {{
+      cat(paste(missing, collapse = ","), sep = "")
+      quit(status = 2)
+    }}
+    cat("ok")
+    """
+    try:
+        result = subprocess.run(["Rscript", "-e", check_code], text=True, capture_output=True)
+    except FileNotFoundError:
+        return (
+            False,
+            "Rscript not found on PATH.\n"
+            "Install R, then install required packages:\n"
+            "Rscript -e \"install.packages(c('baseballr','DBI','RSQLite','jsonlite'))\"",
+        )
+    if result.returncode == 0 and result.stdout.strip() == "ok":
+        return True, f"R + baseballr path is ready (packages: {', '.join(REQUIRED_R_PACKAGES)})."
+
+    missing_csv = (result.stdout or "").strip()
+    if missing_csv:
+        missing = ", ".join(pkg for pkg in missing_csv.split(",") if pkg)
+        return (
+            False,
+            "Missing R package(s): "
+            f"{missing}\n"
+            "Install required packages with:\n"
+            "Rscript -e \"install.packages(c('baseballr','DBI','RSQLite','jsonlite'))\"",
+        )
+
+    stderr = (result.stderr or "").strip()
+    return (
+        False,
+        "Unable to verify R package setup.\n"
+        "Run `Rscript --version` and then install required packages with:\n"
+        "Rscript -e \"install.packages(c('baseballr','DBI','RSQLite','jsonlite'))\"\n"
+        f"R error output:\n{stderr or '(no stderr output)'}",
     )
-    return result.stdout
 
 
 def fetch_baseballr_prospects_csv(year: int) -> list[dict[str, Any]]:
     if not has_rscript():
-        raise RuntimeError("Rscript is not installed. Install R + baseballr, or use a cached JSON export.")
+        raise RuntimeError(
+            "Rscript is not installed. Install R and required packages "
+            "(baseballr, DBI, RSQLite, jsonlite), then retry.\n"
+            "To continue without R, use no-R mode:\n"
+            "python3 main.py seed-no-r-prospects --year 2026"
+        )
     code = f'''
     suppressPackageStartupMessages({{
       library(baseballr)
