@@ -31,7 +31,8 @@ python3 dashboard.py --host 0.0.0.0 --port 8000
 ## Live-source modes
 ### Preferred mode
 - `python3 main.py sync-prospects --year 2026`
-- requires `Rscript` + `baseballr`
+- requires `Rscript` + `baseballr`, `DBI`, `RSQLite`, `jsonlite`
+- verify setup: `python3 main.py verify-baseballr`
 
 ### No-R fallback mode
 - `python3 main.py seed-no-r-prospects --year 2026`

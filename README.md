@@ -22,6 +22,7 @@ A local SQLite-backed tracker for the 2026 MLB Draft that stores prospects, draf
 Uses `baseballr::mlb_draft_prospects()` through R:
 - best source for prospect + draft mapping when R is available
 - supports live draft reconciliation logic
+- requires `Rscript` plus R packages: `baseballr`, `DBI`, `RSQLite`, `jsonlite`
 
 ### No-R fallback mode
 Uses direct MLB Pipeline page scraping and curated seed data:
@@ -92,11 +93,30 @@ docker run --rm -it \
 ```
 
 ## R / baseballr mode
-Once R is installed with the required packages:
+Install R, then install required R packages:
+```bash
+Rscript -e "install.packages(c('baseballr','DBI','RSQLite','jsonlite'))"
+```
+
+Verify your setup before running sync/monitor commands:
+```bash
+python3 main.py verify-baseballr
+```
+
+When verification passes:
 ```bash
 python3 main.py sync-prospects --year 2026
 python3 main.py live-monitor --year 2026
 ```
+
+If `verify-baseballr` fails, fix the reported R / package issue or use no-R mode:
+```bash
+python3 main.py seed-no-r-prospects --year 2026
+```
+
+## When to use each mode
+- Prefer **R + baseballr mode** for production sync/live monitoring and best prospect-to-pick mapping.
+- Use **no-R fallback mode** when R is not available, for local demos, testing, or bootstrap seeding.
 
 ## Environment variables
 Use a local `.env` file or exported shell variables for secrets such as Telegram bot credentials.
