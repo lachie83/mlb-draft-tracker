@@ -43,6 +43,54 @@ python3 main.py seed-mock-consensus --year 2026
 python3 dashboard.py --host 0.0.0.0 --port 8000
 ```
 
+## Docker
+### Build
+```bash
+docker build -t mlb-draft-tracker .
+```
+
+### Run dashboard
+```bash
+docker run --rm -it \
+  -p 8000:8000 \
+  -v $(pwd)/data:/app/data \
+  --env-file .env \
+  mlb-draft-tracker
+```
+
+Open:
+- `http://localhost:8000`
+
+### Docker Compose
+```bash
+docker compose up --build
+```
+
+### Run CLI commands in Docker
+```bash
+docker run --rm -it \
+  -v $(pwd)/data:/app/data \
+  --env-file .env \
+  mlb-draft-tracker \
+  python3 main.py init-db
+```
+
+```bash
+docker run --rm -it \
+  -v $(pwd)/data:/app/data \
+  --env-file .env \
+  mlb-draft-tracker \
+  python3 main.py sync-prospects --year 2026
+```
+
+```bash
+docker run --rm -it \
+  -v $(pwd)/data:/app/data \
+  --env-file .env \
+  mlb-draft-tracker \
+  python3 main.py generate-predictions --year 2026 --top-n 5 --max-pick 20
+```
+
 ## R / baseballr mode
 Once R is installed with the required packages:
 ```bash
