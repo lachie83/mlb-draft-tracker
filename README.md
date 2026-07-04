@@ -44,6 +44,20 @@ python3 main.py seed-mock-consensus --year 2026
 python3 dashboard.py --host 0.0.0.0 --port 8000
 ```
 
+## Testing
+Core tracker logic (schema init, prospect/draft-slot upserts, prediction generation,
+Telegram dedupe, and fallback ingest normalization) has an automated test suite using
+`pytest`. Tests run fully offline — no database file, R, or network access required.
+
+```bash
+cd python_app
+python3 -m venv .venv
+source .venv/bin/activate
+pip install -r requirements-dev.txt
+
+pytest
+```
+
 ## Docker
 ### Build
 ```bash
