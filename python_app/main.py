@@ -12,6 +12,7 @@ from mlb_tracker.sources import (
     fetch_baseballr_prospects_csv,
     normalize_prospect_row,
     seed_draft_slots_from_csv,
+    seed_prospects_from_csv,
     verify_baseballr_setup,
 )
 from mlb_tracker.telegram import TelegramNotifier
@@ -19,6 +20,7 @@ from mlb_tracker.telegram import TelegramNotifier
 
 ROOT = Path(__file__).resolve().parents[1]
 SEED_ORDER = ROOT / "examples" / "draft_order_seed_2026.csv"
+SEED_PROSPECTS_CSV = ROOT / "examples" / "prospects_top250_seed_2026.csv"
 
 
 def cmd_init_db(args):
@@ -46,6 +48,17 @@ def cmd_seed_no_r_prospects(args):
     conn.commit()
     conn.close()
     print(f"Seeded {len(rows)} no-R prospects for {args.year}")
+
+
+def cmd_seed_prospects_csv(args):
+    init_db(args.db)
+    conn = get_connection(args.db)
+    rows = seed_prospects_from_csv(Path(args.csv), args.year)
+    for row in rows:
+        upsert_prospect(conn, row)
+    conn.commit()
+    conn.close()
+    print(f"Seeded {len(rows)} prospects from {args.csv}")
 
 
 def cmd_seed_draft_order(args):
@@ -123,6 +136,11 @@ def build_parser() -> argparse.ArgumentParser:
     p = sub.add_parser("seed-no-r-prospects")
     p.add_argument("--year", type=int, default=2026)
     p.set_defaults(func=cmd_seed_no_r_prospects)
+
+    p = sub.add_parser("seed-prospects-csv")
+    p.add_argument("--year", type=int, default=2026)
+    p.add_argument("--csv", default=str(SEED_PROSPECTS_CSV))
+    p.set_defaults(func=cmd_seed_prospects_csv)
 
     p = sub.add_parser("seed-draft-order")
     p.add_argument("--year", type=int, default=2026)

@@ -66,7 +66,7 @@ app's built-in db path) overrides, e.g. `make pre-draft-sync YEAR=2025`.
 | `make poll-draft-day` | `scripts/poll_draft_day.sh` — runs `live-monitor` on a loop (default every 60s, override with `POLL_INTERVAL_SECONDS`). Refuses to start a second poller for the same year, and stops itself after 5 consecutive failures instead of looping forever. |
 | `make live-monitor-status` | `scripts/live_monitor_status.sh` — shows whether a poller is running, the tail of its log, and the most recently recorded picks. Use this before restarting after a crash. |
 | `make test-telegram` | Sends a one-off Telegram message via `main.py test-telegram` to confirm delivery. See §7. |
-| `make init-db` / `sync-prospects` / `seed-no-r-prospects` / `seed-draft-order` / `generate-predictions` / `seed-mock-consensus` / `verify-baseballr` / `live-monitor` | Thin wrappers around the matching `main.py` subcommand. |
+| `make init-db` / `sync-prospects` / `seed-no-r-prospects` / `seed-prospects-csv` / `seed-draft-order` / `generate-predictions` / `seed-mock-consensus` / `verify-baseballr` / `live-monitor` | Thin wrappers around the matching `main.py` subcommand. `seed-prospects-csv` loads the full top-250 board from `examples/prospects_top250_seed_2026.csv` when baseballr is unavailable — `pre_draft_sync.sh` picks this automatically when a CSV exists for the requested year, falling back to the smaller live `seed-no-r-prospects` scrape otherwise. |
 | `make dashboard` | Runs the local dashboard on `:8000`. |
 
 Run `make help` for the full list.

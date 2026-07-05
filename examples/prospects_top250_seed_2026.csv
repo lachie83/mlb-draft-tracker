@@ -1,0 +1,251 @@
+rank,full_name,position_abbreviation,school_name,age,height,weight,bats,throws
+1,Grady Emerson,SS,Fort Worth Christian (TX),18,6-3,185,L,R
+2,Roch Cholowsky,SS,UCLA,21,6-2,202,R,R
+3,Vahn Lackey,C,Georgia Tech,20,6-2,215,R,R
+4,Jackson Flora,RHP,UC Santa Barbara,21,6-5,205,R,R
+5,Jacob Lombard,SS,Gulliver Prep (FL),18,6-3,195,R,R
+6,Eric Booth Jr.,OF,Oak Grove (MS),18,6-0,207,L,L
+7,Drew Burress,OF,Georgia Tech,21,5-9,185,R,R
+8,Gio Rojas,LHP,Stoneman Douglas (FL),19,6-4,195,R,L
+9,Justin Lebron,SS,Alabama,21,6-2,190,R,R
+10,Tyler Bell,SS,Kentucky,21,6-1,190,S,R
+11,Ryder Helfrick,C,Arkansas,21,6-1,210,R,R
+12,Derek Curiel,OF,Louisiana State,21,6-2,192,L,L
+13,Trevor Condon,OF,Etowah (GA),18,5-11,178,L,R
+14,Chris Hacopian,2B,Texas A&M,21,6-1,210,R,R
+15,Cameron Flukey,RHP,Coastal Carolina,21,6-6,210,R,R
+16,Jared Grindlinger,LHP/OF,Huntington Beach (CA),17,6-3,190,L,L
+17,Hunter Dietz,LHP,Arkansas,21,6-6,235,R,L
+18,Ace Reese,3B,Mississippi State,21,6-4,220,L,R
+19,AJ Gracia,OF,Virginia,21,6-3,195,L,L
+20,Liam Peterson,RHP,Florida,21,6-5,225,R,R
+21,Bo Lowrance,3B,Christ Church Episcopal (SC),18,6-5,200,L,R
+22,Sawyer Strosnider,OF,Texas Christian,21,6-2,200,L,L
+23,Brody Bumila,LHP,Bishop Feehan (MA),18,6-9,255,L,L
+24,Carson Bolemon,LHP,Southside Christian (SC),19,6-4,215,R,L
+25,Tegan Kuhns,RHP,Tennessee,21,6-3,189,S,R
+26,Cole Carlon,LHP,Arizona State,21,6-5,230,L,L
+27,Cole Prosek,3B/C,Magnolia Heights (MS),19,6-1,195,L,R
+28,Daniel Jackson,C,Georgia,21,6-2,200,R,R
+29,Aiden Robbins,OF,Texas,21,6-2,205,R,R
+30,Zion Rose,OF,Louisville,21,6-1,200,R,R
+31,Logan Reddemann,RHP,UCLA,21,6-2,185,S,R
+32,Aiden Ruiz,SS,The Stony Brook (NY),19,5-10,160,S,S
+33,Caden Sorrell,OF,Texas A&M,21,6-3,210,L,L
+34,Landon Thome,2B/3B,Nazareth Academy (IL),18,6-0,177,L,R
+35,Cade Townsend,RHP,Mississippi,21,6-1,185,R,R
+36,Mason Edwards,LHP,Southern California,20,6-2,210,L,L
+37,Taj Marchand,SS,James Island (SC),17,6-2,200,R,R
+38,Gavin Grahovac,1B,Texas A&M,21,6-3,230,R,R
+39,James Clark,SS,St. John Bosco (CA),18,6-1,195,L,R
+40,Taylor Rabe,RHP,Mississippi,21,6-5,200,R,R
+41,Eric Becker,SS,Virginia,21,6-3,190,L,R
+42,Logan Hughes,OF,Texas Tech,21,5-11,197,L,L
+43,Coleman Borthwick,RHP,South Walton (FL),18,6-6,245,R,R
+44,Jack Radel,RHP,Notre Dame,21,6-5,250,R,R
+45,Logan Schmidt,LHP,Ganesha (CA),17,6-4,210,L,L
+46,Will Brick,C,Christian Brothers (TN),18,6-2,195,R,R
+47,Chris Rembert,2B,Auburn,21,5-11,209,R,R
+48,Jarren Advincula,2B,Georgia Tech,21,6-2,195,L,R
+49,Rocco Maniscalco,SS,Oxford (AL),17,6-2,192,S,R
+50,Chase Brunson,OF,Texas Christian,20,6-3,200,R,R
+51,Wes Mendes,LHP,Florida State,21,6-1,198,R,L
+52,Andrew Williamson,OF,Central Florida,20,6-0,195,L,L
+53,Tyler Spangler,SS,De La Salle (CA),18,6-3,195,L,R
+54,Archer Horn,SS,St. Ignatius (CA),18,6-2,205,L,R
+55,Connor Comeau,SS/3B,Anderson (TX),17,6-4,180,L,R
+56,Jensen Hirschkorn,RHP,Kingsburg (CA),18,6-7,205,L,R
+57,Kaden Waechter,RHP,Jesuit (FL),18,6-3,190,R,R
+58,Ben Blair,RHP,Liberty,21,6-3,200,R,R
+59,Jake Brown,OF,Louisiana State,21,6-2,206,L,L
+60,Ty Head,OF,North Carolina State,21,6-3,205,L,L
+61,Kaiden McCarthy,RHP,Vermont Academy (VT),17,6-0,185,R,R
+62,Mulivai Levu,1B,UCLA,21,6-1,205,L,R
+63,Blake Bowen,OF,JSerra (CA),18,6-3,225,R,R
+64,Joseph Contreras,RHP,Blessed Trinity (GA),18,6-4,207,R,R
+65,Blake Bryant,RHP,Citizens Christian (GA),18,6-6,182,R,R
+66,Sean Duncan,LHP,Terry Fox (BC),18,6-3,184,R,L
+67,Owen Hull,OF,North Carolina,21,6-4,215,L,R
+68,Joey Volchko,RHP,Georgia,21,6-4,225,R,R
+69,Ethan Kleinschmit,LHP,Oregon State,21,6-3,206,L,L
+70,Carson Bailey,LHP,McLennan CC,20,6-4,210,R,L
+71,Ethan Bass,SS,Glenbrook North (IL),18,6-2,180,R,R
+72,Will Gasparino,OF,UCLA,21,6-6,220,R,R
+73,Carson Tinney,C,Texas,21,6-4,240,R,R
+74,Jack Natili,C,Cincinnati,21,6-3,198,R,R
+75,Jake Schaffner,SS,North Carolina,21,6-2,200,L,R
+76,Cooper Harris,RHP,Flower Mound (TX),18,6-3,205,R,R
+77,Landon Brown,RHP,Iowa Colony (TX),18,6-4,210,R,R
+78,Jacob Dudan,RHP,North Carolina State,21,6-2,191,L,R
+79,Dee Kennedy,SS,Kansas State,21,5-11,190,R,R
+80,Denton Lord,RHP,South Walton (FL),18,6-8,220,R,R
+81,Peyton Bonds,OF,Rutgers,20,6-5,230,R,R
+82,Bo Holloway,LHP,Christ Presbyterian (TN),18,6-5,215,L,L
+83,Myles Bailey,1B,Florida State,20,6-4,257,L,R
+84,Kollin Ritchie,OF,Oklahoma State,21,6-2,228,L,R
+85,Savion Sims,RHP,Prestonwood Christian (TX),19,6-8,215,R,R
+86,Ryan Peterson,RHP,Sam Houston,22,6-3,215,R,R
+87,Ethan Wachsmann,RHP,Grandview (CO),18,6-5,225,R,R
+88,Carson Wiggins,RHP,Arkansas,21,6-5,215,R,R
+89,Jack Slightom,RHP,Lyons Township (IL),18,6-5,215,R,R
+90,Luke Williams,SS,Franklin (PA),18,6-0,180,R,R
+91,Tre Broussard,OF,Houston,20,6-0,190,L,L
+92,Ruger Riojas,RHP,Texas,22,6-0,195,R,R
+93,Caden Bogenpohl,OF,Missouri State,21,6-6,245,L,R
+94,Noah Wilson,OF,McCallie (TN),19,6-1,195,L,R
+95,Shane Sdao,LHP,Texas A&M,22,6-3,185,L,L
+96,Gabe Gaeckle,RHP,Arkansas,21,6-0,190,R,R
+97,Beau Peterson,3B,Mill Valley (KS),18,6-3,195,L,R
+98,Ryan Lynch,RHP,North Carolina,21,6-3,215,R,R
+99,Cole Koeninger,RHP/SS,Keller (TX),18,6-3,210,R,R
+100,Cooper Sides,RHP,Orange Lutheran (CA),18,6-5,215,R,R
+101,Evan Dempsey,RHP/OF,Florida Gulf Coast,20,6-2,205,L,R
+102,Will Adams,OF/1B,Hoover (AL),18,6-2,203,L,L
+103,Deiten Lachance,C/1B,Oklahoma,21,6-5,231,R,R
+104,Kade Lewis,1B,Wake Forest,21,6-2,220,L,R
+105,Dylan Bowen,SS,Hanover Central (IN),19,6-0,191,R,R
+106,Jack Dugan,SS/3B,Lipscomb Academy (TN),18,6-2,193,L,R
+107,Trey Ebel,SS,Corona (CA),17,6-0,180,R,R
+108,Anthony Murphy,OF,Corona (CA),19,6-0,185,R,R
+109,Julian Garcia,RHP,St. John Bosco (CA),18,6-3,205,R,R
+110,Kolby Stringer,RHP,West Marion (MS),18,6-3,225,L,R
+111,Wilson Andersen,RHP,Jesuit (FL),18,6-4,205,R,R
+112,Brendan Brock,C/OF,Oklahoma,21,6-3,200,R,R
+113,Tyson LeBlanc,SS,Kansas,21,6-0,200,R,R
+114,Carson Kerce,SS,Georgia Tech,21,5-11,200,R,R
+115,Cam Kozeal,SS/2B,Arkansas,21,5-10,205,L,R
+116,Camden Johnson,3B,Oklahoma,21,6-0,176,L,R
+117,Jaxon Willits,SS,Oklahoma,21,6-0,203,S,R
+118,Malachi Washington,OF,Parkview (GA),18,6-1,203,R,R
+119,Keon Johnson,SS,First Presbyterian (GA),18,6-2,203,R,R
+120,Daniel Cuvet,3B,Miami,21,6-3,240,R,R
+121,Tre Phelps,3B,Georgia,22,6-2,197,R,R
+122,Gavin Giese,RHP,Dana Hills (CA),18,6-3,190,R,R
+123,Brett Renfrow,RHP,Virginia Tech,21,6-3,220,R,R
+124,Sean Dunlap,C,Crown Point (IN),18,6-3,205,R,R
+125,AJ Rice,RHP,Pickens (GA),18,5-11,175,R,R
+126,Logan Georges,RHP,Clovis (CA),19,6-5,210,R,R
+127,Josiah Morris,SS/C,Clayton Valley (CA),18,6-1,180,R,R
+128,Roman Martin,3B,UCLA,21,6-2,208,R,R
+129,Dominic Santarelli,1B,St. Joseph (WI),18,6-2,230,L,L
+130,Gunner Skelton,3B,Columbia Academy (TN),18,6-0,195,R,R
+131,Jace Mataczynski,SS,Hudson (WI),18,6-4,195,R,R
+132,Shawn Sullivan,RHP,Walsh Jesuit (OH),19,6-0,188,R,R
+133,Jason DeCaro,RHP,North Carolina,20,6-5,225,R,R
+134,Trey Beard,LHP,Florida State,21,6-2,185,L,L
+135,Kyle Jones,OF,Florida,21,6-3,190,R,R
+136,Kevin Roberts Jr.,OF,Jackson Prep (MS),17,6-5,220,R,R
+137,Ryan Cooney,2B,Oregon,21,6-0,195,R,R
+138,Hudson DeVaughan,RHP,Mooresville (IN),19,6-5,200,R,R
+139,Tyler Putnam,RHP,Battle (MO),18,6-5,200,R,R
+140,Steele Murdock,RHP,UC San Diego,21,6-2,210,R,R
+141,Gary Morse,RHP,Orange Lutheran (CA),19,6-8,209,R,R
+142,Nathaneal Davis-Cleary,OF,Bishop Moore (FL),18,6-0,185,L,L
+143,Graham Schlicht,RHP,De La Salle (CA),18,6-3,195,R,R
+144,Caden Ferraro,OF,Texas Tech,21,6-2,215,L,L
+145,Ethan McElvain,LHP,Arkansas,21,6-4,250,S,L
+146,Deven Sheerin,RHP,Louisiana State,20,6-5,255,R,R
+147,Alex Hernandez,OF/1B,Georgia Tech,20,6-2,210,R,R
+148,Joe Tiroly,2B/3B,Virginia,21,6-0,200,R,R
+149,Henry Ford,3B,Tennessee,21,6-5,220,R,R
+150,Ryan Marohn,LHP,North Carolina State,21,6-2,192,L,L
+151,Kyle Johnson,LHP,Virginia,21,6-1,205,R,L
+152,CJ Weinstein,SS,Orange Lutheran (CA),19,6-1,190,L,R
+153,Jake McCoy,LHP,South Carolina,21,6-1,185,L,L
+154,Lucas Nawrocki,LHP,Aledo (TX),18,5-11,197,L,L
+155,Tommy LaPour,RHP,Texas Christian,21,6-4,230,R,R
+156,Trey Rangel,RHP,The Colony (TX),19,6-1,185,R,R
+157,Bryce Hill,RHP,Greenwich Country Day (CT),18,6-5,215,R,R
+158,Andruw Giles,OF,Basic (NV),18,6-0,195,L,L
+159,Elliot Lascelles,SS,Upper Canada (ON),18,6-1,181,L,R
+160,Alex Weingartner,SS,St. Augustine (NJ),18,6-2,198,R,R
+161,Jason Amalbert,OF,DePaul Catholic (NJ),18,6-1,190,R,R
+162,Dawson Montesa,RHP,West Virginia,20,6-1,185,R,R
+163,Kyle Casteel,RHP,Butler (PA),18,6-4,205,R,R
+164,Brady Harris,OF,Trinity Christian (FL),18,6-1,185,R,R
+165,Alex Sosa,C,Miami,21,6-1,208,L,R
+166,Dalton Wentz,3B/2B,Wake Forest,20,6-2,215,S,R
+167,Jaxon Jelkin,RHP,Kentucky,23,6-5,195,R,R
+168,Ethan Norby,LHP,East Carolina,21,5-10,195,R,L
+169,James Jorgensen,RHP,Jesuit Prep (TX),18,6-0,195,R,R
+170,Brady Snow,RHP,American Heritage (FL),18,6-0,190,R,R
+171,James Tronstein,OF/SS,Harvard-Westlake (CA),18,5-11,170,R,R
+172,Jacob Madrid,C,Notre Dame (CA),18,6-4,215,R,R
+173,Isaac Morton,RHP,Minnesota,21,6-3,195,R,R
+174,Carson Jasa,RHP,Nebraska,21,6-7,215,R,R
+175,Genson Veras,OF,TNXL Academy (FL),18,6-6,225,R,R
+176,Martin Shelar,OF,Marist (GA),18,6-2,205,R,R
+177,Maddox Molony,SS,Oregon,21,6-2,208,R,R
+178,Russell Sandefer,RHP,Florida,21,6-1,200,R,R
+179,Brayden Dowd,OF,Florida State,21,5-10,180,L,L
+180,Trevor Hansen,RHP,UC Irvine,21,6-2,195,R,R
+181,Coleton Brady,RHP,TNXL Academy (FL),17,6-5,215,R,R
+182,Wil Libbert,LHP,Mississippi,21,6-1,215,L,L
+183,Landon Thiel,LHP,Jackson (OH),17,6-7,230,R,L
+184,Teagan Scott,C,South Salem (OR),18,5-11,195,R,R
+185,Jason Jutronich,LHP,Torrey Pines (CA),18,6-4,190,L,L
+186,Luke McNeillie,RHP,Florida,21,6-3,200,L,R
+187,LJ Mercurius,RHP,Oklahoma,21,6-2,175,R,R
+188,Sawyer Nelson,SS,South Salem (OR),18,6-0,180,L,R
+189,Robbie Lavey,C,George Washington,20,6-2,218,L,R
+190,Rylan Lujo,OF,Georgia,21,6-2,192,R,R
+191,Garrett Wright,OF/C,Tennessee,21,6-0,193,R,R
+192,Jet Berry,SS,Queen Creek (AZ),19,5-10,175,S,R
+193,Cal Scolari,RHP,Oregon,22,6-4,220,R,R
+194,Carter Beck,OF,Indiana State,21,6-0,203,L,R
+195,Duncan Marsten,RHP,Wake Forest,21,6-3,220,R,R
+196,Spencer Evans,LHP,TNXL Academy (FL),18,6-3,190,L,L
+197,Eric Segura,RHP,Oregon State,21,6-2,214,R,R
+198,Ryne Barker,SS/3B,Casteel (AZ),19,6-1,175,L,R
+199,Will Plunkett,SS,Mamaroneck (NY),18,6-3,200,R,R
+200,Grayson Willoughby,RHP,Trinity (KY),19,6-2,195,L,R
+201,Gavin Gallaher,2B,North Carolina,21,6-1,191,R,R
+202,Dylan Vigue,RHP,Georgia,22,6-3,230,R,R
+203,Jorvorskie Lane Jr.,OF,Grapevine (TX),18,6-0,195,R,R
+204,Jake Carbaugh,RHP,Plant City (FL),18,6-5,225,R,R
+205,Alex Conover,OF,Oklahoma State,20,6-4,202,L,R
+206,Dominic Voegele,RHP,Kansas,21,6-2,200,R,R
+207,Alain Gomez-Gudino,C,Saguaro (AZ),18,6-1,205,S,R
+208,Robert Omidi,SS/3B,St. Martin (ON),18,6-1,200,L,R
+209,Matt Ponatoski,RHP,Archbishop Moeller (OH),18,6-2,200,L,R
+210,Eric Guevara,3B,Auburn,21,5-11,207,R,R
+211,Aidan Knaak,RHP,Clemson,21,6-1,215,R,R
+212,Rookie Shepard,SS,Faith Lutheran (NV),18,5-11,190,L,R
+213,Ryan Stedman,RHP,Valley (IA),18,6-3,190,R,R
+214,Gannon Grant,RHP,Center Grove (IN),19,6-2,180,R,R
+215,Eric Nachtsheim,RHP,McNeese State,22,6-4,235,R,R
+216,Michael Harpster,RHP,East Tennessee State,21,6-0,180,R,R
+217,Nathan Taylor,RHP,Cincinnati,21,6-5,230,L,R
+218,Grant Govel,RHP,Southern California,21,6-0,200,R,R
+219,Maxx Yehl,LHP,West Virginia,22,6-6,235,L,L
+220,Cal Randall,RHP,UCLA,21,6-4,235,R,R
+221,Bo Rhudy,RHP,Tennessee,21,6-4,230,R,R
+222,Justin LeGuernic,LHP,Clemson,20,6-4,210,R,L
+223,Thomas Burns,RHP,Texas,21,6-3,240,R,R
+224,Brandon McCraine,SS,Auburn,21,6-3,184,R,R
+225,Lucas Moore,OF,Louisville,21,6-0,185,L,R
+226,Ryan Harwood,OF,Casteel (AZ),18,6-3,220,L,R
+227,Nu'u Contrades,2B,Arizona State,22,5-10,180,R,R
+228,Braden Holcomb,OF,Vanderbilt,21,6-4,245,R,R
+229,Cashel Dugger,C,UCLA,20,6-3,210,L,R
+230,Declan Dahl,RHP,Louisiana Tech,21,6-3,200,R,R
+231,Tyler Fay,RHP,Alabama,22,6-5,215,R,R
+232,Micah Worley,LHP,SUNY Stony Brook,22,6-5,220,R,L
+233,Eli Herst,RHP,Seattle Academy (WA),18,6-5,210,R,R
+234,Ben Davis,RHP,Mississippi State,22,6-4,230,R,R
+235,Griffin Long,RHP,Sonoraville (GA),18,6-2,190,R,R
+236,Ty Horn,RHP,Nebraska,21,6-2,190,L,R
+237,Hudson Calhoun,RHP,Mississippi,21,6-4,210,R,R
+238,Josh McDevitt,RHP,Missouri,22,6-2,195,R,R
+239,Hunter Brown,RHP,North Hunterdon (NJ),18,6-5,220,R,R
+240,Keller Bradley,RHP,Pennsbury (PA),18,6-6,180,R,R
+241,Noah Danza,SS,Gloucester Catholic (NJ),18,6-2,205,R,R
+242,Jon Mora,OF,Somerset Academy (FL),19,5-10,170,L,R
+243,Max Bayles,RHP,Santa Clara,21,6-3,210,R,R
+244,Cole Dennis,RHP,Bishop Snyder (FL),17,6-4,224,R,R
+245,Ricky Ojeda,LHP,UC Irvine,20,5-11,185,L,L
+246,Nathan Aceves,RHP,UC Santa Barbara,20,6-3,220,R,R
+247,Owen Kramkowski,RHP,Arizona,20,6-3,173,R,R
+248,Jerek Turlij,RHP,North East (PA),18,6-3,200,R,R
+249,Gage Peterson,RHP,Appalachian State,21,6-5,220,R,R
+250,Cameron Johnson,LHP,Oklahoma,21,6-6,256,L,L

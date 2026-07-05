@@ -24,11 +24,15 @@ echo "==> Seeding official draft order from $ORDER_CSV"
 python3 main.py "${DB_ARGS[@]}" seed-draft-order --year "$YEAR" --csv "$ORDER_CSV"
 
 echo "==> Syncing prospects"
+PROSPECTS_CSV="${PROSPECTS_SEED_CSV:-../examples/prospects_top250_seed_${YEAR}.csv}"
 if python3 main.py verify-baseballr >/dev/null 2>&1; then
   echo "    baseballr is available, using it as the prospect source"
   python3 main.py "${DB_ARGS[@]}" sync-prospects --year "$YEAR"
+elif [ -f "$PROSPECTS_CSV" ]; then
+  echo "    baseballr is unavailable, seeding the top-250 CSV snapshot ($PROSPECTS_CSV)"
+  python3 main.py "${DB_ARGS[@]}" seed-prospects-csv --year "$YEAR" --csv "$PROSPECTS_CSV"
 else
-  echo "    baseballr is unavailable, using the no-R fallback source"
+  echo "    baseballr is unavailable and no CSV snapshot exists for $YEAR, using the no-R live-scrape fallback"
   python3 main.py "${DB_ARGS[@]}" seed-no-r-prospects --year "$YEAR"
 fi
 

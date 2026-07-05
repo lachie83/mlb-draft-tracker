@@ -212,3 +212,99 @@ def seed_draft_slots_from_csv(csv_path: Path, draft_year: int) -> list[dict[str,
                 }
             )
     return rows
+
+
+PROSPECT_CSV_SOURCE = "mlb_pipeline_draft_prospects_manual_csv"
+
+_INFIELD_ABBREVIATIONS = {"1B", "2B", "3B", "SS"}
+_PITCHER_ABBREVIATIONS = {"RHP", "LHP"}
+_SINGLE_POSITION_NAMES = {
+    "1B": "First Base",
+    "2B": "Second Base",
+    "3B": "Third Base",
+    "SS": "Shortstop",
+    "C": "Catcher",
+    "OF": "Outfield",
+    "RHP": "Pitcher",
+    "LHP": "Pitcher",
+}
+
+
+def expand_position_name(position_abbreviation: str) -> str:
+    """Map a scraped position abbreviation (e.g. 'SS', 'LHP/OF') to the
+    canonical position_name categories used elsewhere in the app."""
+    parts = position_abbreviation.split("/")
+    if len(parts) == 1:
+        return _SINGLE_POSITION_NAMES.get(position_abbreviation, position_abbreviation)
+    parts_set = set(parts)
+    if parts_set & _PITCHER_ABBREVIATIONS and parts_set - _PITCHER_ABBREVIATIONS:
+        return "Two-Way Player"
+    if parts_set <= _INFIELD_ABBREVIATIONS:
+        return "Infield"
+    return _SINGLE_POSITION_NAMES.get(parts[0], parts[0])
+
+
+def classify_school_class(school_name: str) -> str:
+    """Coarse HS / JC / 4YR bucket derived from the school name alone.
+
+    MLB Pipeline's draft rankings page doesn't expose a class-year (e.g. "HS SR",
+    "4YR JR") like baseballr does, only the school name, so this is intentionally
+    approximate: high schools are conventionally suffixed with a state/province
+    abbreviation in parentheses (e.g. "Fort Worth Christian (TX)")."""
+    if re.search(r"\([A-Za-z.\s]+\)$", school_name):
+        return "HS"
+    if re.search(r"\bCC\b|Community College|Junior College", school_name):
+        return "JC"
+    return "4YR"
+
+
+def parse_feet_inches_height(height_weight: str) -> tuple[str | None, int | None]:
+    """Parse a "6' 3\" / 185 lbs" cell into ("6-3", 185)."""
+    m = re.match(r"^(\d+)'\s*(\d+)\"\s*/\s*(\d+)\s*lbs$", height_weight.strip())
+    if not m:
+        return None, None
+    feet, inches, weight = m.groups()
+    return f"{feet}-{inches}", int(weight)
+
+
+def seed_prospects_from_csv(csv_path: Path, draft_year: int, id_base: int = 940000) -> list[dict[str, Any]]:
+    """Load a manually-curated/scraped prospect board CSV (rank, full_name,
+    position_abbreviation, school_name, age, height, weight, bats, throws)
+    for use when baseballr is unavailable. person_id values are synthetic
+    (id_base + rank) since this source doesn't expose real MLB person ids."""
+    rows: list[dict[str, Any]] = []
+    with open(csv_path, newline="", encoding="utf-8") as f:
+        reader = csv.DictReader(f)
+        for src in reader:
+            rank = int(src["rank"])
+            full_name = src["full_name"].strip()
+            position_abbreviation = src["position_abbreviation"].strip()
+            raw = {
+                "person_id": id_base + rank,
+                "person_full_name": full_name,
+                "person_first_name": full_name.split()[0],
+                "person_last_name": full_name.split()[-1],
+                "rank": rank,
+                "person_primary_position_abbreviation": position_abbreviation,
+                "person_primary_position_name": expand_position_name(position_abbreviation),
+                "school_name": src["school_name"].strip(),
+                "school_school_class": classify_school_class(src["school_name"].strip()),
+                "person_current_age": int(src["age"]) if src.get("age") else None,
+                "person_height": src.get("height") or None,
+                "person_weight": int(src["weight"]) if src.get("weight") else None,
+                "person_bat_side_code": src.get("bats") or None,
+                "person_pitch_hand_code": src.get("throws") or None,
+                "is_drafted": False,
+                "is_pass": False,
+                "pick_round": None,
+                "pick_number": None,
+                "team_id": None,
+                "team_name": None,
+                "team_abbreviation": None,
+                "person_active": True,
+                "blurb": "Seeded from MLB Pipeline draft prospect rankings (manual CSV import).",
+            }
+            normalized = normalize_prospect_row(raw, draft_year)
+            normalized["source"] = PROSPECT_CSV_SOURCE
+            rows.append(normalized)
+    return rows
