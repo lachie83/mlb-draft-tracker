@@ -25,9 +25,16 @@ Uses `baseballr::mlb_draft_prospects()` through R:
 - requires `Rscript` plus R packages: `baseballr`, `DBI`, `RSQLite`, `jsonlite`
 
 ### No-R fallback mode
-Uses direct MLB Pipeline page scraping and curated seed data:
-- works when `Rscript` is unavailable
-- useful for dashboard/demo/testing/bootstrap
+Works when `Rscript` is unavailable — useful for dashboard/demo/testing/bootstrap.
+Two options, and they can be combined (later upserts win on conflict):
+- `seed-no-r-prospects` — live scrape of MLB Pipeline's draft page plus a curated
+  top-40 fallback list; small but self-refreshing each run.
+- `seed-prospects-csv` — loads `examples/prospects_top250_seed_2026.csv`, a full
+  top-250 draft board snapshot (rank, name, position, school, age, height/weight,
+  bats/throws). It's a point-in-time export (captured by manually browsing MLB
+  Pipeline's draft rankings page), not a live source, so refresh the CSV
+  periodically as rankings move. `person_id` values in this CSV are synthetic
+  (not real MLB person ids), since the rankings page doesn't expose them.
 
 ## Quick start
 ```bash
@@ -38,7 +45,7 @@ pip install -r requirements.txt
 
 python3 main.py init-db
 python3 main.py seed-draft-order --year 2026 --csv ../examples/draft_order_seed_2026.csv
-python3 main.py seed-no-r-prospects --year 2026
+python3 main.py seed-prospects-csv --year 2026
 python3 main.py generate-predictions --year 2026 --top-n 5 --max-pick 20
 python3 main.py seed-mock-consensus --year 2026
 python3 dashboard.py --host 0.0.0.0 --port 8000
@@ -139,6 +146,8 @@ python3 main.py live-monitor --year 2026
 
 If `verify-baseballr` fails, fix the reported R / package issue or use no-R mode:
 ```bash
+python3 main.py seed-prospects-csv --year 2026
+# or, for a live (smaller) scrape instead of the CSV snapshot:
 python3 main.py seed-no-r-prospects --year 2026
 ```
 
@@ -153,11 +162,11 @@ See `.env.example`.
 
 ## Notes
 - The draft order seed is partially verified; compensation and special-round rows should be finalized before draft day.
-- The no-R fallback currently seeds a partial board rather than a complete top 250.
+- `examples/prospects_top250_seed_2026.csv` is a manually-captured snapshot of MLB Pipeline's draft rankings (see `seed-prospects-csv` above); it will drift from the live board over time and should be refreshed periodically, and its `person_id`s are synthetic rather than real MLB ids.
 - The SQLite DB is intentionally excluded from git; recreate it from schema + seed data.
 
 ## Roadmap
-- expand no-R prospect ingest toward a fuller top-250 board
+- automate periodic refresh of the top-250 prospect CSV snapshot (or replace it with a live full-board source)
 - parse official MLB draft order more completely
 - add a second live pick source beyond `baseballr`
 - improve dashboard filtering and draft-day views
