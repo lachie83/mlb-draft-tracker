@@ -44,6 +44,20 @@ python3 main.py seed-mock-consensus --year 2026
 python3 dashboard.py --host 0.0.0.0 --port 8000
 ```
 
+## Automation helpers
+Common workflows (pre-draft sync, the draft-day polling loop, a Telegram
+test message, poller status/recovery) are wrapped in `Makefile` targets and
+`scripts/*.sh` so you don't need to remember flag combinations:
+```bash
+make pre-draft-sync
+make test-telegram
+make poll-draft-day
+make live-monitor-status
+make help   # full list of targets
+```
+See `docs/OPERATIONS.md` for the full draft-day runbook, cron examples, and
+safe restart / recovery steps.
+
 ## Docker
 ### Build
 ```bash
