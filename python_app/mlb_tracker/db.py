@@ -134,6 +134,28 @@ def insert_or_replace_predictions(conn: sqlite3.Connection, rows: Iterable[dict[
     conn.executemany(sql, rows)
 
 
+def upsert_mock_draft_pick(conn: sqlite3.Connection, row: dict[str, Any]) -> None:
+    sql = """
+    INSERT INTO mock_draft_picks (
+        draft_year, source_name, source_authors, source_date, source_url, weight,
+        pick_number, team_name, player_name, prospect_id, mlb_person_id, board_rank, notes
+    ) VALUES (
+        :draft_year, :source_name, :source_authors, :source_date, :source_url, :weight,
+        :pick_number, :team_name, :player_name, :prospect_id, :mlb_person_id, :board_rank, :notes
+    )
+    ON CONFLICT(draft_year, source_name, source_date, pick_number, player_name) DO UPDATE SET
+        source_authors=excluded.source_authors,
+        source_url=excluded.source_url,
+        weight=excluded.weight,
+        team_name=excluded.team_name,
+        prospect_id=excluded.prospect_id,
+        mlb_person_id=excluded.mlb_person_id,
+        board_rank=excluded.board_rank,
+        notes=excluded.notes
+    """
+    conn.execute(sql, row)
+
+
 def upsert_draft_slot(conn: sqlite3.Connection, row: dict[str, Any]) -> None:
     sql = """
     INSERT INTO draft_slots (

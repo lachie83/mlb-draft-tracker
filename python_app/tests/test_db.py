@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from mlb_tracker.db import get_best_available, get_top_prospects, row_to_dict, rows_to_dicts
 
-from .factories import seed_draft_slot, seed_prospect
+from .factories import seed_draft_slot, seed_mock_draft_pick, seed_prospect
 
 
 EXPECTED_TABLES = {
@@ -10,6 +10,7 @@ EXPECTED_TABLES = {
     "draft_slots",
     "actual_picks",
     "predictions",
+    "mock_draft_picks",
     "source_runs",
     "telegram_events_sent",
     "config",
@@ -119,3 +120,44 @@ def test_row_to_dict_and_rows_to_dicts(conn):
     dicts = rows_to_dicts(rows)
     assert len(dicts) == 1
     assert dicts[0]["full_name"] == "Someone"
+
+
+def test_upsert_mock_draft_pick_inserts_new_row(conn):
+    seed_mock_draft_pick(
+        conn,
+        pick_number=1,
+        team_name="Chicago White Sox",
+        player_name="Roch Cholowsky",
+        source_name="MLB Pipeline Mock Draft",
+        source_date="2026-07-02",
+        weight=0.75,
+        board_rank=2,
+    )
+
+    row = conn.execute(
+        "SELECT team_name, weight, board_rank FROM mock_draft_picks "
+        "WHERE draft_year = 2026 AND pick_number = 1 AND player_name = 'Roch Cholowsky'"
+    ).fetchone()
+    assert row["team_name"] == "Chicago White Sox"
+    assert row["weight"] == 0.75
+    assert row["board_rank"] == 2
+
+
+def test_upsert_mock_draft_pick_updates_on_conflict(conn):
+    seed_mock_draft_pick(conn, pick_number=1, player_name="Roch Cholowsky", source_date="2026-07-02", weight=1.0)
+    seed_mock_draft_pick(conn, pick_number=1, player_name="Roch Cholowsky", source_date="2026-07-02", weight=2.0)
+
+    rows = conn.execute(
+        "SELECT weight FROM mock_draft_picks WHERE draft_year = 2026 AND pick_number = 1 AND player_name = 'Roch Cholowsky'"
+    ).fetchall()
+    assert len(rows) == 1
+    assert rows[0]["weight"] == 2.0
+
+
+def test_upsert_mock_draft_pick_allows_multiple_players_for_same_source_and_pick(conn):
+    # e.g. a mock draft that gives a percentage split across candidates for one pick
+    seed_mock_draft_pick(conn, pick_number=1, player_name="Roch Cholowsky", source_date="2026-07-02", weight=0.5)
+    seed_mock_draft_pick(conn, pick_number=1, player_name="Grady Emerson", source_date="2026-07-02", weight=0.45)
+
+    rows = conn.execute("SELECT player_name FROM mock_draft_picks WHERE draft_year = 2026 AND pick_number = 1").fetchall()
+    assert {r["player_name"] for r in rows} == {"Roch Cholowsky", "Grady Emerson"}

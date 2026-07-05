@@ -5,6 +5,9 @@ import sqlite3
 from collections import defaultdict
 from typing import Any
 
+from .db import upsert_mock_draft_pick
+from .real_mock_drafts_2026 import load_real_mock_draft_picks
+
 
 def ingest_mock_assignments(conn: sqlite3.Connection, assignments: list[dict[str, Any]], draft_year: int = 2026, top_n_per_pick: int = 5) -> list[dict[str, Any]]:
     prospects = conn.execute(
@@ -44,18 +47,109 @@ def ingest_mock_assignments(conn: sqlite3.Connection, assignments: list[dict[str
     return out
 
 
-def seed_curated_mock_assignments() -> list[dict[str, Any]]:
-    return [
-        {'pick_number': 1, 'team_name': 'Chicago White Sox', 'player_name': 'Roch Cholowsky', 'weight': 3.0, 'source': 'MLB Pipeline July 2 + June 25 + historical mock consensus'},
-        {'pick_number': 2, 'team_name': 'Tampa Bay Rays', 'player_name': 'Grady Emerson', 'weight': 2.0, 'source': 'MLB Pipeline July 2'},
-        {'pick_number': 2, 'team_name': 'Tampa Bay Rays', 'player_name': 'Vahn Lackey', 'weight': 1.0, 'source': 'MLB Pipeline June 25'},
-        {'pick_number': 3, 'team_name': 'Minnesota Twins', 'player_name': 'Vahn Lackey', 'weight': 2.0, 'source': 'MLB Pipeline July 2'},
-        {'pick_number': 3, 'team_name': 'Minnesota Twins', 'player_name': 'Grady Emerson', 'weight': 1.0, 'source': 'MLB Pipeline June 25'},
-        {'pick_number': 4, 'team_name': 'San Francisco Giants', 'player_name': 'Jacob Lombard', 'weight': 3.0, 'source': 'MLB Pipeline July 2 + June 25'},
-        {'pick_number': 5, 'team_name': 'Pittsburgh Pirates', 'player_name': 'Jackson Flora', 'weight': 1.5, 'source': 'heuristic extension from top board'},
-        {'pick_number': 6, 'team_name': 'Kansas City Royals', 'player_name': 'Drew Burress', 'weight': 1.2, 'source': 'heuristic extension from top board'},
-        {'pick_number': 7, 'team_name': 'Baltimore Orioles', 'player_name': 'Eric Booth Jr.', 'weight': 1.2, 'source': 'heuristic extension from top board'},
-        {'pick_number': 8, 'team_name': 'Athletics', 'player_name': 'Gio Rojas', 'weight': 1.1, 'source': 'heuristic extension from top board'},
-        {'pick_number': 9, 'team_name': 'Atlanta Braves', 'player_name': 'Justin Lebron', 'weight': 1.0, 'source': 'heuristic extension from top board'},
-        {'pick_number': 10, 'team_name': 'Colorado Rockies', 'player_name': 'Tyler Bell', 'weight': 1.0, 'source': 'heuristic extension from top board'},
-    ]
+def ingest_real_mock_draft_picks(conn: sqlite3.Connection, draft_year: int = 2026) -> list[dict[str, Any]]:
+    """Load the real, dated mock draft picks from real_mock_drafts_2026,
+    match each player against the prospects board, and upsert them into
+    mock_draft_picks. Returns the upserted rows."""
+    prospects = conn.execute(
+        "SELECT prospect_id, mlb_person_id, full_name, rank FROM prospects WHERE draft_year = ?",
+        (draft_year,),
+    ).fetchall()
+    by_name = {row["full_name"].lower(): row for row in prospects}
+    by_rank = {row["rank"]: row for row in prospects if row["rank"] is not None}
+
+    rows: list[dict[str, Any]] = []
+    for pick in load_real_mock_draft_picks(draft_year):
+        # A couple of source articles have a player name that doesn't quite
+        # match the board (e.g. a byline typo); fall back to the board rank
+        # the article itself cited for that player rather than dropping the
+        # match, since editing the quoted name would lose source fidelity.
+        p = by_name.get(pick["player_name"].lower()) or by_rank.get(pick["board_rank"])
+        row = {
+            "draft_year": pick["draft_year"],
+            "source_name": pick["source_name"],
+            "source_authors": pick["source_authors"],
+            "source_date": pick["source_date"],
+            "source_url": pick["source_url"],
+            "weight": pick["weight"],
+            "pick_number": pick["pick_number"],
+            "team_name": pick["team_name"],
+            "player_name": pick["player_name"],
+            "prospect_id": p["prospect_id"] if p else None,
+            "mlb_person_id": p["mlb_person_id"] if p else None,
+            "board_rank": pick["board_rank"],
+            "notes": pick["notes"],
+        }
+        upsert_mock_draft_pick(conn, row)
+        rows.append(row)
+    return rows
+
+
+def generate_mock_consensus_predictions(conn: sqlite3.Connection, draft_year: int = 2026, top_n_per_pick: int = 5) -> list[dict[str, Any]]:
+    """Aggregate mock_draft_picks into predictions: for each pick, combine
+    weight across every source that named the same player (this is where
+    repeated player/team associations across mocks get merged into one
+    consensus signal), then normalize into a probability distribution."""
+    picks = conn.execute(
+        """
+        SELECT pick_number, team_name, player_name, prospect_id, mlb_person_id,
+               weight, source_name, source_date, board_rank
+        FROM mock_draft_picks
+        WHERE draft_year = ?
+        ORDER BY pick_number
+        """,
+        (draft_year,),
+    ).fetchall()
+
+    grouped: dict[int, dict[str, dict[str, Any]]] = defaultdict(dict)
+    for row in picks:
+        pick_number = row["pick_number"]
+        key = row["player_name"].strip().lower()
+        candidate = grouped[pick_number].setdefault(
+            key,
+            {
+                "player_name": row["player_name"],
+                "team_name": row["team_name"],
+                "prospect_id": row["prospect_id"],
+                "mlb_person_id": row["mlb_person_id"],
+                "board_ranks": set(),
+                "total_weight": 0.0,
+                "sources": [],
+            },
+        )
+        candidate["total_weight"] += row["weight"]
+        candidate["sources"].append(f"{row['source_name']} ({row['source_date']})")
+        if row["board_rank"] is not None:
+            candidate["board_ranks"].add(row["board_rank"])
+
+    out: list[dict[str, Any]] = []
+    for pick_number, candidates in grouped.items():
+        total = sum(c["total_weight"] for c in candidates.values()) or 1.0
+        ranked = sorted(candidates.values(), key=lambda c: c["total_weight"], reverse=True)
+        for c in ranked[:top_n_per_pick]:
+            sources = sorted(set(c["sources"]))
+            out.append(
+                {
+                    "draft_year": draft_year,
+                    "pick_number": pick_number,
+                    "team_name": c["team_name"],
+                    "prospect_id": c["prospect_id"],
+                    "mlb_person_id": c["mlb_person_id"],
+                    "player_name": c["player_name"],
+                    "predicted_probability": c["total_weight"] / total,
+                    "rank_score": None,
+                    "mock_score": c["total_weight"],
+                    "fit_score": None,
+                    "buzz_score": None,
+                    "model_version": "mock_consensus_v2",
+                    "prediction_source": "; ".join(sources),
+                    "notes": f"aggregated from {len(c['sources'])} mock draft pick(s)"
+                    + (f"; board rank(s): {', '.join(str(r) for r in sorted(c['board_ranks']))}" if c["board_ranks"] else ""),
+                    "raw_payload": json.dumps(
+                        {"sources": sources, "total_weight": c["total_weight"], "board_ranks": sorted(c["board_ranks"])},
+                        ensure_ascii=False,
+                        sort_keys=True,
+                    ),
+                }
+            )
+    return out

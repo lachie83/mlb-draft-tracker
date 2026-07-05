@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from typing import Any
 
-from mlb_tracker.db import upsert_draft_slot, upsert_prospect
+from mlb_tracker.db import upsert_draft_slot, upsert_mock_draft_pick, upsert_prospect
 from mlb_tracker.sources import normalize_prospect_row
 
 
@@ -60,3 +60,34 @@ def seed_draft_slot(conn, draft_year: int = 2026, pick_number: int = 1, team_nam
     upsert_draft_slot(conn, slot)
     conn.commit()
     return slot
+
+
+def seed_mock_draft_pick(
+    conn,
+    draft_year: int = 2026,
+    pick_number: int = 1,
+    team_name: str = "Test Team",
+    player_name: str = "Test Prospect",
+    source_name: str = "Test Mock Source",
+    source_date: str = "2026-06-01",
+    weight: float = 1.0,
+    **overrides: Any,
+) -> dict[str, Any]:
+    row = {
+        "draft_year": draft_year,
+        "source_name": source_name,
+        "source_authors": overrides.pop("source_authors", None),
+        "source_date": source_date,
+        "source_url": overrides.pop("source_url", None),
+        "weight": weight,
+        "pick_number": pick_number,
+        "team_name": team_name,
+        "player_name": player_name,
+        "prospect_id": overrides.pop("prospect_id", None),
+        "mlb_person_id": overrides.pop("mlb_person_id", None),
+        "board_rank": overrides.pop("board_rank", None),
+        "notes": overrides.pop("notes", None),
+    }
+    upsert_mock_draft_pick(conn, row)
+    conn.commit()
+    return row

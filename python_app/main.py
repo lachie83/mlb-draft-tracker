@@ -5,7 +5,7 @@ from pathlib import Path
 
 from mlb_tracker.db import DEFAULT_DB_PATH, get_connection, init_db, insert_or_replace_predictions, upsert_draft_slot, upsert_prospect
 from mlb_tracker.live_monitor import reconcile_live_picks
-from mlb_tracker.mock_ingest import ingest_mock_assignments, seed_curated_mock_assignments
+from mlb_tracker.mock_ingest import generate_mock_consensus_predictions, ingest_real_mock_draft_picks
 from mlb_tracker.no_r_ingest import build_no_r_seed
 from mlb_tracker.predictions import generate_predictions
 from mlb_tracker.sources import (
@@ -82,14 +82,23 @@ def cmd_generate_predictions(args):
     print(f"Generated {len(rows)} heuristic predictions")
 
 
+def cmd_seed_mock_drafts(args):
+    init_db(args.db)
+    conn = get_connection(args.db)
+    rows = ingest_real_mock_draft_picks(conn, draft_year=args.year)
+    conn.commit()
+    conn.close()
+    print(f"Seeded {len(rows)} mock draft pick observations for {args.year}")
+
+
 def cmd_seed_mock_consensus(args):
     init_db(args.db)
     conn = get_connection(args.db)
-    rows = ingest_mock_assignments(conn, seed_curated_mock_assignments(), draft_year=args.year)
-    insert_or_replace_predictions(conn, rows, args.year, "mock_consensus_v1")
+    rows = generate_mock_consensus_predictions(conn, draft_year=args.year, top_n_per_pick=args.top_n)
+    insert_or_replace_predictions(conn, rows, args.year, "mock_consensus_v2")
     conn.commit()
     conn.close()
-    print(f"Seeded {len(rows)} mock-consensus predictions")
+    print(f"Generated {len(rows)} mock-consensus predictions from mock_draft_picks (run seed-mock-drafts first if this is 0)")
 
 
 def cmd_live_monitor(args):
@@ -153,8 +162,13 @@ def build_parser() -> argparse.ArgumentParser:
     p.add_argument("--max-pick", type=int, default=50)
     p.set_defaults(func=cmd_generate_predictions)
 
+    p = sub.add_parser("seed-mock-drafts")
+    p.add_argument("--year", type=int, default=2026)
+    p.set_defaults(func=cmd_seed_mock_drafts)
+
     p = sub.add_parser("seed-mock-consensus")
     p.add_argument("--year", type=int, default=2026)
+    p.add_argument("--top-n", type=int, default=5)
     p.set_defaults(func=cmd_seed_mock_consensus)
 
     p = sub.add_parser("live-monitor")

@@ -39,7 +39,12 @@ fi
 echo "==> Generating heuristic predictions"
 python3 main.py "${DB_ARGS[@]}" generate-predictions --year "$YEAR" --top-n 5 --max-pick 50
 
-echo "==> Seeding curated mock-consensus predictions"
-python3 main.py "${DB_ARGS[@]}" seed-mock-consensus --year "$YEAR"
+if [ "$YEAR" = "2026" ]; then
+  echo "==> Seeding real mock draft picks and consensus predictions"
+  python3 main.py "${DB_ARGS[@]}" seed-mock-drafts --year "$YEAR"
+  python3 main.py "${DB_ARGS[@]}" seed-mock-consensus --year "$YEAR"
+else
+  echo "==> Skipping mock-consensus: no real mock draft data exists for $YEAR (only 2026)"
+fi
 
 echo "==> Pre-draft sync complete for $YEAR."

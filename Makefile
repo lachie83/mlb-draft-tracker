@@ -5,8 +5,8 @@ YEAR ?= 2026
 DB ?=
 DB_FLAG = $(if $(DB),--db $(DB),)
 
-.PHONY: help init-db pre-draft-sync sync-prospects seed-no-r-prospects seed-draft-order \
-	generate-predictions seed-mock-consensus verify-baseballr live-monitor poll-draft-day \
+.PHONY: help init-db pre-draft-sync sync-prospects seed-no-r-prospects seed-prospects-csv seed-draft-order \
+	generate-predictions seed-mock-drafts seed-mock-consensus verify-baseballr live-monitor poll-draft-day \
 	live-monitor-status test-telegram dashboard
 
 help:
@@ -16,8 +16,8 @@ help:
 	@echo "  make live-monitor-status show poller status, recent log lines, and recent picks"
 	@echo "  make test-telegram       send a one-off Telegram test message"
 	@echo "  make dashboard           run the local dashboard on :8000"
-	@echo "  make init-db / sync-prospects / seed-no-r-prospects / seed-draft-order"
-	@echo "  make generate-predictions / seed-mock-consensus / verify-baseballr / live-monitor"
+	@echo "  make init-db / sync-prospects / seed-no-r-prospects / seed-prospects-csv / seed-draft-order"
+	@echo "  make generate-predictions / seed-mock-drafts / seed-mock-consensus / verify-baseballr / live-monitor"
 
 init-db:
 	cd python_app && $(PYTHON) main.py $(DB_FLAG) init-db
@@ -31,13 +31,19 @@ sync-prospects:
 seed-no-r-prospects:
 	cd python_app && $(PYTHON) main.py $(DB_FLAG) seed-no-r-prospects --year $(YEAR)
 
+seed-prospects-csv:
+	cd python_app && $(PYTHON) main.py $(DB_FLAG) seed-prospects-csv --year $(YEAR)
+
 seed-draft-order:
 	cd python_app && $(PYTHON) main.py $(DB_FLAG) seed-draft-order --year $(YEAR) --csv ../examples/draft_order_seed_$(YEAR).csv
 
 generate-predictions:
 	cd python_app && $(PYTHON) main.py $(DB_FLAG) generate-predictions --year $(YEAR) --top-n 5 --max-pick 50
 
-seed-mock-consensus:
+seed-mock-drafts:
+	cd python_app && $(PYTHON) main.py $(DB_FLAG) seed-mock-drafts --year $(YEAR)
+
+seed-mock-consensus: seed-mock-drafts
 	cd python_app && $(PYTHON) main.py $(DB_FLAG) seed-mock-consensus --year $(YEAR)
 
 verify-baseballr:

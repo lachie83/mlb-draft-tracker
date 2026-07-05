@@ -237,6 +237,49 @@ def fetch_dashboard_data(conn: sqlite3.Connection, year: int):
         )
     ]
 
+    models = [
+        r["model_version"]
+        for r in q(
+            conn,
+            "SELECT DISTINCT model_version FROM predictions WHERE draft_year = ? ORDER BY model_version",
+            (year,),
+        )
+    ]
+
+    top_picks_by_model = [
+        dict(r)
+        for r in q(
+            conn,
+            """
+            WITH ranked AS (
+                SELECT pick_number, team_name, player_name, model_version, predicted_probability,
+                       ROW_NUMBER() OVER (
+                           PARTITION BY pick_number, model_version
+                           ORDER BY predicted_probability DESC
+                       ) AS rn
+                FROM predictions
+                WHERE draft_year = ?
+            )
+            SELECT pick_number, team_name, model_version, player_name,
+                   ROUND(predicted_probability, 4) AS predicted_probability
+            FROM ranked
+            WHERE rn = 1
+            ORDER BY pick_number
+            """,
+            (year,),
+        )
+    ]
+    model_comparison: dict[int, dict] = {}
+    for row in top_picks_by_model:
+        entry = model_comparison.setdefault(
+            row["pick_number"], {"pick_number": row["pick_number"], "team_name": row["team_name"], "models": {}}
+        )
+        entry["models"][row["model_version"]] = {
+            "player_name": row["player_name"],
+            "predicted_probability": row["predicted_probability"],
+        }
+    model_comparison_rows = sorted(model_comparison.values(), key=lambda r: r["pick_number"])
+
     summary = {
         "year": year,
         "prospects_loaded": prospects_loaded,
@@ -256,10 +299,12 @@ def fetch_dashboard_data(conn: sqlite3.Connection, year: int):
         "on_the_clock": on_the_clock,
         "positions": positions,
         "teams": teams,
+        "models": models,
+        "model_comparison": model_comparison_rows,
     }
 
 
-def row_attrs(*, status=None, position=None, school=None, team=None) -> str:
+def row_attrs(*, status=None, position=None, school=None, team=None, model=None) -> str:
     attrs = []
     if status:
         attrs.append(f'data-status="{esc(slugify(status))}"')
@@ -269,6 +314,8 @@ def row_attrs(*, status=None, position=None, school=None, team=None) -> str:
         attrs.append(f'data-school="{esc(slugify(school))}"')
     if team:
         attrs.append(f'data-team="{esc(slugify(team))}"')
+    if model:
+        attrs.append(f'data-model="{esc(slugify(model))}"')
     return " ".join(attrs)
 
 
@@ -283,7 +330,8 @@ def filterable_table(table_id, title, headers, rows, cell_keys, *, count_label="
         school = school_type(row["school_class"]) if "school_class" in row else None
         team = row.get("draft_team_name") or row.get("team_name")
         position = row.get("position_name")
-        attrs = row_attrs(status=status, position=position, school=school, team=team)
+        model = row.get("model_version")
+        attrs = row_attrs(status=status, position=position, school=school, team=team, model=model)
         cells = "".join(f"<td>{esc(row.get(k, ''))}</td>" for k in cell_keys)
         body_rows.append(f"<tr class=\"frow\" {attrs}>{cells}</tr>")
 
@@ -341,12 +389,15 @@ def render_on_the_clock(otc):
     """
 
 
-def render_filter_bar(positions, teams):
+def render_filter_bar(positions, teams, models):
     position_options = "".join(
         f'<option value="{esc(slugify(p))}">{esc(p)}</option>' for p in positions
     )
     team_options = "".join(
         f'<option value="{esc(slugify(t))}">{esc(t)}</option>' for t in teams
+    )
+    model_options = "".join(
+        f'<option value="{esc(slugify(m))}">{esc(m)}</option>' for m in models
     )
     return f"""
     <div class="filter-bar">
@@ -385,8 +436,58 @@ def render_filter_bar(positions, teams):
           {team_options}
         </select>
       </div>
+      <div class="filter-group">
+        <label for="f-model">Model</label>
+        <select id="f-model" onchange="applyFilters()">
+          <option value="">All models</option>
+          {model_options}
+        </select>
+      </div>
       <button type="button" class="btn-ghost" onclick="resetFilters()">Reset</button>
     </div>
+    """
+
+
+def render_model_comparison(rows, models):
+    if not rows:
+        return """
+        <section class="panel" id="model-comparison">
+          <div class="panel-header"><h2>Model Comparison</h2></div>
+          <p class="muted">No predictions generated yet — run generate-predictions and/or seed-mock-consensus.</p>
+        </section>
+        """
+
+    model_headers = "".join(f"<th>{esc(m)}</th>" for m in models)
+    body_rows = []
+    for row in rows:
+        cells = []
+        picks_for_row = [row["models"].get(m) for m in models]
+        distinct_players = {p["player_name"] for p in picks_for_row if p}
+        agree = len(distinct_players) == 1 and len(picks_for_row) == len([p for p in picks_for_row if p]) and len(models) > 1
+        for m in models:
+            pick = row["models"].get(m)
+            if pick:
+                cells.append(f"<td>{esc(pick['player_name'])} <span class=\"muted\">({esc(pick['predicted_probability'])})</span></td>")
+            else:
+                cells.append('<td class="muted">&mdash;</td>')
+        agreement_cell = '<td><span class="badge badge-accent">Agree</span></td>' if agree else "<td></td>"
+        body_rows.append(
+            f"<tr><td>{esc(row['pick_number'])}</td><td>{esc(row['team_name'])}</td>{''.join(cells)}{agreement_cell}</tr>"
+        )
+
+    return f"""
+    <section class="panel" id="model-comparison">
+      <div class="panel-header">
+        <h2>Model Comparison</h2>
+        <span class="badge">{len(rows)} picks</span>
+      </div>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>Pick</th><th>Team</th>{model_headers}<th>Agreement</th></tr></thead>
+          <tbody>{''.join(body_rows)}</tbody>
+        </table>
+      </div>
+    </section>
     """
 
 
@@ -609,6 +710,7 @@ function applyFilters() {
   const position = document.getElementById('f-position').value;
   const school = document.getElementById('f-school').value;
   const team = document.getElementById('f-team').value;
+  const model = document.getElementById('f-model').value;
   const search = document.getElementById('f-search').value.trim().toLowerCase();
 
   document.querySelectorAll('tr.frow').forEach(function (row) {
@@ -617,6 +719,7 @@ function applyFilters() {
     if (position && row.dataset.position && row.dataset.position !== position) visible = false;
     if (school && row.dataset.school && row.dataset.school !== school) visible = false;
     if (team && row.dataset.team && row.dataset.team !== team) visible = false;
+    if (model && row.dataset.model && row.dataset.model !== model) visible = false;
     if (search && !row.textContent.toLowerCase().includes(search)) visible = false;
     row.style.display = visible ? '' : 'none';
   });
@@ -638,6 +741,7 @@ function resetFilters() {
   document.getElementById('f-position').value = '';
   document.getElementById('f-school').value = '';
   document.getElementById('f-team').value = '';
+  document.getElementById('f-model').value = '';
   applyFilters();
 }
 
@@ -682,8 +786,9 @@ def app_factory(db_path: str):
         </div>
         """
 
-        filter_bar = render_filter_bar(data["positions"], data["teams"])
+        filter_bar = render_filter_bar(data["positions"], data["teams"], data["models"])
         on_the_clock = render_on_the_clock(data["on_the_clock"])
+        model_comparison_panel = render_model_comparison(data["model_comparison"], data["models"])
 
         best_available_panel = filterable_table(
             "best-available",
@@ -768,6 +873,7 @@ def app_factory(db_path: str):
             <a href="#fallers">Fallers</a>
             <a href="#actual-picks">Actual Picks</a>
             <a href="#predictions">Predictions</a>
+            <a href="#model-comparison">Model Comparison</a>
             <a href="#board">Full Board</a>
           </nav>
 
@@ -779,6 +885,7 @@ def app_factory(db_path: str):
             {fallers_panel}
             {picks_panel}
             {predictions_panel}
+            {model_comparison_panel}
             {board_panel}
           </main>
 

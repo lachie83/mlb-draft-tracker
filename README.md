@@ -47,8 +47,34 @@ python3 main.py init-db
 python3 main.py seed-draft-order --year 2026 --csv ../examples/draft_order_seed_2026.csv
 python3 main.py seed-prospects-csv --year 2026
 python3 main.py generate-predictions --year 2026 --top-n 5 --max-pick 20
+python3 main.py seed-mock-drafts --year 2026
 python3 main.py seed-mock-consensus --year 2026
 python3 dashboard.py --host 0.0.0.0 --port 8000
+```
+
+## Predictions
+Two independent prediction models are generated per pick and shown side by
+side in the dashboard's Model Comparison view:
+- **`heuristic_v1`** — `generate-predictions`. A rank/mock-shape/team-fit
+  heuristic with no external mock-draft input.
+- **`mock_consensus_v2`** — `seed-mock-drafts` + `seed-mock-consensus`.
+  Aggregates real, dated, attributed mock draft picks (currently two MLB
+  Pipeline mock drafts — see `python_app/mlb_tracker/real_mock_drafts_2026.py`
+  for exact sources/dates/URLs) stored in the `mock_draft_picks` table. When
+  multiple mocks name the same player for a pick, their weights are summed
+  before normalizing into a probability, so agreement across sources
+  produces a stronger consensus signal than any single mock. Every resulting
+  prediction's `prediction_source` column lists exactly which mock(s) it
+  came from.
+
+Like the prospect CSV, `real_mock_drafts_2026.py` is a point-in-time
+transcription of specific published mock drafts, not a live feed — it won't
+include mock drafts published after it was written. Extend it (or add a
+sibling module for other years) as new mocks come out.
+
+```bash
+python3 main.py seed-mock-drafts --year 2026     # populate mock_draft_picks
+python3 main.py seed-mock-consensus --year 2026  # aggregate into predictions
 ```
 
 ## Testing
@@ -170,4 +196,4 @@ See `.env.example`.
 - parse official MLB draft order more completely
 - add a second live pick source beyond `baseballr`
 - improve dashboard filtering and draft-day views
-- strengthen prediction model with more mock-draft inputs
+- add mock drafts from additional outlets beyond MLB Pipeline, and automate periodic re-transcription as new mocks are published
