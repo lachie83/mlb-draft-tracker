@@ -136,6 +136,28 @@ CREATE TABLE IF NOT EXISTS predictions (
 
 CREATE INDEX IF NOT EXISTS idx_predictions_pick ON predictions(draft_year, pick_number, predicted_probability DESC);
 
+CREATE TABLE IF NOT EXISTS mock_draft_picks (
+    mock_pick_id INTEGER PRIMARY KEY AUTOINCREMENT,
+    draft_year INTEGER NOT NULL,
+    source_name TEXT NOT NULL,
+    source_authors TEXT,
+    source_date TEXT NOT NULL,
+    source_url TEXT,
+    weight REAL NOT NULL DEFAULT 1.0,
+    pick_number INTEGER NOT NULL,
+    team_name TEXT NOT NULL,
+    player_name TEXT NOT NULL,
+    prospect_id INTEGER,
+    mlb_person_id INTEGER,
+    board_rank INTEGER,
+    notes TEXT,
+    created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY(prospect_id) REFERENCES prospects(prospect_id),
+    UNIQUE(draft_year, source_name, source_date, pick_number, player_name)
+);
+
+CREATE INDEX IF NOT EXISTS idx_mock_draft_picks_pick ON mock_draft_picks(draft_year, pick_number);
+
 CREATE TABLE IF NOT EXISTS source_runs (
     run_id INTEGER PRIMARY KEY AUTOINCREMENT,
     source_name TEXT NOT NULL,
