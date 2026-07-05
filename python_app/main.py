@@ -97,6 +97,17 @@ def cmd_verify_baseballr(_args):
     raise RuntimeError(message)
 
 
+def cmd_test_telegram(args):
+    notifier = TelegramNotifier()
+    if not notifier.enabled:
+        raise RuntimeError(
+            "Telegram is not configured. Set TELEGRAM_BOT_TOKEN and TELEGRAM_CHAT_ID "
+            "(see .env.example) and re-run this command."
+        )
+    result = notifier.send(args.message)
+    print(f"Sent test message to Telegram: {result}")
+
+
 def build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(description="MLB Draft 2026 tracker")
     parser.add_argument("--db", default=str(DEFAULT_DB_PATH))
@@ -134,6 +145,10 @@ def build_parser() -> argparse.ArgumentParser:
 
     p = sub.add_parser("verify-baseballr")
     p.set_defaults(func=cmd_verify_baseballr)
+
+    p = sub.add_parser("test-telegram")
+    p.add_argument("--message", default="MLB Draft Tracker: this is a test notification.")
+    p.set_defaults(func=cmd_test_telegram)
     return parser
 
 
