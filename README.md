@@ -120,18 +120,22 @@ pytest
 ```
 
 ## Automation helpers
-Common workflows (pre-draft sync, the draft-day polling loop, a Telegram
-test message, poller status/recovery) are wrapped in `Makefile` targets and
-`scripts/*.sh` so you don't need to remember flag combinations:
+Common workflows (pre-draft sync, a full draft-day rehearsal against real
+past data, the draft-day polling loop, a Telegram test message, poller
+status/recovery) are wrapped in `Makefile` targets and `scripts/*.sh` so
+you don't need to remember flag combinations:
 ```bash
 make pre-draft-sync
 make test-telegram
+make rehearse-draft-day
 make poll-draft-day
 make live-monitor-status
 make help   # full list of targets
 ```
-See `docs/OPERATIONS.md` for the full draft-day runbook, cron examples, and
-safe restart / recovery steps.
+**Not sure what to actually run and when?** See the "TL;DR" at the top of
+`docs/OPERATIONS.md` — it boils the whole draft day down to three commands.
+That doc also has the full runbook, a Telegram setup walkthrough, cron
+examples, and safe restart / recovery steps.
 
 ## Docker
 ### Build
