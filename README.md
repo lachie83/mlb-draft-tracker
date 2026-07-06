@@ -138,6 +138,12 @@ That doc also has the full runbook, a Telegram setup walkthrough, cron
 examples, and safe restart / recovery steps.
 
 ## Docker
+Looking to run this in production on Kubernetes (AKS) instead? See
+`docs/AKS_DEPLOYMENT.md` — cost-minimized cluster, durable storage, HTTPS
+via cert-manager/Let's Encrypt, Telegram secrets in a K8s Secret, and a
+fully automated draft-day operational loop. It uses `Dockerfile.k8s` (leaner,
+no R) rather than the `Dockerfile` below.
+
 ### Build
 ```bash
 docker build -t mlb-draft-tracker .

@@ -1,0 +1,14 @@
+# Apply with: kubectl apply -k k8s/
+# Note: 01-secret.example.yaml is intentionally NOT listed here - create
+# the real Secret imperatively (see that file's header comment and
+# docs/AKS_DEPLOYMENT.md) rather than applying it from a file.
+resources:
+  - 00-namespace.yaml
+  - 02-configmap.yaml
+  - 03-pvc.yaml
+  - 04-serviceaccount.yaml
+  - 05-deployment.yaml
+  - 06-service.yaml
+  - 07-ingress.yaml
+  - 08-cluster-issuer.yaml
+  - 09-networkpolicy.yaml

@@ -20,6 +20,11 @@ def get_connection(db_path: Path | str = DEFAULT_DB_PATH) -> sqlite3.Connection:
     conn = sqlite3.connect(db_path)
     conn.row_factory = sqlite3.Row
     conn.execute("PRAGMA foreign_keys = ON")
+    # Two processes can now legitimately write to the same db concurrently
+    # (e.g. the AKS deployment's pre-draft-sync refresh and live-monitor
+    # polling loop) - wait rather than immediately raising "database is
+    # locked" on brief contention.
+    conn.execute("PRAGMA busy_timeout = 30000")
     return conn
 
 

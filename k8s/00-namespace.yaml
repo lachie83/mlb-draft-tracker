@@ -1,0 +1,14 @@
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: mlb-draft-tracker
+  labels:
+    app.kubernetes.io/name: mlb-draft-tracker
+    # Enforce the Kubernetes "restricted" Pod Security Standard for every
+    # pod in this namespace (non-root, no added capabilities, no privilege
+    # escalation, default seccomp profile). The deployment in this
+    # directory is written to comply with it.
+    pod-security.kubernetes.io/enforce: restricted
+    pod-security.kubernetes.io/enforce-version: latest
+    pod-security.kubernetes.io/audit: restricted
+    pod-security.kubernetes.io/warn: restricted

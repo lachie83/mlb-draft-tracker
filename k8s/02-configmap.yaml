@@ -1,0 +1,18 @@
+# Non-secret runtime configuration. Adjust here rather than editing the
+# Deployment directly.
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: mlb-draft-tracker-config
+  namespace: mlb-draft-tracker
+data:
+  DRAFT_YEAR: "2026"
+  # How often the automation sidecar re-runs pre_draft_sync.sh (refresh
+  # order/prospects/predictions). 21600s = 6h, matching OPERATIONS.md's
+  # "draft week" cadence. Lower this in the days immediately before the
+  # draft if you want fresher data more often.
+  PRE_DRAFT_SYNC_INTERVAL_SECONDS: "21600"
+  # How often the automation sidecar polls the live MLB Stats API for new
+  # picks. 60s matches OPERATIONS.md's live-window recommendation; cheap
+  # enough to just leave running continuously rather than time-gating it.
+  POLL_INTERVAL_SECONDS: "60"
