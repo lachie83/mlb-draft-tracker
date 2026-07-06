@@ -18,8 +18,16 @@ from __future__ import annotations
 import time
 from typing import Any, Callable
 
-from .db import upsert_draft_slot
-from .mlb_stats_api import fetch_draft, iter_picks, pick_to_draft_slot, reconcile_picks_from_api
+from .db import upsert_draft_slot, upsert_prospect
+from .mlb_stats_api import (
+    STATS_API_SOURCE,
+    fetch_draft,
+    iter_picks,
+    pick_to_draft_slot,
+    pick_to_raw_prospect,
+    reconcile_picks_from_api,
+)
+from .sources import normalize_prospect_row
 from .telegram import TelegramNotifier
 
 
@@ -52,10 +60,10 @@ def rehearse_draft_day(
     notifier: TelegramNotifier | None = None,
     on_tick: Callable[[list[dict[str, Any]], int, int], None] | None = None,
 ) -> int:
-    """Seed target_year's draft_slots from source_year's real order, then
-    reveal source_year's real picks into target_year a batch at a time,
-    running the normal reconcile/Telegram-alert path on each reveal.
-    Returns the total number of picks simulated."""
+    """Seed target_year's draft_slots and full prospect board from
+    source_year's real data, then reveal source_year's real picks into
+    target_year a batch at a time, running the normal reconcile/Telegram-alert
+    path on each reveal. Returns the total number of picks simulated."""
     source_payload = fetch_draft(source_year)
 
     # Seed the full schedule upfront, same as real draft day: the pick order
@@ -63,6 +71,21 @@ def rehearse_draft_day(
     # revealed live.
     for pick in iter_picks(source_payload):
         upsert_draft_slot(conn, pick_to_draft_slot(pick, target_year))
+
+    # Also seed every player as still-undrafted up front, same as a real
+    # pre-draft prospect board (e.g. seed-prospects-csv) would - otherwise
+    # "best available" in Telegram alerts and the dashboard has nothing to
+    # show, since reconcile_picks_from_api only ever inserts a player at the
+    # moment they're revealed as drafted. The reveal loop below flips each
+    # one to is_drafted=1 as it happens, via the normal upsert_prospect path.
+    for pick in iter_picks(source_payload):
+        raw = pick_to_raw_prospect(pick)
+        if raw is None:
+            continue
+        raw["is_drafted"] = False
+        normalized = normalize_prospect_row(raw, target_year)
+        normalized["source"] = STATS_API_SOURCE
+        upsert_prospect(conn, normalized)
     conn.commit()
 
     replay = ReplayClient(source_payload, batch_size=batch_size, max_reveal=picks)
