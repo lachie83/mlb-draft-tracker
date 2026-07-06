@@ -24,7 +24,14 @@ class TelegramNotifier:
             return {"ok": False, "reason": "telegram not configured", "text": text}
         url = f"https://api.telegram.org/bot{self.bot_token}/sendMessage"
         resp = requests.post(url, json={"chat_id": self.chat_id, "text": text}, timeout=30)
-        resp.raise_for_status()
+        try:
+            resp.raise_for_status()
+        except requests.exceptions.HTTPError as exc:
+            try:
+                detail = resp.json().get("description", resp.text)
+            except ValueError:
+                detail = resp.text
+            raise requests.exceptions.HTTPError(f"{exc} - Telegram says: {detail}", response=resp) from exc
         return resp.json()
 
 
