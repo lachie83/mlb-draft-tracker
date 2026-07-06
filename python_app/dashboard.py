@@ -71,15 +71,29 @@ def fetch_dashboard_data(conn: sqlite3.Connection, year: int):
         for r in q(
             conn,
             """
-            SELECT rank, full_name, position_name, school_name, school_class
-            FROM prospects
-            WHERE draft_year = ? AND rank IS NOT NULL AND COALESCE(is_drafted, 0) = 0
-            ORDER BY rank
+            SELECT pros.rank, pros.full_name, pros.position_name, pros.school_name, pros.school_class,
+                   pros.current_age, pros.bats, pros.throws,
+                   mock.team_name AS mock_team, ROUND(mock.predicted_probability, 4) AS mock_probability
+            FROM prospects pros
+            LEFT JOIN (
+                SELECT mlb_person_id, team_name, predicted_probability,
+                       ROW_NUMBER() OVER (
+                           PARTITION BY mlb_person_id ORDER BY predicted_probability DESC
+                       ) AS rn
+                FROM predictions
+                WHERE draft_year = ? AND mlb_person_id IS NOT NULL
+            ) mock ON mock.mlb_person_id = pros.mlb_person_id AND mock.rn = 1
+            WHERE pros.draft_year = ? AND pros.rank IS NOT NULL AND COALESCE(pros.is_drafted, 0) = 0
+            ORDER BY pros.rank
             LIMIT 25
             """,
-            (year,),
+            (year, year),
         )
     ]
+    for row in best_available:
+        row["bats_throws"] = (
+            f"{row['bats']}/{row['throws']}" if row.get("bats") and row.get("throws") else ""
+        )
 
     picks = [
         dict(r)
@@ -193,13 +207,16 @@ def fetch_dashboard_data(conn: sqlite3.Connection, year: int):
             for r in q(
                 conn,
                 """
-                SELECT pr.player_name, ROUND(pr.predicted_probability, 4) AS predicted_probability,
-                       p.position_name, p.school_name
+                SELECT pr.player_name,
+                       ROUND(MAX(pr.predicted_probability), 4) AS predicted_probability,
+                       COUNT(DISTINCT pr.model_version) AS model_count,
+                       MAX(p.position_name) AS position_name, MAX(p.school_name) AS school_name
                 FROM predictions pr
                 LEFT JOIN prospects p
                     ON pr.mlb_person_id = p.mlb_person_id AND pr.draft_year = p.draft_year
                 WHERE pr.draft_year = ? AND pr.pick_number = ?
-                ORDER BY pr.predicted_probability DESC
+                GROUP BY COALESCE(pr.mlb_person_id, pr.player_name)
+                ORDER BY predicted_probability DESC
                 LIMIT 5
                 """,
                 (year, slot["pick_number"]),
@@ -366,11 +383,12 @@ def render_on_the_clock(otc):
               <td>{esc(c.get('position_name'))}</td>
               <td>{esc(c.get('school_name'))}</td>
               <td>{esc(c.get('predicted_probability'))}</td>
+              <td>{'<span class="badge badge-accent">Agree</span>' if c.get('model_count', 1) > 1 else ''}</td>
             </tr>"""
         for c in otc["candidates"]
     )
     if not candidate_rows:
-        candidate_rows = '<tr><td colspan="4" class="muted">No predictions generated for this pick yet.</td></tr>'
+        candidate_rows = '<tr><td colspan="5" class="muted">No predictions generated for this pick yet.</td></tr>'
 
     return f"""
     <section class="panel highlight" id="on-the-clock">
@@ -381,7 +399,7 @@ def render_on_the_clock(otc):
       <p class="on-the-clock-team">{esc(otc['team_name'])} <span class="muted">&middot; {esc(otc.get('round_label') or '')}</span></p>
       <div class="table-wrap">
         <table>
-          <thead><tr><th>Player</th><th>Position</th><th>School</th><th>Win Prob.</th></tr></thead>
+          <thead><tr><th>Player</th><th>Position</th><th>School</th><th>Win Prob.</th><th>Models</th></tr></thead>
           <tbody>{candidate_rows}</tbody>
         </table>
       </div>
@@ -793,9 +811,9 @@ def app_factory(db_path: str):
         best_available_panel = filterable_table(
             "best-available",
             "Best Available",
-            ["Rank", "Player", "Position", "School"],
+            ["Rank", "Player", "Position", "School", "Age", "B/T", "Mock Team", "Mock Prob."],
             data["best_available"],
-            ["rank", "full_name", "position_name", "school_name"],
+            ["rank", "full_name", "position_name", "school_name", "current_age", "bats_throws", "mock_team", "mock_probability"],
             count_label="prospects",
             default_status="Undrafted",
         )
