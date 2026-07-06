@@ -1,0 +1,13 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: mlb-draft-tracker
+  namespace: mlb-draft-tracker
+spec:
+  type: ClusterIP
+  selector:
+    app.kubernetes.io/name: mlb-draft-tracker
+  ports:
+    - name: http
+      port: 80
+      targetPort: http

@@ -1,0 +1,30 @@
+# Requires ingress-nginx (for the ingressClassName) and cert-manager (for
+# the cluster-issuer annotation) to already be installed - see
+# docs/AKS_DEPLOYMENT.md. Replace <YOUR_DOMAIN> with the domain you point
+# at the ingress controller's public IP.
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: mlb-draft-tracker
+  namespace: mlb-draft-tracker
+  annotations:
+    cert-manager.io/cluster-issuer: letsencrypt-prod
+    nginx.ingress.kubernetes.io/ssl-redirect: "true"
+    nginx.ingress.kubernetes.io/force-ssl-redirect: "true"
+spec:
+  ingressClassName: nginx
+  tls:
+    - hosts:
+        - "<YOUR_DOMAIN>"
+      secretName: mlb-draft-tracker-tls
+  rules:
+    - host: "<YOUR_DOMAIN>"
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: mlb-draft-tracker
+                port:
+                  name: http

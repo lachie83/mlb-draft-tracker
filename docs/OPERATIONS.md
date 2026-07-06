@@ -40,6 +40,8 @@ Run a local SQLite-backed tracker that:
 - `r_prototype/live_monitor.R` — R/baseballr live pick sync prototype (legacy; see `live-monitor-api`)
 - Telegram delivery via bot token + chat id env vars
 - `Makefile` + `scripts/` — automation helpers for the workflows below (see §5a)
+- `k8s/` + `docs/AKS_DEPLOYMENT.md` — running this in production on Azure
+  Kubernetes Service instead of locally/Docker Compose
 
 ## 3. Suggested schedules
 ### Pre-draft (now through draft week)

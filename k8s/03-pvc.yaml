@@ -1,0 +1,19 @@
+# Durable storage for the sqlite database, so it survives pod restarts,
+# node replacement, and rescheduling. Uses AKS's built-in "managed-csi"
+# storage class (Azure Disk, Standard SSD LRS) - cheap and durable, at the
+# cost of being ReadWriteOnce (fine here: both containers in the pod that
+# needs it run on the same node - see 03-deployment.yaml).
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: mlb-draft-tracker-data
+  namespace: mlb-draft-tracker
+spec:
+  accessModes:
+    - ReadWriteOnce
+  storageClassName: managed-csi
+  resources:
+    requests:
+      # The sqlite db + logs are small (tens of MB); 5Gi leaves generous
+      # headroom while staying at Azure Disk's practical minimum billing size.
+      storage: 5Gi

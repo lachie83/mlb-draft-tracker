@@ -1,0 +1,18 @@
+# Cluster-scoped (not namespaced) - applies once per cluster, not per app.
+# Requires cert-manager to already be installed - see docs/AKS_DEPLOYMENT.md.
+# Replace <YOUR_EMAIL> with a real address; Let's Encrypt uses it only for
+# expiry/revocation notices.
+apiVersion: cert-manager.io/v1
+kind: ClusterIssuer
+metadata:
+  name: letsencrypt-prod
+spec:
+  acme:
+    server: https://acme-v02.api.letsencrypt.org/directory
+    email: "<YOUR_EMAIL>"
+    privateKeySecretRef:
+      name: letsencrypt-prod-account-key
+    solvers:
+      - http01:
+          ingress:
+            ingressClassName: nginx

@@ -1,0 +1,44 @@
+# Lean production image for the AKS deployment (see docs/AKS_DEPLOYMENT.md).
+#
+# Deliberately does NOT install R/baseballr: the AKS deployment relies
+# entirely on the MLB Stats API path (sync-draft-order-api, live-monitor-api)
+# plus the no-R/CSV prospect board sources, all of which need only the
+# Python dependencies below. This keeps the image small, keeps the build
+# fast, and reduces attack surface for an internet-facing deployment. If you
+# need the baseballr path, use the root Dockerfile instead.
+FROM python:3.12-slim
+
+ENV DEBIAN_FRONTEND=noninteractive \
+    PYTHONUNBUFFERED=1 \
+    PYTHONDONTWRITEBYTECODE=1
+
+WORKDIR /app
+
+# ca-certificates: verifying TLS to statsapi.mlb.com / api.telegram.org.
+# curl: used by the container's own healthcheck tooling if needed.
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    ca-certificates \
+    curl \
+    && rm -rf /var/lib/apt/lists/*
+
+COPY python_app/requirements.txt /app/python_app/requirements.txt
+RUN pip install --no-cache-dir -r /app/python_app/requirements.txt
+
+COPY python_app /app/python_app
+COPY sql /app/sql
+COPY examples /app/examples
+COPY docs /app/docs
+COPY scripts /app/scripts
+COPY Makefile /app/Makefile
+
+RUN mkdir -p /app/data \
+    && groupadd --gid 10001 appuser \
+    && useradd --uid 10001 --gid appuser --shell /usr/sbin/nologin --no-create-home appuser \
+    && chown -R appuser:appuser /app
+
+USER appuser
+WORKDIR /app/python_app
+
+EXPOSE 8000
+
+CMD ["python3", "dashboard.py", "--host", "0.0.0.0", "--port", "8000"]
