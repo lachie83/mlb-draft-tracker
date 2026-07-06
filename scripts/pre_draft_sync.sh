@@ -15,24 +15,26 @@ DB_ARGS=()
 if [ -n "${DRAFT_DB:-}" ]; then
   DB_ARGS=(--db "$DRAFT_DB")
 fi
-ORDER_CSV="${DRAFT_ORDER_CSV:-../examples/draft_order_seed_${YEAR}.csv}"
 
 echo "==> Initializing database"
 python3 main.py "${DB_ARGS[@]}" init-db
 
-echo "==> Seeding official draft order from $ORDER_CSV"
-python3 main.py "${DB_ARGS[@]}" seed-draft-order --year "$YEAR" --csv "$ORDER_CSV"
+echo "==> Syncing official draft order from the MLB Stats API"
+python3 main.py "${DB_ARGS[@]}" sync-draft-order-api --year "$YEAR"
 
 echo "==> Syncing prospects"
+# The MLB Stats API's per-year prospects list isn't populated pre-draft (verified
+# empty for an upcoming draft), so the ranked pre-draft board still comes from
+# baseballr when available, or the CSV/no-R fallback otherwise. Draft order and
+# live picks (see live-monitor-api) don't have this gap.
 PROSPECTS_CSV="${PROSPECTS_SEED_CSV:-../examples/prospects_top250_seed_${YEAR}.csv}"
-if python3 main.py verify-baseballr >/dev/null 2>&1; then
-  echo "    baseballr is available, using it as the prospect source"
-  python3 main.py "${DB_ARGS[@]}" sync-prospects --year "$YEAR"
+if python3 main.py verify-baseballr >/dev/null 2>&1 && python3 main.py "${DB_ARGS[@]}" sync-prospects --year "$YEAR"; then
+  echo "    synced prospects via baseballr"
 elif [ -f "$PROSPECTS_CSV" ]; then
-  echo "    baseballr is unavailable, seeding the top-250 CSV snapshot ($PROSPECTS_CSV)"
+  echo "    baseballr unavailable or its live call failed, seeding the top-250 CSV snapshot ($PROSPECTS_CSV)"
   python3 main.py "${DB_ARGS[@]}" seed-prospects-csv --year "$YEAR" --csv "$PROSPECTS_CSV"
 else
-  echo "    baseballr is unavailable and no CSV snapshot exists for $YEAR, using the no-R live-scrape fallback"
+  echo "    baseballr unavailable or its live call failed, and no CSV snapshot exists for $YEAR, using the no-R live-scrape fallback"
   python3 main.py "${DB_ARGS[@]}" seed-no-r-prospects --year "$YEAR"
 fi
 

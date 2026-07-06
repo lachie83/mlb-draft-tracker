@@ -1,0 +1,4453 @@
+{
+  "copyright": "Copyright 2026 MLB Advanced Media, L.P.  Use of any content on this page acknowledges agreement to the terms posted here http://gdx.mlb.com/components/copyright.txt",
+  "drafts": {
+    "rounds": [
+      {
+        "round": "1",
+        "picks": [
+          {
+            "bisPlayerId": 5035626,
+            "pickRound": "1",
+            "pickNumber": 1,
+            "displayPickNumber": 1,
+            "roundPickNumber": 1,
+            "rank": 5,
+            "pickValue": "11075900",
+            "signingBonus": "8200000",
+            "home": {
+              "city": "Fort Cobb",
+              "state": "Oklahoma",
+              "country": "USA"
+            },
+            "scoutingReport": "https://www.mlb.com/video/example",
+            "school": {
+              "name": "Fort Cobb-Broxton HS",
+              "schoolClass": "HS SR",
+              "city": "Fort Cobb",
+              "country": "USA",
+              "state": "OK"
+            },
+            "headshotLink": "https://img.mlbstatic.com/mlb-photos/image/upload/d_people:generic:headshot:silo:current.png/w_120,q_auto:best/v1/people/816113/headshot/draft/current",
+            "person": {
+              "id": 816113,
+              "fullName": "Eli Willits",
+              "link": "/api/v1/people/816113",
+              "firstName": "Eli",
+              "lastName": "Willits",
+              "birthDate": "2007-12-09",
+              "currentAge": 18,
+              "birthCity": "Lawton",
+              "birthStateProvince": "OK",
+              "birthCountry": "USA",
+              "height": "6' 1\"",
+              "weight": 180,
+              "active": true,
+              "primaryPosition": {
+                "code": "6",
+                "name": "Shortstop",
+                "type": "Infielder",
+                "abbreviation": "SS"
+              },
+              "useName": "Eli",
+              "useLastName": "Willits",
+              "boxscoreName": "Willits",
+              "gender": "M",
+              "isPlayer": true,
+              "isVerified": true,
+              "draftYear": 2025,
+              "batSide": {
+                "code": "S",
+                "description": "Switch"
+              },
+              "pitchHand": {
+                "code": "R",
+                "description": "Right"
+              },
+              "nameFirstLast": "Eli Willits",
+              "nameSlug": "eli-willits-816113",
+              "firstLastName": "Eli Willits",
+              "lastFirstName": "Willits, Eli",
+              "lastInitName": "Willits, E",
+              "initLastName": "E Willits",
+              "fullFMLName": "Eli Willits",
+              "fullLFMName": "Willits, Eli ",
+              "strikeZoneTop": 3.255,
+              "strikeZoneBottom": 1.643
+            },
+            "team": {
+              "id": 120,
+              "name": "Washington Nationals"
+            },
+            "draftType": {
+              "code": "JR",
+              "description": "Rule 4 / June Amateur Draft"
+            },
+            "isDrafted": true,
+            "isPass": false,
+            "year": "2025"
+          },
+          {
+            "bisPlayerId": 5020458,
+            "pickRound": "1",
+            "pickNumber": 2,
+            "displayPickNumber": 2,
+            "roundPickNumber": 2,
+            "rank": 18,
+            "pickValue": "10252700",
+            "signingBonus": "7689525",
+            "home": {
+              "city": "San Diego",
+              "state": "California",
+              "country": "USA"
+            },
+            "scoutingReport": "https://www.mlb.com/video/example",
+            "school": {
+              "name": "UC Santa Barbara",
+              "schoolClass": "4YR JR",
+              "city": "Isla Vista",
+              "country": "USA",
+              "state": "CA"
+            },
+            "headshotLink": "https://img.mlbstatic.com/mlb-photos/image/upload/d_people:generic:headshot:silo:current.png/w_120,q_auto:best/v1/people/803285/headshot/draft/current",
+            "person": {
+              "id": 803285,
+              "fullName": "Tyler Bremner",
+              "link": "/api/v1/people/803285",
+              "firstName": "Tyler",
+              "lastName": "Bremner",
+              "birthDate": "2004-04-20",
+              "currentAge": 22,
+              "birthCity": "San Diego",
+              "birthStateProvince": "CA",
+              "birthCountry": "USA",
+              "height": "6' 2\"",
+              "weight": 190,
+              "active": true,
+              "primaryPosition": {
+                "code": "1",
+                "name": "Pitcher",
+                "type": "Pitcher",
+                "abbreviation": "P"
+              },
+              "useName": "Tyler",
+              "useLastName": "Bremner",
+              "boxscoreName": "Bremner",
+              "gender": "M",
+              "isPlayer": true,
+              "isVerified": true,
+              "draftYear": 2025,
+              "batSide": {
+                "code": "R",
+                "description": "Right"
+              },
+              "pitchHand": {
+                "code": "R",
+                "description": "Right"
+              },
+              "nameFirstLast": "Tyler Bremner",
+              "nameSlug": "tyler-bremner-803285",
+              "firstLastName": "Tyler Bremner",
+              "lastFirstName": "Bremner, Tyler",
+              "lastInitName": "Bremner, T",
+              "initLastName": "T Bremner",
+              "fullFMLName": "Tyler Bremner",
+              "fullLFMName": "Bremner, Tyler",
+              "strikeZoneTop": 3.299,
+              "strikeZoneBottom": 1.665
+            },
+            "team": {
+              "id": 108,
+              "name": "Los Angeles Angels"
+            },
+            "draftType": {
+              "code": "JR",
+              "description": "Rule 4 / June Amateur Draft"
+            },
+            "isDrafted": true,
+            "isPass": false,
+            "year": "2025"
+          }
+        ]
+      },
+      {
+        "round": "PPI",
+        "picks": [
+          {
+            "bisPlayerId": 5035447,
+            "pickRound": "PPI",
+            "pickNumber": 28,
+            "displayPickNumber": 28,
+            "roundPickNumber": 1,
+            "rank": 26,
+            "pickValue": "3282200",
+            "signingBonus": "3197500",
+            "home": {
+              "city": "High Point",
+              "state": "North Carolina",
+              "country": "USA"
+            },
+            "scoutingReport": "https://www.mlb.com/video/example",
+            "school": {
+              "name": "Wesleyan Christian Academy",
+              "schoolClass": "HS SR",
+              "city": "High Point",
+              "country": "USA",
+              "state": "NC"
+            },
+            "headshotLink": "https://img.mlbstatic.com/mlb-photos/image/upload/d_people:generic:headshot:silo:current.png/w_120,q_auto:best/v1/people/815843/headshot/draft/current",
+            "person": {
+              "id": 815843,
+              "fullName": "Josh Hammond",
+              "link": "/api/v1/people/815843",
+              "firstName": "Joshua",
+              "lastName": "Hammond",
+              "birthDate": "2006-09-21",
+              "currentAge": 19,
+              "birthCity": "Greensboro",
+              "birthStateProvince": "NC",
+              "birthCountry": "USA",
+              "height": "6' 1\"",
+              "weight": 210,
+              "active": true,
+              "primaryPosition": {
+                "code": "6",
+                "name": "Shortstop",
+                "type": "Infielder",
+                "abbreviation": "SS"
+              },
+              "useName": "Josh",
+              "useLastName": "Hammond",
+              "middleName": "Matthew",
+              "boxscoreName": "Hammond",
+              "gender": "M",
+              "isPlayer": true,
+              "isVerified": true,
+              "draftYear": 2025,
+              "batSide": {
+                "code": "R",
+                "description": "Right"
+              },
+              "pitchHand": {
+                "code": "R",
+                "description": "Right"
+              },
+              "nameFirstLast": "Josh Hammond",
+              "nameSlug": "josh-hammond-815843",
+              "firstLastName": "Josh Hammond",
+              "lastFirstName": "Hammond, Josh",
+              "lastInitName": "Hammond, J",
+              "initLastName": "J Hammond",
+              "fullFMLName": "Joshua Matthew Hammond",
+              "fullLFMName": "Hammond, Joshua Matthew",
+              "strikeZoneTop": 3.255,
+              "strikeZoneBottom": 1.643
+            },
+            "team": {
+              "id": 118,
+              "name": "Kansas City Royals"
+            },
+            "draftType": {
+              "code": "JR",
+              "description": "Rule 4 / June Amateur Draft"
+            },
+            "isDrafted": true,
+            "isPass": false,
+            "year": "2025"
+          }
+        ]
+      },
+      {
+        "round": "1C",
+        "picks": [
+          {
+            "bisPlayerId": 5020476,
+            "pickRound": "1C",
+            "pickNumber": 29,
+            "displayPickNumber": 29,
+            "roundPickNumber": 1,
+            "rank": 31,
+            "pickValue": "3191100",
+            "signingBonus": "3000000",
+            "home": {
+              "city": "Bowling Green",
+              "state": "Kentucky",
+              "country": "USA"
+            },
+            "scoutingReport": "https://www.mlb.com/video/example",
+            "school": {
+              "name": "Louisville",
+              "schoolClass": "4YR JR",
+              "city": "Louisville",
+              "country": "USA",
+              "state": "KY"
+            },
+            "headshotLink": "https://img.mlbstatic.com/mlb-photos/image/upload/d_people:generic:headshot:silo:current.png/w_120,q_auto:best/v1/people/804467/headshot/draft/current",
+            "person": {
+              "id": 804467,
+              "fullName": "Patrick Forbes",
+              "link": "/api/v1/people/804467",
+              "firstName": "Patrick",
+              "lastName": "Forbes",
+              "birthDate": "2004-07-11",
+              "currentAge": 21,
+              "birthCity": "Bowling Green",
+              "birthStateProvince": "KY",
+              "birthCountry": "USA",
+              "height": "6' 3\"",
+              "weight": 220,
+              "active": true,
+              "primaryPosition": {
+                "code": "1",
+                "name": "Pitcher",
+                "type": "Pitcher",
+                "abbreviation": "P"
+              },
+              "useName": "Patrick",
+              "useLastName": "Forbes",
+              "boxscoreName": "Forbes",
+              "gender": "M",
+              "isPlayer": true,
+              "isVerified": true,
+              "draftYear": 2025,
+              "batSide": {
+                "code": "R",
+                "description": "Right"
+              },
+              "pitchHand": {
+                "code": "R",
+                "description": "Right"
+              },
+              "nameFirstLast": "Patrick Forbes",
+              "nameSlug": "patrick-forbes-804467",
+              "firstLastName": "Patrick Forbes",
+              "lastFirstName": "Forbes, Patrick",
+              "lastInitName": "Forbes, P",
+              "initLastName": "P Forbes",
+              "fullFMLName": "Patrick Forbes",
+              "fullLFMName": "Forbes, Patrick",
+              "strikeZoneTop": 3.344,
+              "strikeZoneBottom": 1.688
+            },
+            "team": {
+              "id": 109,
+              "name": "Arizona Diamondbacks"
+            },
+            "draftType": {
+              "code": "JR",
+              "description": "Rule 4 / June Amateur Draft"
+            },
+            "isDrafted": true,
+            "isPass": false,
+            "year": "2025"
+          },
+          {
+            "bisPlayerId": 5020426,
+            "pickRound": "1C",
+            "pickNumber": 30,
+            "displayPickNumber": 30,
+            "roundPickNumber": 2,
+            "rank": 32,
+            "pickValue": "3113300",
+            "signingBonus": "3113300",
+            "home": {
+              "city": "Haddon Hgts",
+              "state": "New Jersey",
+              "country": "USA"
+            },
+            "scoutingReport": "https://www.mlb.com/video/example",
+            "school": {
+              "name": "Coastal Carolina",
+              "schoolClass": "4YR JR",
+              "city": "Conway",
+              "country": "USA",
+              "state": "SC"
+            },
+            "headshotLink": "https://img.mlbstatic.com/mlb-photos/image/upload/d_people:generic:headshot:silo:current.png/w_120,q_auto:best/v1/people/805207/headshot/draft/current",
+            "person": {
+              "id": 805207,
+              "fullName": "Caden Bodine",
+              "link": "/api/v1/people/805207",
+              "firstName": "Caden",
+              "lastName": "Bodine",
+              "primaryNumber": "18",
+              "birthDate": "2003-12-02",
+              "currentAge": 22,
+              "birthCity": "Mount Holly",
+              "birthStateProvince": "NJ",
+              "birthCountry": "USA",
+              "height": "5' 10\"",
+              "weight": 200,
+              "active": true,
+              "primaryPosition": {
+                "code": "2",
+                "name": "Catcher",
+                "type": "Catcher",
+                "abbreviation": "C"
+              },
+              "useName": "Caden",
+              "useLastName": "Bodine",
+              "middleName": "Garrett",
+              "boxscoreName": "Bodine",
+              "gender": "M",
+              "isPlayer": true,
+              "isVerified": true,
+              "draftYear": 2025,
+              "batSide": {
+                "code": "S",
+                "description": "Switch"
+              },
+              "pitchHand": {
+                "code": "R",
+                "description": "Right"
+              },
+              "nameFirstLast": "Caden Bodine",
+              "nameSlug": "caden-bodine-805207",
+              "firstLastName": "Caden Bodine",
+              "lastFirstName": "Bodine, Caden",
+              "lastInitName": "Bodine, C",
+              "initLastName": "C Bodine",
+              "fullFMLName": "Caden Garrett Bodine",
+              "fullLFMName": "Bodine, Caden Garrett",
+              "strikeZoneTop": 3.121,
+              "strikeZoneBottom": 1.575
+            },
+            "team": {
+              "id": 110,
+              "name": "Baltimore Orioles"
+            },
+            "draftType": {
+              "code": "JR",
+              "description": "Rule 4 / June Amateur Draft"
+            },
+            "isDrafted": true,
+            "isPass": false,
+            "year": "2025"
+          }
+        ]
+      },
+      {
+        "round": "CB-A",
+        "picks": [
+          {
+            "bisPlayerId": 5026433,
+            "pickRound": "CB-A",
+            "pickNumber": 33,
+            "displayPickNumber": 33,
+            "roundPickNumber": 1,
+            "rank": 61,
+            "pickValue": "2898300",
+            "signingBonus": "2500000",
+            "home": {
+              "city": "Sioux Falls",
+              "state": "South Dakota",
+              "country": "USA"
+            },
+            "scoutingReport": "https://www.mlb.com/video/example",
+            "school": {
+              "name": "Tennessee",
+              "schoolClass": "4YR JR",
+              "city": "Knoxville",
+              "country": "USA",
+              "state": "TN"
+            },
+            "headshotLink": "https://img.mlbstatic.com/mlb-photos/image/upload/d_people:generic:headshot:silo:current.png/w_120,q_auto:best/v1/people/815071/headshot/draft/current",
+            "person": {
+              "id": 815071,
+              "fullName": "Marcus Phillips",
+              "link": "/api/v1/people/815071",
+              "firstName": "Marcus",
+              "lastName": "Phillips",
+              "birthDate": "2004-07-26",
+              "currentAge": 21,
+              "birthCity": "Sioux Falls",
+              "birthStateProvince": "SD",
+              "birthCountry": "USA",
+              "height": "6' 4\"",
+              "weight": 246,
+              "active": true,
+              "primaryPosition": {
+                "code": "1",
+                "name": "Pitcher",
+                "type": "Pitcher",
+                "abbreviation": "P"
+              },
+              "useName": "Marcus",
+              "useLastName": "Phillips",
+              "middleName": "Allen",
+              "boxscoreName": "Phillips",
+              "gender": "M",
+              "isPlayer": true,
+              "isVerified": true,
+              "draftYear": 2025,
+              "batSide": {
+                "code": "R",
+                "description": "Right"
+              },
+              "pitchHand": {
+                "code": "R",
+                "description": "Right"
+              },
+              "nameFirstLast": "Marcus Phillips",
+              "nameSlug": "marcus-phillips-815071",
+              "firstLastName": "Marcus Phillips",
+              "lastFirstName": "Phillips, Marcus",
+              "lastInitName": "Phillips, M",
+              "initLastName": "M Phillips",
+              "fullFMLName": "Marcus Allen Phillips",
+              "fullLFMName": "Phillips, Marcus Allen",
+              "strikeZoneTop": 3.388,
+              "strikeZoneBottom": 1.71
+            },
+            "team": {
+              "id": 111,
+              "name": "Boston Red Sox"
+            },
+            "draftType": {
+              "code": "JR",
+              "description": "Rule 4 / June Amateur Draft"
+            },
+            "isDrafted": true,
+            "isPass": false,
+            "year": "2025"
+          },
+          {
+            "bisPlayerId": 5035196,
+            "pickRound": "CB-A",
+            "pickNumber": 34,
+            "displayPickNumber": 34,
+            "roundPickNumber": 2,
+            "rank": 219,
+            "pickValue": "2827300",
+            "signingBonus": "2447500",
+            "home": {
+              "city": "Smithtown",
+              "state": "New York",
+              "country": "USA"
+            },
+            "scoutingReport": "https://www.mlb.com/video/example",
+            "school": {
+              "name": "Hauppauge HS",
+              "schoolClass": "HS SR",
+              "city": "Hauppauge",
+              "country": "USA",
+              "state": "NY"
+            },
+            "headshotLink": "https://img.mlbstatic.com/mlb-photos/image/upload/d_people:generic:headshot:silo:current.png/w_120,q_auto:best/v1/people/834672/headshot/draft/current",
+            "person": {
+              "id": 834672,
+              "fullName": "Michael Oliveto",
+              "link": "/api/v1/people/834672",
+              "firstName": "Michael",
+              "lastName": "Oliveto",
+              "birthDate": "2007-02-03",
+              "currentAge": 19,
+              "birthCity": "West Islip",
+              "birthStateProvince": "NY",
+              "birthCountry": "USA",
+              "height": "6' 3\"",
+              "weight": 185,
+              "active": true,
+              "primaryPosition": {
+                "code": "2",
+                "name": "Catcher",
+                "type": "Catcher",
+                "abbreviation": "C"
+              },
+              "useName": "Michael",
+              "useLastName": "Oliveto",
+              "middleName": "William",
+              "boxscoreName": "Oliveto",
+              "gender": "M",
+              "isPlayer": true,
+              "isVerified": true,
+              "draftYear": 2025,
+              "batSide": {
+                "code": "L",
+                "description": "Left"
+              },
+              "pitchHand": {
+                "code": "R",
+                "description": "Right"
+              },
+              "nameFirstLast": "Michael Oliveto",
+              "nameSlug": "michael-oliveto-834672",
+              "firstLastName": "Michael Oliveto",
+              "lastFirstName": "Oliveto, Michael",
+              "lastInitName": "Oliveto, M",
+              "initLastName": "M Oliveto",
+              "fullFMLName": "Michael William Oliveto",
+              "fullLFMName": "Oliveto, Michael William",
+              "strikeZoneTop": 3.344,
+              "strikeZoneBottom": 1.688
+            },
+            "team": {
+              "id": 116,
+              "name": "Detroit Tigers"
+            },
+            "draftType": {
+              "code": "JR",
+              "description": "Rule 4 / June Amateur Draft"
+            },
+            "isDrafted": true,
+            "isPass": false,
+            "year": "2025"
+          }
+        ]
+      },
+      {
+        "round": "2",
+        "picks": [
+          {
+            "bisPlayerId": 5034556,
+            "pickRound": "2",
+            "pickNumber": 44,
+            "displayPickNumber": 44,
+            "roundPickNumber": 1,
+            "rank": 57,
+            "pickValue": "2223600",
+            "signingBonus": "2997500",
+            "home": {
+              "city": "Willowbrook",
+              "state": "Illinois",
+              "country": "USA"
+            },
+            "scoutingReport": "https://www.mlb.com/video/example",
+            "school": {
+              "name": "Nazareth Academy",
+              "schoolClass": "HS SR",
+              "city": "La Grange Park",
+              "country": "USA",
+              "state": "IL"
+            },
+            "headshotLink": "https://img.mlbstatic.com/mlb-photos/image/upload/d_people:generic:headshot:silo:current.png/w_120,q_auto:best/v1/people/828262/headshot/draft/current",
+            "person": {
+              "id": 828262,
+              "fullName": "Jaden Fauske",
+              "link": "/api/v1/people/828262",
+              "firstName": "Jaden",
+              "lastName": "Fauske",
+              "birthDate": "2006-11-21",
+              "currentAge": 19,
+              "birthCity": "Willowbrook",
+              "birthStateProvince": "IL",
+              "birthCountry": "USA",
+              "height": "6' 3\"",
+              "weight": 200,
+              "active": true,
+              "primaryPosition": {
+                "code": "O",
+                "name": "Outfield",
+                "type": "Outfielder",
+                "abbreviation": "OF"
+              },
+              "useName": "Jaden",
+              "useLastName": "Fauske",
+              "boxscoreName": "Fauske",
+              "gender": "M",
+              "isPlayer": true,
+              "isVerified": true,
+              "draftYear": 2025,
+              "batSide": {
+                "code": "L",
+                "description": "Left"
+              },
+              "pitchHand": {
+                "code": "R",
+                "description": "Right"
+              },
+              "nameFirstLast": "Jaden Fauske",
+              "nameSlug": "jaden-fauske-828262",
+              "firstLastName": "Jaden Fauske",
+              "lastFirstName": "Fauske, Jaden",
+              "lastInitName": "Fauske, J",
+              "initLastName": "J Fauske",
+              "fullFMLName": "Jaden Fauske",
+              "fullLFMName": "Fauske, Jaden ",
+              "strikeZoneTop": 3.344,
+              "strikeZoneBottom": 1.688
+            },
+            "team": {
+              "id": 145,
+              "name": "Chicago White Sox"
+            },
+            "draftType": {
+              "code": "JR",
+              "description": "Rule 4 / June Amateur Draft"
+            },
+            "isDrafted": true,
+            "isPass": false,
+            "year": "2025"
+          },
+          {
+            "bisPlayerId": 5035306,
+            "pickRound": "2",
+            "pickNumber": 45,
+            "displayPickNumber": 45,
+            "roundPickNumber": 2,
+            "rank": 41,
+            "pickValue": "2171900",
+            "signingBonus": "2071900",
+            "home": {
+              "city": "Yazoo City",
+              "state": "Mississippi",
+              "country": "USA"
+            },
+            "scoutingReport": "https://www.mlb.com/video/example",
+            "school": {
+              "name": "Southern Mississippi",
+              "schoolClass": "4YR JR",
+              "city": "Hattiesburg",
+              "country": "USA",
+              "state": "MS"
+            },
+            "headshotLink": "https://img.mlbstatic.com/mlb-photos/image/upload/d_people:generic:headshot:silo:current.png/w_120,q_auto:best/v1/people/822477/headshot/draft/current",
+            "person": {
+              "id": 822477,
+              "fullName": "JB Middleton",
+              "link": "/api/v1/people/822477",
+              "firstName": "Jonathan",
+              "lastName": "Middleton",
+              "birthDate": "2003-11-24",
+              "currentAge": 22,
+              "birthCity": "Yazoo City",
+              "birthStateProvince": "MS",
+              "birthCountry": "USA",
+              "height": "6' 0\"",
+              "weight": 178,
+              "active": true,
+              "primaryPosition": {
+                "code": "1",
+                "name": "Pitcher",
+                "type": "Pitcher",
+                "abbreviation": "P"
+              },
+              "useName": "JB",
+              "useLastName": "Middleton",
+              "middleName": "Bailey",
+              "boxscoreName": "Middleton",
+              "gender": "M",
+              "isPlayer": true,
+              "isVerified": true,
+              "draftYear": 2025,
+              "batSide": {
+                "code": "R",
+                "description": "Right"
+              },
+              "pitchHand": {
+                "code": "R",
+                "description": "Right"
+              },
+              "nameFirstLast": "JB Middleton",
+              "nameSlug": "jb-middleton-822477",
+              "firstLastName": "JB Middleton",
+              "lastFirstName": "Middleton, JB",
+              "lastInitName": "Middleton, J",
+              "initLastName": "J Middleton",
+              "fullFMLName": "Jonathan Bailey Middleton",
+              "fullLFMName": "Middleton, Jonathan Bailey",
+              "strikeZoneTop": 3.21,
+              "strikeZoneBottom": 1.62
+            },
+            "team": {
+              "id": 115,
+              "name": "Colorado Rockies"
+            },
+            "draftType": {
+              "code": "JR",
+              "description": "Rule 4 / June Amateur Draft"
+            },
+            "isDrafted": true,
+            "isPass": false,
+            "year": "2025"
+          },
+          {
+            "bisPlayerId": 5034975,
+            "pickRound": "2",
+            "pickNumber": 50,
+            "displayPickNumber": 50,
+            "roundPickNumber": 7,
+            "rank": 49,
+            "pickValue": "1934700",
+            "home": {
+              "city": "Lynwood",
+              "state": "California",
+              "country": "USA"
+            },
+            "scoutingReport": "https://www.mlb.com/video/example",
+            "school": {
+              "name": "Warren HS",
+              "schoolClass": "HS SR",
+              "city": "Downey",
+              "country": "USA",
+              "state": "CA"
+            },
+            "headshotLink": "https://img.mlbstatic.com/mlb-photos/image/upload/d_people:generic:headshot:silo:current.png/w_120,q_auto:best/v1/people/815979/headshot/draft/current",
+            "person": {
+              "id": 815979,
+              "fullName": "Angel Cervantes",
+              "link": "/api/v1/people/815979",
+              "firstName": "Angel",
+              "lastName": "Cervantes",
+              "birthDate": "2007-08-21",
+              "currentAge": 18,
+              "birthCity": "Whittier",
+              "birthStateProvince": "CA",
+              "birthCountry": "USA",
+              "height": "6' 2\"",
+              "weight": 215,
+              "active": true,
+              "primaryPosition": {
+                "code": "1",
+                "name": "Pitcher",
+                "type": "Pitcher",
+                "abbreviation": "P"
+              },
+              "useName": "Angel",
+              "useLastName": "Cervantes",
+              "middleName": "Dario",
+              "boxscoreName": "Cervantes",
+              "gender": "M",
+              "isPlayer": true,
+              "isVerified": true,
+              "draftYear": 2025,
+              "batSide": {
+                "code": "R",
+                "description": "Right"
+              },
+              "pitchHand": {
+                "code": "R",
+                "description": "Right"
+              },
+              "nameFirstLast": "Angel Cervantes",
+              "nameTitle": "Jr.",
+              "nameSuffix": "Jr.",
+              "nameSlug": "angel-cervantes-815979",
+              "firstLastName": "Angel Cervantes",
+              "lastFirstName": "Cervantes, Angel",
+              "lastInitName": "Cervantes, A",
+              "initLastName": "A Cervantes",
+              "fullFMLName": "Angel Cervantes",
+              "fullLFMName": "Cervantes, Angel ",
+              "strikeZoneTop": 3.299,
+              "strikeZoneBottom": 1.665
+            },
+            "team": {
+              "id": 134,
+              "name": "Pittsburgh Pirates"
+            },
+            "draftType": {
+              "code": "JR",
+              "description": "Rule 4 / June Amateur Draft"
+            },
+            "isDrafted": true,
+            "isPass": false,
+            "year": "2025"
+          }
+        ]
+      },
+      {
+        "round": "CB-B",
+        "picks": [
+          {
+            "bisPlayerId": 5035388,
+            "pickRound": "CB-B",
+            "pickNumber": 66,
+            "displayPickNumber": 66,
+            "roundPickNumber": 1,
+            "rank": 161,
+            "pickValue": "1320400",
+            "signingBonus": "1100000",
+            "home": {
+              "city": "Brentwood",
+              "state": "Tennessee",
+              "country": "USA"
+            },
+            "scoutingReport": "https://www.mlb.com/video/example",
+            "school": {
+              "name": "Arizona",
+              "schoolClass": "4YR JR",
+              "city": "Tucson",
+              "country": "USA",
+              "state": "AZ"
+            },
+            "headshotLink": "https://img.mlbstatic.com/mlb-photos/image/upload/d_people:generic:headshot:silo:current.png/w_120,q_auto:best/v1/people/830239/headshot/draft/current",
+            "person": {
+              "id": 830239,
+              "fullName": "Aaron Walton",
+              "link": "/api/v1/people/830239",
+              "firstName": "Aaron",
+              "lastName": "Walton",
+              "birthDate": "2004-05-14",
+              "currentAge": 22,
+              "birthCity": "Nashville",
+              "birthStateProvince": "TN",
+              "birthCountry": "USA",
+              "height": "6' 4\"",
+              "weight": 218,
+              "active": true,
+              "primaryPosition": {
+                "code": "O",
+                "name": "Outfield",
+                "type": "Outfielder",
+                "abbreviation": "OF"
+              },
+              "useName": "Aaron",
+              "useLastName": "Walton",
+              "middleName": "Dean",
+              "boxscoreName": "Walton",
+              "gender": "M",
+              "isPlayer": true,
+              "isVerified": true,
+              "draftYear": 2025,
+              "batSide": {
+                "code": "R",
+                "description": "Right"
+              },
+              "pitchHand": {
+                "code": "R",
+                "description": "Right"
+              },
+              "nameFirstLast": "Aaron Walton",
+              "nameSlug": "aaron-walton-830239",
+              "firstLastName": "Aaron Walton",
+              "lastFirstName": "Walton, Aaron",
+              "lastInitName": "Walton, A",
+              "initLastName": "A Walton",
+              "fullFMLName": "Aaron Walton",
+              "fullLFMName": "Walton, Aaron ",
+              "strikeZoneTop": 3.388,
+              "strikeZoneBottom": 1.71
+            },
+            "team": {
+              "id": 114,
+              "name": "Cleveland Guardians"
+            },
+            "draftType": {
+              "code": "JR",
+              "description": "Rule 4 / June Amateur Draft"
+            },
+            "isDrafted": true,
+            "isPass": false,
+            "year": "2025"
+          },
+          {
+            "bisPlayerId": 5021691,
+            "pickRound": "CB-B",
+            "pickNumber": 69,
+            "displayPickNumber": 69,
+            "roundPickNumber": 2,
+            "rank": 127,
+            "pickValue": "1223800",
+            "signingBonus": "1147500",
+            "home": {
+              "city": "Tampa",
+              "state": "Florida",
+              "country": "USA"
+            },
+            "scoutingReport": "https://www.mlb.com/video/example",
+            "school": {
+              "name": "Georgia",
+              "schoolClass": "4YR JR",
+              "city": "Athens",
+              "country": "USA",
+              "state": "GA"
+            },
+            "headshotLink": "https://img.mlbstatic.com/mlb-photos/image/upload/d_people:generic:headshot:silo:current.png/w_120,q_auto:best/v1/people/802411/headshot/draft/current",
+            "person": {
+              "id": 802411,
+              "fullName": "JT Quinn",
+              "link": "/api/v1/people/802411",
+              "firstName": "Jonathan",
+              "lastName": "Quinn",
+              "birthDate": "2004-04-22",
+              "currentAge": 22,
+              "birthCity": "Tampa",
+              "birthStateProvince": "FL",
+              "birthCountry": "USA",
+              "height": "6' 6\"",
+              "weight": 210,
+              "active": true,
+              "primaryPosition": {
+                "code": "1",
+                "name": "Pitcher",
+                "type": "Pitcher",
+                "abbreviation": "P"
+              },
+              "useName": "JT",
+              "useLastName": "Quinn",
+              "middleName": "Thomas",
+              "boxscoreName": "Quinn",
+              "gender": "M",
+              "isPlayer": true,
+              "isVerified": true,
+              "draftYear": 2025,
+              "batSide": {
+                "code": "R",
+                "description": "Right"
+              },
+              "pitchHand": {
+                "code": "R",
+                "description": "Right"
+              },
+              "nameFirstLast": "JT Quinn",
+              "nameSlug": "jt-quinn-802411",
+              "firstLastName": "JT Quinn",
+              "lastFirstName": "Quinn, JT",
+              "lastInitName": "Quinn, J",
+              "initLastName": "J Quinn",
+              "fullFMLName": "Jonathan Thomas Quinn",
+              "fullLFMName": "Quinn, Jonathan Thomas",
+              "strikeZoneTop": 3.478,
+              "strikeZoneBottom": 1.755
+            },
+            "team": {
+              "id": 110,
+              "name": "Baltimore Orioles"
+            },
+            "draftType": {
+              "code": "JR",
+              "description": "Rule 4 / June Amateur Draft"
+            },
+            "isDrafted": true,
+            "isPass": false,
+            "year": "2025"
+          }
+        ]
+      },
+      {
+        "round": "SUP-2",
+        "picks": [
+          {
+            "bisPlayerId": 5035079,
+            "pickRound": "SUP-2",
+            "pickNumber": 67,
+            "displayPickNumber": 67,
+            "roundPickNumber": 1,
+            "rank": 56,
+            "pickValue": "1285400",
+            "signingBonus": "1285400",
+            "home": {
+              "city": "Bradenton",
+              "state": "Florida",
+              "country": "USA"
+            },
+            "scoutingReport": "https://www.mlb.com/video/example",
+            "school": {
+              "name": "IMG Academy",
+              "schoolClass": "HS SR",
+              "city": "Bradenton",
+              "country": "USA",
+              "state": "FL"
+            },
+            "headshotLink": "https://img.mlbstatic.com/mlb-photos/image/upload/d_people:generic:headshot:silo:current.png/w_120,q_auto:best/v1/people/815830/headshot/draft/current",
+            "person": {
+              "id": 815830,
+              "fullName": "Dean Moss",
+              "link": "/api/v1/people/815830",
+              "firstName": "Dean",
+              "lastName": "Moss",
+              "birthDate": "2006-04-17",
+              "currentAge": 20,
+              "birthCity": "Burlingame",
+              "birthStateProvince": "CA",
+              "birthCountry": "USA",
+              "height": "6' 0\"",
+              "weight": 180,
+              "active": true,
+              "primaryPosition": {
+                "code": "O",
+                "name": "Outfield",
+                "type": "Outfielder",
+                "abbreviation": "OF"
+              },
+              "useName": "Dean",
+              "useLastName": "Moss",
+              "boxscoreName": "Moss",
+              "gender": "M",
+              "isPlayer": true,
+              "isVerified": true,
+              "draftYear": 2025,
+              "batSide": {
+                "code": "L",
+                "description": "Left"
+              },
+              "pitchHand": {
+                "code": "R",
+                "description": "Right"
+              },
+              "nameFirstLast": "Dean Moss",
+              "nameSlug": "dean-moss-815830",
+              "firstLastName": "Dean Moss",
+              "lastFirstName": "Moss, Dean",
+              "lastInitName": "Moss, D",
+              "initLastName": "D Moss",
+              "fullFMLName": "Dean Moss",
+              "fullLFMName": "Moss, Dean ",
+              "strikeZoneTop": 3.21,
+              "strikeZoneBottom": 1.62
+            },
+            "team": {
+              "id": 139,
+              "name": "Tampa Bay Rays"
+            },
+            "draftType": {
+              "code": "JR",
+              "description": "Rule 4 / June Amateur Draft"
+            },
+            "isDrafted": true,
+            "isPass": false,
+            "year": "2025"
+          },
+          {
+            "bisPlayerId": 5034562,
+            "pickRound": "SUP-2",
+            "pickNumber": 68,
+            "displayPickNumber": 68,
+            "roundPickNumber": 2,
+            "pickValue": "1254400",
+            "signingBonus": "1097500",
+            "home": {
+              "city": "Franklinville",
+              "state": "New Jersey",
+              "country": "USA"
+            },
+            "school": {
+              "name": "Delsea Reg HS",
+              "schoolClass": "HS SR",
+              "city": "Franklinville",
+              "country": "USA",
+              "state": "NJ"
+            },
+            "headshotLink": "https://img.mlbstatic.com/mlb-photos/image/upload/d_people:generic:headshot:silo:current.png/w_120,q_auto:best/v1/people/827980/headshot/draft/current",
+            "person": {
+              "id": 827980,
+              "fullName": "Frank Cairone",
+              "link": "/api/v1/people/827980",
+              "firstName": "Frank",
+              "lastName": "Cairone",
+              "birthDate": "2007-09-14",
+              "currentAge": 18,
+              "birthCity": "Gloucester",
+              "birthStateProvince": "NJ",
+              "birthCountry": "USA",
+              "height": "6' 2\"",
+              "weight": 195,
+              "active": true,
+              "primaryPosition": {
+                "code": "1",
+                "name": "Pitcher",
+                "type": "Pitcher",
+                "abbreviation": "P"
+              },
+              "useName": "Frank",
+              "useLastName": "Cairone",
+              "middleName": "Anthony",
+              "boxscoreName": "Cairone",
+              "gender": "M",
+              "isPlayer": true,
+              "isVerified": true,
+              "draftYear": 2025,
+              "batSide": {
+                "code": "R",
+                "description": "Right"
+              },
+              "pitchHand": {
+                "code": "L",
+                "description": "Left"
+              },
+              "nameFirstLast": "Frank Cairone",
+              "nameTitle": "III",
+              "nameSuffix": "III",
+              "nameSlug": "frank-cairone-827980",
+              "firstLastName": "Frank Cairone",
+              "lastFirstName": "Cairone, Frank",
+              "lastInitName": "Cairone, F",
+              "initLastName": "F Cairone",
+              "fullFMLName": "Frank Anthony Cairone",
+              "fullLFMName": "Cairone, Frank Anthony",
+              "strikeZoneTop": 3.299,
+              "strikeZoneBottom": 1.665
+            },
+            "team": {
+              "id": 158,
+              "name": "Milwaukee Brewers"
+            },
+            "draftType": {
+              "code": "JR",
+              "description": "Rule 4 / June Amateur Draft"
+            },
+            "isDrafted": true,
+            "isPass": false,
+            "year": "2025"
+          }
+        ]
+      },
+      {
+        "round": "2C",
+        "picks": [
+          {
+            "bisPlayerId": 5020352,
+            "pickRound": "2C",
+            "pickNumber": 75,
+            "displayPickNumber": 75,
+            "roundPickNumber": 1,
+            "rank": 72,
+            "pickValue": "1093800",
+            "signingBonus": "1093800",
+            "home": {
+              "city": "Brooklyn",
+              "state": "New York",
+              "country": "USA"
+            },
+            "scoutingReport": "https://www.mlb.com/video/example",
+            "school": {
+              "name": "Virginia",
+              "schoolClass": "4YR JR",
+              "city": "Charlottesville",
+              "country": "USA",
+              "state": "VA"
+            },
+            "headshotLink": "https://img.mlbstatic.com/mlb-photos/image/upload/d_people:generic:headshot:silo:current.png/w_120,q_auto:best/v1/people/804995/headshot/draft/current",
+            "person": {
+              "id": 804995,
+              "fullName": "Henry Godbout",
+              "link": "/api/v1/people/804995",
+              "firstName": "Henry",
+              "lastName": "Godbout",
+              "birthDate": "2003-11-06",
+              "currentAge": 22,
+              "birthCity": "New York",
+              "birthStateProvince": "NY",
+              "birthCountry": "USA",
+              "height": "6' 0\"",
+              "weight": 190,
+              "active": true,
+              "primaryPosition": {
+                "code": "6",
+                "name": "Shortstop",
+                "type": "Infielder",
+                "abbreviation": "SS"
+              },
+              "useName": "Henry",
+              "useLastName": "Godbout",
+              "middleName": "Bachner",
+              "boxscoreName": "Godbout",
+              "gender": "M",
+              "isPlayer": true,
+              "isVerified": true,
+              "draftYear": 2025,
+              "batSide": {
+                "code": "R",
+                "description": "Right"
+              },
+              "pitchHand": {
+                "code": "R",
+                "description": "Right"
+              },
+              "nameFirstLast": "Henry Godbout",
+              "nameSlug": "henry-godbout-804995",
+              "firstLastName": "Henry Godbout",
+              "lastFirstName": "Godbout, Henry",
+              "lastInitName": "Godbout, H",
+              "initLastName": "H Godbout",
+              "fullFMLName": "Henry Bachner Godbout",
+              "fullLFMName": "Godbout, Henry Bachner",
+              "strikeZoneTop": 3.221,
+              "strikeZoneBottom": 1.625
+            },
+            "team": {
+              "id": 111,
+              "name": "Boston Red Sox"
+            },
+            "draftType": {
+              "code": "JR",
+              "description": "Rule 4 / June Amateur Draft"
+            },
+            "isDrafted": true,
+            "isPass": false,
+            "year": "2025"
+          }
+        ]
+      },
+      {
+        "round": "3",
+        "picks": [
+          {
+            "bisPlayerId": 5035983,
+            "pickRound": "3",
+            "pickNumber": 76,
+            "displayPickNumber": 76,
+            "roundPickNumber": 1,
+            "rank": 79,
+            "pickValue": "1076800",
+            "signingBonus": "922500",
+            "home": {
+              "city": "Brunswick",
+              "state": "Georgia",
+              "country": "USA"
+            },
+            "scoutingReport": "https://www.mlb.com/video/example",
+            "school": {
+              "name": "Georgia Tech",
+              "schoolClass": "4YR JR",
+              "city": "Atlanta",
+              "country": "USA",
+              "state": "GA"
+            },
+            "headshotLink": "https://img.mlbstatic.com/mlb-photos/image/upload/d_people:generic:headshot:silo:current.png/w_120,q_auto:best/v1/people/827517/headshot/draft/current",
+            "person": {
+              "id": 827517,
+              "fullName": "Kyle Lodise",
+              "link": "/api/v1/people/827517",
+              "firstName": "Kyle",
+              "lastName": "Lodise",
+              "birthDate": "2003-10-17",
+              "currentAge": 22,
+              "birthCity": "Brunswick",
+              "birthStateProvince": "GA",
+              "birthCountry": "USA",
+              "height": "5' 11\"",
+              "weight": 180,
+              "active": true,
+              "primaryPosition": {
+                "code": "6",
+                "name": "Shortstop",
+                "type": "Infielder",
+                "abbreviation": "SS"
+              },
+              "useName": "Kyle",
+              "useLastName": "Lodise",
+              "middleName": "Joseph",
+              "boxscoreName": "Lodise",
+              "gender": "M",
+              "isPlayer": true,
+              "isVerified": true,
+              "draftYear": 2025,
+              "batSide": {
+                "code": "R",
+                "description": "Right"
+              },
+              "pitchHand": {
+                "code": "R",
+                "description": "Right"
+              },
+              "nameFirstLast": "Kyle Lodise",
+              "nameSlug": "kyle-lodise-827517",
+              "firstLastName": "Kyle Lodise",
+              "lastFirstName": "Lodise, Kyle",
+              "lastInitName": "Lodise, K",
+              "initLastName": "K Lodise",
+              "fullFMLName": "Kyle Lodise",
+              "fullLFMName": "Lodise, Kyle ",
+              "strikeZoneTop": 3.165,
+              "strikeZoneBottom": 1.598
+            },
+            "team": {
+              "id": 145,
+              "name": "Chicago White Sox"
+            },
+            "draftType": {
+              "code": "JR",
+              "description": "Rule 4 / June Amateur Draft"
+            },
+            "isDrafted": true,
+            "isPass": false,
+            "year": "2025"
+          },
+          {
+            "bisPlayerId": 5020601,
+            "pickRound": "3",
+            "pickNumber": 77,
+            "displayPickNumber": 77,
+            "roundPickNumber": 2,
+            "rank": 159,
+            "pickValue": "1060300",
+            "signingBonus": "950000",
+            "home": {
+              "city": "Fountain Valley",
+              "state": "California",
+              "country": "USA"
+            },
+            "scoutingReport": "https://www.mlb.com/video/example",
+            "school": {
+              "name": "USC",
+              "schoolClass": "4YR JR",
+              "city": "Los Angeles",
+              "country": "USA",
+              "state": "CA"
+            },
+            "headshotLink": "https://img.mlbstatic.com/mlb-photos/image/upload/d_people:generic:headshot:silo:current.png/w_120,q_auto:best/v1/people/805260/headshot/draft/current",
+            "person": {
+              "id": 805260,
+              "fullName": "Ethan Hedges",
+              "link": "/api/v1/people/805260",
+              "firstName": "Ethan",
+              "lastName": "Hedges",
+              "birthDate": "2004-04-19",
+              "currentAge": 22,
+              "birthCity": "Newport Beach",
+              "birthStateProvince": "CA",
+              "birthCountry": "USA",
+              "height": "6' 1\"",
+              "weight": 185,
+              "active": true,
+              "primaryPosition": {
+                "code": "5",
+                "name": "Third Base",
+                "type": "Infielder",
+                "abbreviation": "3B"
+              },
+              "useName": "Ethan",
+              "useLastName": "Hedges",
+              "middleName": "Joseph",
+              "boxscoreName": "Hedges",
+              "gender": "M",
+              "isPlayer": true,
+              "isVerified": true,
+              "draftYear": 2025,
+              "batSide": {
+                "code": "R",
+                "description": "Right"
+              },
+              "pitchHand": {
+                "code": "R",
+                "description": "Right"
+              },
+              "nameFirstLast": "Ethan Hedges",
+              "nameSlug": "ethan-hedges-805260",
+              "firstLastName": "Ethan Hedges",
+              "lastFirstName": "Hedges, Ethan",
+              "lastInitName": "Hedges, E",
+              "initLastName": "E Hedges",
+              "fullFMLName": "Ethan Joseph Hedges",
+              "fullLFMName": "Hedges, Ethan Joseph",
+              "strikeZoneTop": 3.255,
+              "strikeZoneBottom": 1.643
+            },
+            "team": {
+              "id": 115,
+              "name": "Colorado Rockies"
+            },
+            "draftType": {
+              "code": "JR",
+              "description": "Rule 4 / June Amateur Draft"
+            },
+            "isDrafted": true,
+            "isPass": false,
+            "year": "2025"
+          }
+        ]
+      },
+      {
+        "round": "SUP-3",
+        "picks": [
+          {
+            "bisPlayerId": 5021685,
+            "pickRound": "SUP-3",
+            "pickNumber": 105,
+            "displayPickNumber": 105,
+            "roundPickNumber": 1,
+            "rank": 148,
+            "pickValue": "729600",
+            "signingBonus": "597500",
+            "home": {
+              "city": "South Milwaukee",
+              "state": "Wisconsin",
+              "country": "USA"
+            },
+            "scoutingReport": "https://www.mlb.com/video/example",
+            "school": {
+              "name": "Tennessee",
+              "schoolClass": "4YR JR",
+              "city": "Knoxville",
+              "country": "USA",
+              "state": "TN"
+            },
+            "headshotLink": "https://img.mlbstatic.com/mlb-photos/image/upload/d_people:generic:headshot:silo:current.png/w_120,q_auto:best/v1/people/805422/headshot/draft/current",
+            "person": {
+              "id": 805422,
+              "fullName": "Nate Snead",
+              "link": "/api/v1/people/805422",
+              "firstName": "Nathaniel",
+              "lastName": "Snead",
+              "birthDate": "2004-03-16",
+              "currentAge": 22,
+              "birthCity": "Menomonee Falls",
+              "birthStateProvince": "WI",
+              "birthCountry": "USA",
+              "height": "6' 2\"",
+              "weight": 212,
+              "active": true,
+              "primaryPosition": {
+                "code": "1",
+                "name": "Pitcher",
+                "type": "Pitcher",
+                "abbreviation": "P"
+              },
+              "useName": "Nate",
+              "useLastName": "Snead",
+              "middleName": "James",
+              "boxscoreName": "Snead",
+              "gender": "M",
+              "isPlayer": true,
+              "isVerified": true,
+              "draftYear": 2025,
+              "batSide": {
+                "code": "R",
+                "description": "Right"
+              },
+              "pitchHand": {
+                "code": "R",
+                "description": "Right"
+              },
+              "nameFirstLast": "Nate Snead",
+              "nameSlug": "nate-snead-805422",
+              "firstLastName": "Nate Snead",
+              "lastFirstName": "Snead, Nate",
+              "lastInitName": "Snead, N",
+              "initLastName": "N Snead",
+              "fullFMLName": "Nathaniel James Snead",
+              "fullLFMName": "Snead, Nathaniel James",
+              "strikeZoneTop": 3.299,
+              "strikeZoneBottom": 1.665
+            },
+            "team": {
+              "id": 108,
+              "name": "Los Angeles Angels"
+            },
+            "draftType": {
+              "code": "JR",
+              "description": "Rule 4 / June Amateur Draft"
+            },
+            "isDrafted": true,
+            "isPass": false,
+            "year": "2025"
+          }
+        ]
+      },
+      {
+        "round": "4",
+        "picks": [
+          {
+            "bisPlayerId": 5026477,
+            "pickRound": "4",
+            "pickNumber": 106,
+            "displayPickNumber": 106,
+            "roundPickNumber": 1,
+            "rank": 164,
+            "pickValue": "722600",
+            "signingBonus": "1097500",
+            "home": {
+              "city": "Santa Clarita",
+              "state": "California",
+              "country": "USA"
+            },
+            "scoutingReport": "https://www.mlb.com/video/example",
+            "school": {
+              "name": "Crespi Carmelite HS",
+              "schoolClass": "HS SR",
+              "city": "Encino",
+              "country": "USA",
+              "state": "CA"
+            },
+            "headshotLink": "https://img.mlbstatic.com/mlb-photos/image/upload/d_people:generic:headshot:silo:current.png/w_120,q_auto:best/v1/people/821933/headshot/draft/current",
+            "person": {
+              "id": 821933,
+              "fullName": "Landon Hodge",
+              "link": "/api/v1/people/821933",
+              "firstName": "Landon",
+              "lastName": "Hodge",
+              "birthDate": "2007-02-18",
+              "currentAge": 19,
+              "birthCity": "Panorama City",
+              "birthStateProvince": "CA",
+              "birthCountry": "USA",
+              "height": "6' 1\"",
+              "weight": 175,
+              "active": true,
+              "primaryPosition": {
+                "code": "2",
+                "name": "Catcher",
+                "type": "Catcher",
+                "abbreviation": "C"
+              },
+              "useName": "Landon",
+              "useLastName": "Hodge",
+              "middleName": "Taylor Christopher",
+              "boxscoreName": "Hodge",
+              "gender": "M",
+              "isPlayer": true,
+              "isVerified": true,
+              "draftYear": 2025,
+              "batSide": {
+                "code": "L",
+                "description": "Left"
+              },
+              "pitchHand": {
+                "code": "R",
+                "description": "Right"
+              },
+              "nameFirstLast": "Landon Hodge",
+              "nameSlug": "landon-hodge-821933",
+              "firstLastName": "Landon Hodge",
+              "lastFirstName": "Hodge, Landon",
+              "lastInitName": "Hodge, L",
+              "initLastName": "L Hodge",
+              "fullFMLName": "Landon Hodge",
+              "fullLFMName": "Hodge, Landon ",
+              "strikeZoneTop": 3.255,
+              "strikeZoneBottom": 1.643
+            },
+            "team": {
+              "id": 145,
+              "name": "Chicago White Sox"
+            },
+            "draftType": {
+              "code": "JR",
+              "description": "Rule 4 / June Amateur Draft"
+            },
+            "isDrafted": true,
+            "isPass": false,
+            "year": "2025"
+          },
+          {
+            "bisPlayerId": 5022054,
+            "pickRound": "4",
+            "pickNumber": 107,
+            "displayPickNumber": 107,
+            "roundPickNumber": 2,
+            "rank": 139,
+            "pickValue": "715400",
+            "signingBonus": "700000",
+            "home": {
+              "city": "Santa Ana",
+              "state": "California",
+              "country": "USA"
+            },
+            "scoutingReport": "https://www.mlb.com/video/example",
+            "school": {
+              "name": "University of California - Irvine",
+              "schoolClass": "4YR JR",
+              "city": "Irvine",
+              "country": "USA",
+              "state": "CA"
+            },
+            "headshotLink": "https://img.mlbstatic.com/mlb-photos/image/upload/d_people:generic:headshot:silo:current.png/w_120,q_auto:best/v1/people/804465/headshot/draft/current",
+            "person": {
+              "id": 804465,
+              "fullName": "Riley Kelly",
+              "link": "/api/v1/people/804465",
+              "firstName": "Riley",
+              "lastName": "Kelly",
+              "birthDate": "2004-04-21",
+              "currentAge": 22,
+              "birthCity": "Orange",
+              "birthStateProvince": "CA",
+              "birthCountry": "USA",
+              "height": "6' 5\"",
+              "weight": 215,
+              "active": true,
+              "primaryPosition": {
+                "code": "1",
+                "name": "Pitcher",
+                "type": "Pitcher",
+                "abbreviation": "P"
+              },
+              "useName": "Riley",
+              "useLastName": "Kelly",
+              "middleName": "James",
+              "boxscoreName": "Kelly",
+              "gender": "M",
+              "isPlayer": true,
+              "isVerified": true,
+              "draftYear": 2025,
+              "batSide": {
+                "code": "R",
+                "description": "Right"
+              },
+              "pitchHand": {
+                "code": "R",
+                "description": "Right"
+              },
+              "nameFirstLast": "Riley Kelly",
+              "nameSlug": "riley-kelly-804465",
+              "firstLastName": "Riley Kelly",
+              "lastFirstName": "Kelly, Riley",
+              "lastInitName": "Kelly, R",
+              "initLastName": "R Kelly",
+              "fullFMLName": "Riley James Kelly",
+              "fullLFMName": "Kelly, Riley James",
+              "strikeZoneTop": 3.433,
+              "strikeZoneBottom": 1.733
+            },
+            "team": {
+              "id": 115,
+              "name": "Colorado Rockies"
+            },
+            "draftType": {
+              "code": "JR",
+              "description": "Rule 4 / June Amateur Draft"
+            },
+            "isDrafted": true,
+            "isPass": false,
+            "year": "2025"
+          }
+        ]
+      },
+      {
+        "round": "4C",
+        "picks": [
+          {
+            "bisPlayerId": 5020036,
+            "pickRound": "4C",
+            "pickNumber": 136,
+            "displayPickNumber": 136,
+            "roundPickNumber": 1,
+            "pickValue": "539700",
+            "signingBonus": "497500",
+            "home": {
+              "city": "Grimesland",
+              "state": "North Carolina",
+              "country": "USA"
+            },
+            "school": {
+              "name": "East Carolina",
+              "schoolClass": "4YR JR",
+              "city": "Greenville",
+              "country": "USA",
+              "state": "NC"
+            },
+            "headshotLink": "https://img.mlbstatic.com/mlb-photos/image/upload/d_people:generic:headshot:silo:current.png/w_120,q_auto:best/v1/people/703483/headshot/draft/current",
+            "person": {
+              "id": 703483,
+              "fullName": "Dixon Williams",
+              "link": "/api/v1/people/703483",
+              "firstName": "Dixon",
+              "lastName": "Williams",
+              "birthDate": "2003-12-19",
+              "currentAge": 22,
+              "birthCity": "Greenville",
+              "birthStateProvince": "NC",
+              "birthCountry": "USA",
+              "height": "6' 2\"",
+              "weight": 210,
+              "active": true,
+              "primaryPosition": {
+                "code": "4",
+                "name": "Second Base",
+                "type": "Infielder",
+                "abbreviation": "2B"
+              },
+              "useName": "Dixon",
+              "useLastName": "Williams",
+              "middleName": "Ray",
+              "boxscoreName": "Williams",
+              "gender": "M",
+              "isPlayer": true,
+              "isVerified": true,
+              "draftYear": 2025,
+              "batSide": {
+                "code": "L",
+                "description": "Left"
+              },
+              "pitchHand": {
+                "code": "R",
+                "description": "Right"
+              },
+              "nameFirstLast": "Dixon Williams",
+              "nameSlug": "dixon-williams-703483",
+              "firstLastName": "Dixon Williams",
+              "lastFirstName": "Williams, Dixon",
+              "lastInitName": "Williams, D",
+              "initLastName": "D Williams",
+              "fullFMLName": "Dixon Ray Williams",
+              "fullLFMName": "Williams, Dixon Ray",
+              "strikeZoneTop": 3.299,
+              "strikeZoneBottom": 1.665
+            },
+            "team": {
+              "id": 144,
+              "name": "Atlanta Braves"
+            },
+            "draftType": {
+              "code": "JR",
+              "description": "Rule 4 / June Amateur Draft"
+            },
+            "isDrafted": true,
+            "isPass": false,
+            "year": "2025"
+          }
+        ]
+      },
+      {
+        "round": "5",
+        "picks": [
+          {
+            "bisPlayerId": 5020495,
+            "pickRound": "5",
+            "pickNumber": 137,
+            "displayPickNumber": 137,
+            "roundPickNumber": 1,
+            "rank": 147,
+            "pickValue": "534400",
+            "signingBonus": "587500",
+            "home": {
+              "city": "Oklahoma City",
+              "state": "Oklahoma",
+              "country": "USA"
+            },
+            "scoutingReport": "https://www.mlb.com/video/example",
+            "school": {
+              "name": "Oklahoma State",
+              "schoolClass": "4YR JR",
+              "city": "Stillwater",
+              "country": "USA",
+              "state": "OK"
+            },
+            "headshotLink": "https://img.mlbstatic.com/mlb-photos/image/upload/d_people:generic:headshot:silo:current.png/w_120,q_auto:best/v1/people/805031/headshot/draft/current",
+            "person": {
+              "id": 805031,
+              "fullName": "Gabe Davis",
+              "link": "/api/v1/people/805031",
+              "firstName": "Gabriel",
+              "lastName": "Davis",
+              "birthDate": "2003-10-21",
+              "currentAge": 22,
+              "birthCity": "Midwest City",
+              "birthStateProvince": "OK",
+              "birthCountry": "USA",
+              "height": "6' 9\"",
+              "weight": 234,
+              "active": true,
+              "primaryPosition": {
+                "code": "1",
+                "name": "Pitcher",
+                "type": "Pitcher",
+                "abbreviation": "P"
+              },
+              "useName": "Gabe",
+              "useLastName": "Davis",
+              "middleName": "Brady",
+              "boxscoreName": "Davis",
+              "gender": "M",
+              "isPlayer": true,
+              "isVerified": true,
+              "draftYear": 2025,
+              "batSide": {
+                "code": "R",
+                "description": "Right"
+              },
+              "pitchHand": {
+                "code": "R",
+                "description": "Right"
+              },
+              "nameFirstLast": "Gabe Davis",
+              "nameSlug": "gabe-davis-805031",
+              "firstLastName": "Gabe Davis",
+              "lastFirstName": "Davis, Gabe",
+              "lastInitName": "Davis, G",
+              "initLastName": "G Davis",
+              "fullFMLName": "Gabriel Brady Davis",
+              "fullLFMName": "Davis, Gabriel Brady",
+              "strikeZoneTop": 3.611,
+              "strikeZoneBottom": 1.823
+            },
+            "team": {
+              "id": 145,
+              "name": "Chicago White Sox"
+            },
+            "draftType": {
+              "code": "JR",
+              "description": "Rule 4 / June Amateur Draft"
+            },
+            "isDrafted": true,
+            "isPass": false,
+            "year": "2025"
+          },
+          {
+            "bisPlayerId": 5025636,
+            "pickRound": "5",
+            "pickNumber": 138,
+            "displayPickNumber": 138,
+            "roundPickNumber": 2,
+            "pickValue": "529100",
+            "signingBonus": "600000",
+            "home": {
+              "city": "Brooklandville",
+              "state": "Maryland",
+              "country": "USA"
+            },
+            "school": {
+              "name": "Wake Forest",
+              "schoolClass": "4YR SO",
+              "city": "Winston-Salem",
+              "country": "USA",
+              "state": "NC"
+            },
+            "headshotLink": "https://img.mlbstatic.com/mlb-photos/image/upload/d_people:generic:headshot:silo:current.png/w_120,q_auto:best/v1/people/806174/headshot/draft/current",
+            "person": {
+              "id": 806174,
+              "fullName": "Cameron Nelson",
+              "link": "/api/v1/people/806174",
+              "firstName": "Cameron",
+              "lastName": "Nelson",
+              "birthDate": "2004-05-27",
+              "currentAge": 22,
+              "birthCity": "Baltimore",
+              "birthStateProvince": "MD",
+              "birthCountry": "USA",
+              "height": "5' 11\"",
+              "weight": 185,
+              "active": true,
+              "primaryPosition": {
+                "code": "O",
+                "name": "Outfield",
+                "type": "Outfielder",
+                "abbreviation": "OF"
+              },
+              "useName": "Cameron",
+              "useLastName": "Nelson",
+              "middleName": "Thomas",
+              "boxscoreName": "Nelson",
+              "gender": "M",
+              "isPlayer": true,
+              "isVerified": true,
+              "draftYear": 2025,
+              "batSide": {
+                "code": "L",
+                "description": "Left"
+              },
+              "pitchHand": {
+                "code": "L",
+                "description": "Left"
+              },
+              "nameFirstLast": "Cameron Nelson",
+              "nameSlug": "cameron-nelson-806174",
+              "firstLastName": "Cameron Nelson",
+              "lastFirstName": "Nelson, Cameron",
+              "lastInitName": "Nelson, C",
+              "initLastName": "C Nelson",
+              "fullFMLName": "Cameron Thomas Nelson",
+              "fullLFMName": "Nelson, Cameron Thomas",
+              "strikeZoneTop": 3.165,
+              "strikeZoneBottom": 1.598
+            },
+            "team": {
+              "id": 115,
+              "name": "Colorado Rockies"
+            },
+            "draftType": {
+              "code": "JR",
+              "description": "Rule 4 / June Amateur Draft"
+            },
+            "isDrafted": true,
+            "isPass": false,
+            "year": "2025"
+          }
+        ]
+      },
+      {
+        "round": "6",
+        "picks": [
+          {
+            "bisPlayerId": 5019347,
+            "pickRound": "6",
+            "pickNumber": 166,
+            "displayPickNumber": 166,
+            "roundPickNumber": 1,
+            "rank": 142,
+            "pickValue": "403900",
+            "signingBonus": "447500",
+            "home": {
+              "city": "Lithia",
+              "state": "Florida",
+              "country": "USA"
+            },
+            "scoutingReport": "https://www.mlb.com/video/example",
+            "school": {
+              "name": "Florida",
+              "schoolClass": "4YR JR",
+              "city": "Gainesville",
+              "country": "USA",
+              "state": "FL"
+            },
+            "headshotLink": "https://img.mlbstatic.com/mlb-photos/image/upload/d_people:generic:headshot:silo:current.png/w_120,q_auto:best/v1/people/701333/headshot/draft/current",
+            "person": {
+              "id": 701333,
+              "fullName": "Colby Shelton",
+              "link": "/api/v1/people/701333",
+              "firstName": "Colby",
+              "lastName": "Shelton",
+              "birthDate": "2002-12-06",
+              "currentAge": 23,
+              "birthCity": "Charlotte",
+              "birthStateProvince": "NC",
+              "birthCountry": "USA",
+              "height": "6' 0\"",
+              "weight": 205,
+              "active": true,
+              "primaryPosition": {
+                "code": "6",
+                "name": "Shortstop",
+                "type": "Infielder",
+                "abbreviation": "SS"
+              },
+              "useName": "Colby",
+              "useLastName": "Shelton",
+              "middleName": "James",
+              "boxscoreName": "Shelton",
+              "gender": "M",
+              "isPlayer": true,
+              "isVerified": true,
+              "draftYear": 2025,
+              "batSide": {
+                "code": "L",
+                "description": "Left"
+              },
+              "pitchHand": {
+                "code": "R",
+                "description": "Right"
+              },
+              "nameFirstLast": "Colby Shelton",
+              "nameSlug": "colby-shelton-701333",
+              "firstLastName": "Colby Shelton",
+              "lastFirstName": "Shelton, Colby",
+              "lastInitName": "Shelton, C",
+              "initLastName": "C Shelton",
+              "fullFMLName": "Colby James Shelton",
+              "fullLFMName": "Shelton, Colby James",
+              "strikeZoneTop": 3.21,
+              "strikeZoneBottom": 1.62
+            },
+            "team": {
+              "id": 145,
+              "name": "Chicago White Sox"
+            },
+            "draftType": {
+              "code": "JR",
+              "description": "Rule 4 / June Amateur Draft"
+            },
+            "isDrafted": true,
+            "isPass": false,
+            "year": "2025"
+          },
+          {
+            "bisPlayerId": 5020431,
+            "pickRound": "6",
+            "pickNumber": 167,
+            "displayPickNumber": 167,
+            "roundPickNumber": 2,
+            "rank": 224,
+            "pickValue": "400400",
+            "signingBonus": "425000",
+            "home": {
+              "city": "Louisville",
+              "state": "Kentucky",
+              "country": "USA"
+            },
+            "scoutingReport": "https://www.mlb.com/video/example",
+            "school": {
+              "name": "Louisville",
+              "schoolClass": "4YR JR",
+              "city": "Louisville",
+              "country": "USA",
+              "state": "KY"
+            },
+            "headshotLink": "https://img.mlbstatic.com/mlb-photos/image/upload/d_people:generic:headshot:silo:current.png/w_120,q_auto:best/v1/people/702600/headshot/draft/current",
+            "person": {
+              "id": 702600,
+              "fullName": "Matt Klein",
+              "link": "/api/v1/people/702600",
+              "firstName": "Matthew",
+              "lastName": "Klein",
+              "birthDate": "2003-10-12",
+              "currentAge": 22,
+              "birthCity": "Louisville",
+              "birthStateProvince": "KY",
+              "birthCountry": "USA",
+              "height": "6' 2\"",
+              "weight": 210,
+              "active": true,
+              "primaryPosition": {
+                "code": "2",
+                "name": "Catcher",
+                "type": "Catcher",
+                "abbreviation": "C"
+              },
+              "useName": "Matt",
+              "useLastName": "Klein",
+              "middleName": "Scott",
+              "boxscoreName": "Klein",
+              "gender": "M",
+              "isPlayer": true,
+              "isVerified": true,
+              "draftYear": 2025,
+              "batSide": {
+                "code": "L",
+                "description": "Left"
+              },
+              "pitchHand": {
+                "code": "R",
+                "description": "Right"
+              },
+              "nameFirstLast": "Matt Klein",
+              "nameSlug": "matt-klein-702600",
+              "firstLastName": "Matt Klein",
+              "lastFirstName": "Klein, Matt",
+              "lastInitName": "Klein, M",
+              "initLastName": "M Klein",
+              "fullFMLName": "Matthew Scott Klein",
+              "fullLFMName": "Klein, Matthew Scott",
+              "strikeZoneTop": 3.299,
+              "strikeZoneBottom": 1.665
+            },
+            "team": {
+              "id": 115,
+              "name": "Colorado Rockies"
+            },
+            "draftType": {
+              "code": "JR",
+              "description": "Rule 4 / June Amateur Draft"
+            },
+            "isDrafted": true,
+            "isPass": false,
+            "year": "2025"
+          }
+        ]
+      },
+      {
+        "round": "7",
+        "picks": [
+          {
+            "bisPlayerId": 5029486,
+            "pickRound": "7",
+            "pickNumber": 196,
+            "displayPickNumber": 196,
+            "roundPickNumber": 1,
+            "pickValue": "314500",
+            "signingBonus": "147500",
+            "home": {
+              "city": "Madison",
+              "state": "Connecticut",
+              "country": "USA"
+            },
+            "school": {
+              "name": "University of Rhode Island",
+              "schoolClass": "4YR SR",
+              "city": "Kingston",
+              "country": "USA",
+              "state": "RI"
+            },
+            "headshotLink": "https://img.mlbstatic.com/mlb-photos/image/upload/d_people:generic:headshot:silo:current.png/w_120,q_auto:best/v1/people/834962/headshot/draft/current",
+            "person": {
+              "id": 834962,
+              "fullName": "Anthony DePino",
+              "link": "/api/v1/people/834962",
+              "firstName": "Anthony",
+              "lastName": "DePino",
+              "birthDate": "2003-02-19",
+              "currentAge": 23,
+              "birthCity": "New Haven",
+              "birthStateProvince": "CT",
+              "birthCountry": "USA",
+              "height": "5' 11\"",
+              "weight": 218,
+              "active": true,
+              "primaryPosition": {
+                "code": "5",
+                "name": "Third Base",
+                "type": "Infielder",
+                "abbreviation": "3B"
+              },
+              "useName": "Anthony",
+              "useLastName": "DePino",
+              "middleName": "Carl",
+              "boxscoreName": "DePino",
+              "gender": "M",
+              "isPlayer": true,
+              "isVerified": true,
+              "draftYear": 2025,
+              "batSide": {
+                "code": "R",
+                "description": "Right"
+              },
+              "pitchHand": {
+                "code": "R",
+                "description": "Right"
+              },
+              "nameFirstLast": "Anthony DePino",
+              "nameSlug": "anthony-depino-834962",
+              "firstLastName": "Anthony DePino",
+              "lastFirstName": "DePino, Anthony",
+              "lastInitName": "DePino, A",
+              "initLastName": "A DePino",
+              "fullFMLName": "Anthony Carl DePino",
+              "fullLFMName": "DePino, Anthony Carl",
+              "strikeZoneTop": 3.165,
+              "strikeZoneBottom": 1.598
+            },
+            "team": {
+              "id": 145,
+              "name": "Chicago White Sox"
+            },
+            "draftType": {
+              "code": "JR",
+              "description": "Rule 4 / June Amateur Draft"
+            },
+            "isDrafted": true,
+            "isPass": false,
+            "year": "2025"
+          },
+          {
+            "bisPlayerId": 5007373,
+            "pickRound": "7",
+            "pickNumber": 197,
+            "displayPickNumber": 197,
+            "roundPickNumber": 2,
+            "rank": 196,
+            "pickValue": "311900",
+            "signingBonus": "200000",
+            "home": {
+              "city": "Tuscaloosa",
+              "state": "Alabama",
+              "country": "USA"
+            },
+            "scoutingReport": "https://www.mlb.com/video/example",
+            "school": {
+              "name": "Houston",
+              "schoolClass": "4YR GR",
+              "city": "Houston",
+              "country": "USA",
+              "state": "TX"
+            },
+            "headshotLink": "https://img.mlbstatic.com/mlb-photos/image/upload/d_people:generic:headshot:silo:current.png/w_120,q_auto:best/v1/people/683328/headshot/draft/current",
+            "person": {
+              "id": 683328,
+              "fullName": "Antoine Jean",
+              "link": "/api/v1/people/683328",
+              "firstName": "Antoine",
+              "lastName": "Jean",
+              "birthDate": "2001-08-01",
+              "currentAge": 24,
+              "birthCity": "Montreal",
+              "birthStateProvince": "QC",
+              "birthCountry": "Canada",
+              "height": "6' 2\"",
+              "weight": 190,
+              "active": true,
+              "primaryPosition": {
+                "code": "1",
+                "name": "Pitcher",
+                "type": "Pitcher",
+                "abbreviation": "P"
+              },
+              "useName": "Antoine",
+              "useLastName": "Jean",
+              "boxscoreName": "Jean",
+              "gender": "M",
+              "isPlayer": true,
+              "isVerified": true,
+              "draftYear": 2025,
+              "batSide": {
+                "code": "R",
+                "description": "Right"
+              },
+              "pitchHand": {
+                "code": "L",
+                "description": "Left"
+              },
+              "nameFirstLast": "Antoine Jean",
+              "nameSlug": "antoine-jean-683328",
+              "firstLastName": "Antoine Jean",
+              "lastFirstName": "Jean, Antoine",
+              "lastInitName": "Jean, A",
+              "initLastName": "A Jean",
+              "fullFMLName": "Antoine Jean",
+              "fullLFMName": "Jean, Antoine",
+              "strikeZoneTop": 3.299,
+              "strikeZoneBottom": 1.665
+            },
+            "team": {
+              "id": 115,
+              "name": "Colorado Rockies"
+            },
+            "draftType": {
+              "code": "JR",
+              "description": "Rule 4 / June Amateur Draft"
+            },
+            "isDrafted": true,
+            "isPass": false,
+            "year": "2025"
+          }
+        ]
+      },
+      {
+        "round": "8",
+        "picks": [
+          {
+            "bisPlayerId": 5035051,
+            "pickRound": "8",
+            "pickNumber": 226,
+            "displayPickNumber": 226,
+            "roundPickNumber": 1,
+            "pickValue": "248700",
+            "signingBonus": "246200",
+            "home": {
+              "city": "Miamisburg",
+              "state": "Ohio",
+              "country": "USA"
+            },
+            "school": {
+              "name": "Ohio State",
+              "schoolClass": "4YR JR",
+              "city": "Columbus",
+              "country": "USA",
+              "state": "OH"
+            },
+            "headshotLink": "https://img.mlbstatic.com/mlb-photos/image/upload/d_people:generic:headshot:silo:current.png/w_120,q_auto:best/v1/people/822360/headshot/draft/current",
+            "person": {
+              "id": 822360,
+              "fullName": "Blaine Wynk",
+              "link": "/api/v1/people/822360",
+              "firstName": "Blaine",
+              "lastName": "Wynk",
+              "birthDate": "2004-05-12",
+              "currentAge": 22,
+              "birthCity": "Kettering",
+              "birthStateProvince": "OH",
+              "birthCountry": "USA",
+              "height": "6' 3\"",
+              "weight": 207,
+              "active": true,
+              "primaryPosition": {
+                "code": "1",
+                "name": "Pitcher",
+                "type": "Pitcher",
+                "abbreviation": "P"
+              },
+              "useName": "Blaine",
+              "useLastName": "Wynk",
+              "middleName": "Alexander",
+              "boxscoreName": "Wynk",
+              "gender": "M",
+              "isPlayer": true,
+              "isVerified": true,
+              "draftYear": 2025,
+              "batSide": {
+                "code": "R",
+                "description": "Right"
+              },
+              "pitchHand": {
+                "code": "R",
+                "description": "Right"
+              },
+              "nameFirstLast": "Blaine Wynk",
+              "nameSlug": "blaine-wynk-822360",
+              "firstLastName": "Blaine Wynk",
+              "lastFirstName": "Wynk, Blaine",
+              "lastInitName": "Wynk, B",
+              "initLastName": "B Wynk",
+              "fullFMLName": "Blaine Alexander Wynk",
+              "fullLFMName": "Wynk, Blaine Alexander",
+              "strikeZoneTop": 3.344,
+              "strikeZoneBottom": 1.688
+            },
+            "team": {
+              "id": 145,
+              "name": "Chicago White Sox"
+            },
+            "draftType": {
+              "code": "JR",
+              "description": "Rule 4 / June Amateur Draft"
+            },
+            "isDrafted": true,
+            "isPass": false,
+            "year": "2025"
+          },
+          {
+            "bisPlayerId": 5021966,
+            "pickRound": "8",
+            "pickNumber": 227,
+            "displayPickNumber": 227,
+            "roundPickNumber": 2,
+            "rank": 151,
+            "pickValue": "247200",
+            "signingBonus": "325000",
+            "home": {
+              "city": "Belvidere",
+              "state": "North Carolina",
+              "country": "USA"
+            },
+            "scoutingReport": "https://www.mlb.com/video/example",
+            "school": {
+              "name": "UNC Wilmington",
+              "schoolClass": "4YR JR",
+              "city": "Wilmington",
+              "country": "USA",
+              "state": "NC"
+            },
+            "headshotLink": "https://img.mlbstatic.com/mlb-photos/image/upload/d_people:generic:headshot:silo:current.png/w_120,q_auto:best/v1/people/805880/headshot/draft/current",
+            "person": {
+              "id": 805880,
+              "fullName": "Tanner Thach",
+              "link": "/api/v1/people/805880",
+              "firstName": "Tanner",
+              "lastName": "Thach",
+              "birthDate": "2004-03-11",
+              "currentAge": 22,
+              "birthCity": "Edenton",
+              "birthStateProvince": "NC",
+              "birthCountry": "USA",
+              "height": "6' 4\"",
+              "weight": 225,
+              "active": true,
+              "primaryPosition": {
+                "code": "3",
+                "name": "First Base",
+                "type": "Infielder",
+                "abbreviation": "1B"
+              },
+              "useName": "Tanner",
+              "useLastName": "Thach",
+              "middleName": "Benjamin",
+              "boxscoreName": "Thach",
+              "gender": "M",
+              "isPlayer": true,
+              "isVerified": true,
+              "draftYear": 2025,
+              "batSide": {
+                "code": "L",
+                "description": "Left"
+              },
+              "pitchHand": {
+                "code": "L",
+                "description": "Left"
+              },
+              "nameFirstLast": "Tanner Thach",
+              "nameSlug": "tanner-thach-805880",
+              "firstLastName": "Tanner Thach",
+              "lastFirstName": "Thach, Tanner",
+              "lastInitName": "Thach, T",
+              "initLastName": "T Thach",
+              "fullFMLName": "Tanner Benjamin Thach",
+              "fullLFMName": "Thach, Tanner Benjamin",
+              "strikeZoneTop": 3.388,
+              "strikeZoneBottom": 1.71
+            },
+            "team": {
+              "id": 115,
+              "name": "Colorado Rockies"
+            },
+            "draftType": {
+              "code": "JR",
+              "description": "Rule 4 / June Amateur Draft"
+            },
+            "isDrafted": true,
+            "isPass": false,
+            "year": "2025"
+          }
+        ]
+      },
+      {
+        "round": "9",
+        "picks": [
+          {
+            "bisPlayerId": 5012183,
+            "pickRound": "9",
+            "pickNumber": 256,
+            "displayPickNumber": 256,
+            "roundPickNumber": 1,
+            "pickValue": "210900",
+            "signingBonus": "7500",
+            "home": {
+              "city": "Bristow",
+              "state": "Virginia",
+              "country": "USA"
+            },
+            "school": {
+              "name": "Coastal Carolina",
+              "schoolClass": "4YR GR",
+              "city": "Conway",
+              "country": "USA",
+              "state": "SC"
+            },
+            "headshotLink": "https://img.mlbstatic.com/mlb-photos/image/upload/d_people:generic:headshot:silo:current.png/w_120,q_auto:best/v1/people/694408/headshot/draft/current",
+            "person": {
+              "id": 694408,
+              "fullName": "Riley Eikhoff",
+              "link": "/api/v1/people/694408",
+              "firstName": "Riley",
+              "lastName": "Eikhoff",
+              "birthDate": "2001-11-16",
+              "currentAge": 24,
+              "birthCity": "Atlanta",
+              "birthStateProvince": "GA",
+              "birthCountry": "USA",
+              "height": "5' 10\"",
+              "weight": 185,
+              "active": true,
+              "primaryPosition": {
+                "code": "1",
+                "name": "Pitcher",
+                "type": "Pitcher",
+                "abbreviation": "P"
+              },
+              "useName": "Riley",
+              "useLastName": "Eikhoff",
+              "middleName": "Duncan",
+              "boxscoreName": "Eikhoff",
+              "gender": "M",
+              "isPlayer": true,
+              "isVerified": true,
+              "draftYear": 2025,
+              "batSide": {
+                "code": "R",
+                "description": "Right"
+              },
+              "pitchHand": {
+                "code": "R",
+                "description": "Right"
+              },
+              "nameFirstLast": "Riley Eikhoff",
+              "nameSlug": "riley-eikhoff-694408",
+              "firstLastName": "Riley Eikhoff",
+              "lastFirstName": "Eikhoff, Riley",
+              "lastInitName": "Eikhoff, R",
+              "initLastName": "R Eikhoff",
+              "fullFMLName": "Riley Duncan Eikhoff",
+              "fullLFMName": "Eikhoff, Riley Duncan",
+              "strikeZoneTop": 3.121,
+              "strikeZoneBottom": 1.575
+            },
+            "team": {
+              "id": 145,
+              "name": "Chicago White Sox"
+            },
+            "draftType": {
+              "code": "JR",
+              "description": "Rule 4 / June Amateur Draft"
+            },
+            "isDrafted": true,
+            "isPass": false,
+            "year": "2025"
+          },
+          {
+            "bisPlayerId": 5037884,
+            "pickRound": "9",
+            "pickNumber": 257,
+            "displayPickNumber": 257,
+            "roundPickNumber": 2,
+            "pickValue": "210200",
+            "signingBonus": "50000",
+            "home": {
+              "city": "Jackson",
+              "state": "New Jersey",
+              "country": "USA"
+            },
+            "school": {
+              "name": "SUNY Binghamton",
+              "schoolClass": "4YR SR",
+              "city": "Binghamton",
+              "country": "USA",
+              "state": "NY"
+            },
+            "headshotLink": "https://img.mlbstatic.com/mlb-photos/image/upload/d_people:generic:headshot:silo:current.png/w_120,q_auto:best/v1/people/836051/headshot/draft/current",
+            "person": {
+              "id": 836051,
+              "fullName": "Zach Rogacki",
+              "link": "/api/v1/people/836051",
+              "firstName": "Zachary",
+              "lastName": "Rogacki",
+              "birthDate": "2003-07-19",
+              "currentAge": 22,
+              "birthCity": "Hamilton",
+              "birthStateProvince": "NJ",
+              "birthCountry": "USA",
+              "height": "6' 1\"",
+              "weight": 185,
+              "active": true,
+              "primaryPosition": {
+                "code": "2",
+                "name": "Catcher",
+                "type": "Catcher",
+                "abbreviation": "C"
+              },
+              "useName": "Zach",
+              "useLastName": "Rogacki",
+              "boxscoreName": "Rogacki",
+              "gender": "M",
+              "isPlayer": true,
+              "isVerified": true,
+              "draftYear": 2025,
+              "batSide": {
+                "code": "L",
+                "description": "Left"
+              },
+              "pitchHand": {
+                "code": "R",
+                "description": "Right"
+              },
+              "nameFirstLast": "Zach Rogacki",
+              "nameSlug": "zach-rogacki-836051",
+              "firstLastName": "Zach Rogacki",
+              "lastFirstName": "Rogacki, Zach",
+              "lastInitName": "Rogacki, Z",
+              "initLastName": "Z Rogacki",
+              "fullFMLName": "Zachary Rogacki",
+              "fullLFMName": "Rogacki, Zachary ",
+              "strikeZoneTop": 3.255,
+              "strikeZoneBottom": 1.643
+            },
+            "team": {
+              "id": 115,
+              "name": "Colorado Rockies"
+            },
+            "draftType": {
+              "code": "JR",
+              "description": "Rule 4 / June Amateur Draft"
+            },
+            "isDrafted": true,
+            "isPass": false,
+            "year": "2025"
+          }
+        ]
+      },
+      {
+        "round": "10",
+        "picks": [
+          {
+            "bisPlayerId": 5020633,
+            "pickRound": "10",
+            "pickNumber": 286,
+            "displayPickNumber": 286,
+            "roundPickNumber": 1,
+            "pickValue": "195300",
+            "signingBonus": "7500",
+            "home": {
+              "city": "Sergeant Bluff",
+              "state": "Iowa",
+              "country": "USA"
+            },
+            "school": {
+              "name": "Iowa",
+              "schoolClass": "4YR GR",
+              "city": "Iowa City",
+              "country": "USA",
+              "state": "IA"
+            },
+            "headshotLink": "https://img.mlbstatic.com/mlb-photos/image/upload/d_people:generic:headshot:silo:current.png/w_120,q_auto:best/v1/people/812372/headshot/draft/current",
+            "person": {
+              "id": 812372,
+              "fullName": "Daniel Wright",
+              "link": "/api/v1/people/812372",
+              "firstName": "Daniel",
+              "lastName": "Wright",
+              "birthDate": "2002-06-13",
+              "currentAge": 24,
+              "birthCity": "Sioux City",
+              "birthStateProvince": "IA",
+              "birthCountry": "USA",
+              "height": "6' 9\"",
+              "weight": 245,
+              "active": true,
+              "primaryPosition": {
+                "code": "1",
+                "name": "Pitcher",
+                "type": "Pitcher",
+                "abbreviation": "P"
+              },
+              "useName": "Daniel",
+              "useLastName": "Wright",
+              "middleName": "Thomas",
+              "boxscoreName": "Wright, D",
+              "gender": "M",
+              "isPlayer": true,
+              "isVerified": true,
+              "draftYear": 2025,
+              "batSide": {
+                "code": "R",
+                "description": "Right"
+              },
+              "pitchHand": {
+                "code": "R",
+                "description": "Right"
+              },
+              "nameFirstLast": "Daniel Wright",
+              "nameSlug": "daniel-wright-812372",
+              "firstLastName": "Daniel Wright",
+              "lastFirstName": "Wright, Daniel",
+              "lastInitName": "Wright, D",
+              "initLastName": "D Wright",
+              "fullFMLName": "Daniel Thomas Wright",
+              "fullLFMName": "Wright, Daniel Thomas",
+              "strikeZoneTop": 3.611,
+              "strikeZoneBottom": 1.823
+            },
+            "team": {
+              "id": 145,
+              "name": "Chicago White Sox"
+            },
+            "draftType": {
+              "code": "JR",
+              "description": "Rule 4 / June Amateur Draft"
+            },
+            "isDrafted": true,
+            "isPass": false,
+            "year": "2025"
+          },
+          {
+            "bisPlayerId": 5021860,
+            "pickRound": "10",
+            "pickNumber": 287,
+            "displayPickNumber": 287,
+            "roundPickNumber": 2,
+            "pickValue": "195100",
+            "signingBonus": "195100",
+            "home": {
+              "city": "New Port Richey",
+              "state": "Florida",
+              "country": "USA"
+            },
+            "school": {
+              "name": "South Florida",
+              "schoolClass": "4YR JR",
+              "city": "Tampa",
+              "country": "USA",
+              "state": "FL"
+            },
+            "headshotLink": "https://img.mlbstatic.com/mlb-photos/image/upload/d_people:generic:headshot:silo:current.png/w_120,q_auto:best/v1/people/813282/headshot/draft/current",
+            "person": {
+              "id": 813282,
+              "fullName": "Austin Newton",
+              "link": "/api/v1/people/813282",
+              "firstName": "Austin",
+              "lastName": "Newton",
+              "birthDate": "2004-04-29",
+              "currentAge": 22,
+              "birthCity": "Tampa",
+              "birthStateProvince": "FL",
+              "birthCountry": "USA",
+              "height": "6' 6\"",
+              "weight": 252,
+              "active": true,
+              "primaryPosition": {
+                "code": "1",
+                "name": "Pitcher",
+                "type": "Pitcher",
+                "abbreviation": "P"
+              },
+              "useName": "Austin",
+              "useLastName": "Newton",
+              "boxscoreName": "Newton",
+              "gender": "M",
+              "isPlayer": true,
+              "isVerified": true,
+              "draftYear": 2025,
+              "batSide": {
+                "code": "R",
+                "description": "Right"
+              },
+              "pitchHand": {
+                "code": "R",
+                "description": "Right"
+              },
+              "nameFirstLast": "Austin Newton",
+              "nameSlug": "austin-newton-813282",
+              "firstLastName": "Austin Newton",
+              "lastFirstName": "Newton, Austin",
+              "lastInitName": "Newton, A",
+              "initLastName": "A Newton",
+              "fullFMLName": "Austin Newton",
+              "fullLFMName": "Newton, Austin ",
+              "strikeZoneTop": 3.478,
+              "strikeZoneBottom": 1.755
+            },
+            "team": {
+              "id": 115,
+              "name": "Colorado Rockies"
+            },
+            "draftType": {
+              "code": "JR",
+              "description": "Rule 4 / June Amateur Draft"
+            },
+            "isDrafted": true,
+            "isPass": false,
+            "year": "2025"
+          }
+        ]
+      },
+      {
+        "round": "11",
+        "picks": [
+          {
+            "bisPlayerId": 5034907,
+            "pickRound": "11",
+            "pickNumber": 316,
+            "displayPickNumber": 316,
+            "roundPickNumber": 1,
+            "pickValue": "0",
+            "signingBonus": "197500",
+            "home": {
+              "city": "Colleyville",
+              "state": "Texas",
+              "country": "USA"
+            },
+            "school": {
+              "name": "Covenant HS",
+              "schoolClass": "HS SR",
+              "city": "Colleyville",
+              "country": "USA",
+              "state": "TX"
+            },
+            "headshotLink": "https://img.mlbstatic.com/mlb-photos/image/upload/d_people:generic:headshot:silo:current.png/w_120,q_auto:best/v1/people/815592/headshot/draft/current",
+            "person": {
+              "id": 815592,
+              "fullName": "Matthew Boughton",
+              "link": "/api/v1/people/815592",
+              "firstName": "Matthew",
+              "lastName": "Boughton",
+              "birthDate": "2005-09-10",
+              "currentAge": 20,
+              "birthCity": "Dallas",
+              "birthStateProvince": "TX",
+              "birthCountry": "USA",
+              "height": "6' 2\"",
+              "weight": 175,
+              "active": true,
+              "primaryPosition": {
+                "code": "6",
+                "name": "Shortstop",
+                "type": "Infielder",
+                "abbreviation": "SS"
+              },
+              "useName": "Matthew",
+              "useLastName": "Boughton",
+              "middleName": "David Zenko",
+              "boxscoreName": "Boughton",
+              "gender": "M",
+              "isPlayer": true,
+              "isVerified": true,
+              "draftYear": 2025,
+              "batSide": {
+                "code": "R",
+                "description": "Right"
+              },
+              "pitchHand": {
+                "code": "R",
+                "description": "Right"
+              },
+              "nameFirstLast": "Matthew Boughton",
+              "nameSlug": "matthew-boughton-815592",
+              "firstLastName": "Matthew Boughton",
+              "lastFirstName": "Boughton, Matthew",
+              "lastInitName": "Boughton, M",
+              "initLastName": "M Boughton",
+              "fullFMLName": "Matthew David Zenko Boughton",
+              "fullLFMName": "Boughton, Matthew David Zenko",
+              "strikeZoneTop": 3.299,
+              "strikeZoneBottom": 1.665
+            },
+            "team": {
+              "id": 145,
+              "name": "Chicago White Sox"
+            },
+            "draftType": {
+              "code": "JR",
+              "description": "Rule 4 / June Amateur Draft"
+            },
+            "isDrafted": true,
+            "isPass": false,
+            "year": "2025"
+          },
+          {
+            "bisPlayerId": 5021337,
+            "pickRound": "11",
+            "pickNumber": 317,
+            "displayPickNumber": 317,
+            "roundPickNumber": 2,
+            "pickValue": "0",
+            "signingBonus": "200000",
+            "home": {
+              "city": "Alpharetta",
+              "state": "Georgia",
+              "country": "USA"
+            },
+            "school": {
+              "name": "Georgia",
+              "schoolClass": "4YR JR",
+              "city": "Athens",
+              "country": "USA",
+              "state": "GA"
+            },
+            "headshotLink": "https://img.mlbstatic.com/mlb-photos/image/upload/d_people:generic:headshot:silo:current.png/w_120,q_auto:best/v1/people/823226/headshot/draft/current",
+            "person": {
+              "id": 823226,
+              "fullName": "Zach Harris",
+              "link": "/api/v1/people/823226",
+              "firstName": "Zachary",
+              "lastName": "Harris",
+              "birthDate": "2003-10-21",
+              "currentAge": 22,
+              "birthCity": "Alpharetta",
+              "birthStateProvince": "GA",
+              "birthCountry": "USA",
+              "height": "6' 1\"",
+              "weight": 181,
+              "active": true,
+              "primaryPosition": {
+                "code": "1",
+                "name": "Pitcher",
+                "type": "Pitcher",
+                "abbreviation": "P"
+              },
+              "useName": "Zach",
+              "useLastName": "Harris",
+              "middleName": "William",
+              "boxscoreName": "Harris",
+              "gender": "M",
+              "isPlayer": true,
+              "isVerified": true,
+              "draftYear": 2025,
+              "batSide": {
+                "code": "R",
+                "description": "Right"
+              },
+              "pitchHand": {
+                "code": "R",
+                "description": "Right"
+              },
+              "nameFirstLast": "Zach Harris",
+              "nameSlug": "zach-harris-823226",
+              "firstLastName": "Zach Harris",
+              "lastFirstName": "Harris, Zach",
+              "lastInitName": "Harris, Z",
+              "initLastName": "Z Harris",
+              "fullFMLName": "Zachary William Harris",
+              "fullLFMName": "Harris, Zachary William",
+              "strikeZoneTop": 3.255,
+              "strikeZoneBottom": 1.643
+            },
+            "team": {
+              "id": 115,
+              "name": "Colorado Rockies"
+            },
+            "draftType": {
+              "code": "JR",
+              "description": "Rule 4 / June Amateur Draft"
+            },
+            "isDrafted": true,
+            "isPass": false,
+            "year": "2025"
+          }
+        ]
+      },
+      {
+        "round": "12",
+        "picks": [
+          {
+            "bisPlayerId": 5037708,
+            "pickRound": "12",
+            "pickNumber": 346,
+            "displayPickNumber": 346,
+            "roundPickNumber": 1,
+            "pickValue": "0",
+            "signingBonus": "172500",
+            "home": {
+              "city": "Savannah",
+              "state": "Georgia",
+              "country": "USA"
+            },
+            "school": {
+              "name": "Mercer U",
+              "schoolClass": "4YR JR",
+              "city": "Macon",
+              "country": "USA",
+              "state": "GA"
+            },
+            "headshotLink": "https://img.mlbstatic.com/mlb-photos/image/upload/d_people:generic:headshot:silo:current.png/w_120,q_auto:best/v1/people/836058/headshot/draft/current",
+            "person": {
+              "id": 836058,
+              "fullName": "Ely Brown",
+              "link": "/api/v1/people/836058",
+              "firstName": "Ely",
+              "lastName": "Brown",
+              "birthDate": "2004-07-13",
+              "currentAge": 21,
+              "birthCity": "Omaha",
+              "birthStateProvince": "NE",
+              "birthCountry": "USA",
+              "height": "6' 0\"",
+              "weight": 190,
+              "active": true,
+              "primaryPosition": {
+                "code": "O",
+                "name": "Outfield",
+                "type": "Outfielder",
+                "abbreviation": "OF"
+              },
+              "useName": "Ely",
+              "useLastName": "Brown",
+              "middleName": "Anthony",
+              "boxscoreName": "Brown",
+              "gender": "M",
+              "isPlayer": true,
+              "isVerified": true,
+              "draftYear": 2025,
+              "batSide": {
+                "code": "L",
+                "description": "Left"
+              },
+              "pitchHand": {
+                "code": "L",
+                "description": "Left"
+              },
+              "nameFirstLast": "Ely Brown",
+              "nameSlug": "ely-brown-836058",
+              "firstLastName": "Ely Brown",
+              "lastFirstName": "Brown, Ely",
+              "lastInitName": "Brown, E",
+              "initLastName": "E Brown",
+              "fullFMLName": "Ely Anthony Brown",
+              "fullLFMName": "Brown, Ely Anthony",
+              "strikeZoneTop": 3.21,
+              "strikeZoneBottom": 1.62
+            },
+            "team": {
+              "id": 145,
+              "name": "Chicago White Sox"
+            },
+            "draftType": {
+              "code": "JR",
+              "description": "Rule 4 / June Amateur Draft"
+            },
+            "isDrafted": true,
+            "isPass": false,
+            "year": "2025"
+          },
+          {
+            "bisPlayerId": 5037841,
+            "pickRound": "12",
+            "pickNumber": 347,
+            "displayPickNumber": 347,
+            "roundPickNumber": 2,
+            "pickValue": "0",
+            "signingBonus": "150000",
+            "home": {
+              "city": "Telferner",
+              "state": "Texas",
+              "country": "USA"
+            },
+            "school": {
+              "name": "Houston-Victoria",
+              "schoolClass": "4YR JR",
+              "city": "Victoria",
+              "country": "USA",
+              "state": "TX"
+            },
+            "headshotLink": "https://img.mlbstatic.com/mlb-photos/image/upload/d_people:generic:headshot:silo:current.png/w_120,q_auto:best/v1/people/836059/headshot/draft/current",
+            "person": {
+              "id": 836059,
+              "fullName": "Brady Parker",
+              "link": "/api/v1/people/836059",
+              "firstName": "Brady",
+              "lastName": "Parker",
+              "birthDate": "2004-05-24",
+              "currentAge": 22,
+              "birthCity": "Victoria",
+              "birthStateProvince": "TX",
+              "birthCountry": "USA",
+              "height": "6' 2\"",
+              "weight": 185,
+              "active": true,
+              "primaryPosition": {
+                "code": "1",
+                "name": "Pitcher",
+                "type": "Pitcher",
+                "abbreviation": "P"
+              },
+              "useName": "Brady",
+              "useLastName": "Parker",
+              "boxscoreName": "Parker",
+              "gender": "M",
+              "isPlayer": true,
+              "isVerified": true,
+              "draftYear": 2025,
+              "batSide": {
+                "code": "L",
+                "description": "Left"
+              },
+              "pitchHand": {
+                "code": "L",
+                "description": "Left"
+              },
+              "nameFirstLast": "Brady Parker",
+              "nameTitle": "Jr.",
+              "nameSuffix": "Jr.",
+              "nameSlug": "brady-parker-836059",
+              "firstLastName": "Brady Parker",
+              "lastFirstName": "Parker, Brady",
+              "lastInitName": "Parker, B",
+              "initLastName": "B Parker",
+              "fullFMLName": "Brady Parker",
+              "fullLFMName": "Parker, Brady ",
+              "strikeZoneTop": 3.299,
+              "strikeZoneBottom": 1.665
+            },
+            "team": {
+              "id": 115,
+              "name": "Colorado Rockies"
+            },
+            "draftType": {
+              "code": "JR",
+              "description": "Rule 4 / June Amateur Draft"
+            },
+            "isDrafted": true,
+            "isPass": false,
+            "year": "2025"
+          }
+        ]
+      },
+      {
+        "round": "13",
+        "picks": [
+          {
+            "bisPlayerId": 5020348,
+            "pickRound": "13",
+            "pickNumber": 376,
+            "displayPickNumber": 376,
+            "roundPickNumber": 1,
+            "rank": 176,
+            "pickValue": "0",
+            "signingBonus": "150000",
+            "home": {
+              "city": "Sinton",
+              "state": "Texas",
+              "country": "USA"
+            },
+            "scoutingReport": "https://www.mlb.com/video/example",
+            "school": {
+              "name": "Texas",
+              "schoolClass": "4YR JR",
+              "city": "Austin",
+              "country": "USA",
+              "state": "TX"
+            },
+            "headshotLink": "https://img.mlbstatic.com/mlb-photos/image/upload/d_people:generic:headshot:silo:current.png/w_120,q_auto:best/v1/people/805025/headshot/draft/current",
+            "person": {
+              "id": 805025,
+              "fullName": "Rylan Galvan",
+              "link": "/api/v1/people/805025",
+              "firstName": "Rylan",
+              "lastName": "Galvan",
+              "birthDate": "2003-06-12",
+              "currentAge": 23,
+              "birthCity": "Corpus Christi",
+              "birthStateProvince": "TX",
+              "birthCountry": "USA",
+              "height": "6' 0\"",
+              "weight": 215,
+              "active": true,
+              "primaryPosition": {
+                "code": "2",
+                "name": "Catcher",
+                "type": "Catcher",
+                "abbreviation": "C"
+              },
+              "useName": "Rylan",
+              "useLastName": "Galvan",
+              "middleName": "Joe",
+              "boxscoreName": "Galvan",
+              "gender": "M",
+              "isPlayer": true,
+              "isVerified": true,
+              "draftYear": 2025,
+              "batSide": {
+                "code": "R",
+                "description": "Right"
+              },
+              "pitchHand": {
+                "code": "R",
+                "description": "Right"
+              },
+              "nameFirstLast": "Rylan Galvan",
+              "nameSlug": "rylan-galvan-805025",
+              "firstLastName": "Rylan Galvan",
+              "lastFirstName": "Galvan, Rylan",
+              "lastInitName": "Galvan, R",
+              "initLastName": "R Galvan",
+              "fullFMLName": "Rylan Joe Galvan",
+              "fullLFMName": "Galvan, Rylan Joe",
+              "strikeZoneTop": 3.21,
+              "strikeZoneBottom": 1.62
+            },
+            "team": {
+              "id": 145,
+              "name": "Chicago White Sox"
+            },
+            "draftType": {
+              "code": "JR",
+              "description": "Rule 4 / June Amateur Draft"
+            },
+            "isDrafted": true,
+            "isPass": false,
+            "year": "2025"
+          },
+          {
+            "bisPlayerId": 5016774,
+            "pickRound": "13",
+            "pickNumber": 377,
+            "displayPickNumber": 377,
+            "roundPickNumber": 2,
+            "pickValue": "0",
+            "signingBonus": "150000",
+            "home": {
+              "city": "Baldwin Park",
+              "state": "California",
+              "country": "USA"
+            },
+            "school": {
+              "name": "Mt. San Antonio College",
+              "schoolClass": "JC J2",
+              "city": "Walnut",
+              "country": "USA",
+              "state": "CA"
+            },
+            "headshotLink": "https://img.mlbstatic.com/mlb-photos/image/upload/d_people:generic:headshot:silo:current.png/w_120,q_auto:best/v1/people/701698/headshot/draft/current",
+            "person": {
+              "id": 701698,
+              "fullName": "Izeah Muniz",
+              "link": "/api/v1/people/701698",
+              "firstName": "Izeah",
+              "lastName": "Muniz",
+              "birthDate": "2003-11-14",
+              "currentAge": 22,
+              "birthCity": "West Covina",
+              "birthStateProvince": "CA",
+              "birthCountry": "USA",
+              "height": "6' 5\"",
+              "weight": 240,
+              "active": true,
+              "primaryPosition": {
+                "code": "1",
+                "name": "Pitcher",
+                "type": "Pitcher",
+                "abbreviation": "P"
+              },
+              "useName": "Izeah",
+              "useLastName": "Muniz",
+              "boxscoreName": "Muniz",
+              "gender": "M",
+              "isPlayer": true,
+              "isVerified": true,
+              "draftYear": 2025,
+              "batSide": {
+                "code": "R",
+                "description": "Right"
+              },
+              "pitchHand": {
+                "code": "R",
+                "description": "Right"
+              },
+              "nameFirstLast": "Izeah Muniz",
+              "nameSlug": "izeah-muniz-701698",
+              "firstLastName": "Izeah Muniz",
+              "lastFirstName": "Muniz, Izeah",
+              "lastInitName": "Muniz, I",
+              "initLastName": "I Muniz",
+              "fullFMLName": "Izeah  Muniz",
+              "fullLFMName": "Muniz, Izeah",
+              "strikeZoneTop": 3.433,
+              "strikeZoneBottom": 1.733
+            },
+            "team": {
+              "id": 115,
+              "name": "Colorado Rockies"
+            },
+            "draftType": {
+              "code": "JR",
+              "description": "Rule 4 / June Amateur Draft"
+            },
+            "isDrafted": true,
+            "isPass": false,
+            "year": "2025"
+          }
+        ]
+      },
+      {
+        "round": "14",
+        "picks": [
+          {
+            "bisPlayerId": 5030136,
+            "pickRound": "14",
+            "pickNumber": 406,
+            "displayPickNumber": 406,
+            "roundPickNumber": 1,
+            "pickValue": "0",
+            "signingBonus": "150000",
+            "home": {
+              "city": "San Francisco",
+              "state": "California",
+              "country": "USA"
+            },
+            "school": {
+              "name": "Washington",
+              "schoolClass": "4YR SR",
+              "city": "Seattle",
+              "country": "USA",
+              "state": "WA"
+            },
+            "headshotLink": "https://img.mlbstatic.com/mlb-photos/image/upload/d_people:generic:headshot:silo:current.png/w_120,q_auto:best/v1/people/822514/headshot/draft/current",
+            "person": {
+              "id": 822514,
+              "fullName": "Max Banks",
+              "link": "/api/v1/people/822514",
+              "firstName": "Maxwell",
+              "lastName": "Banks",
+              "birthDate": "2003-05-07",
+              "currentAge": 23,
+              "birthCity": "San Francisco",
+              "birthStateProvince": "CA",
+              "birthCountry": "USA",
+              "height": "6' 4\"",
+              "weight": 225,
+              "active": true,
+              "primaryPosition": {
+                "code": "1",
+                "name": "Pitcher",
+                "type": "Pitcher",
+                "abbreviation": "P"
+              },
+              "useName": "Max",
+              "useLastName": "Banks",
+              "middleName": "Walter",
+              "boxscoreName": "Banks",
+              "gender": "M",
+              "isPlayer": true,
+              "isVerified": true,
+              "draftYear": 2025,
+              "batSide": {
+                "code": "R",
+                "description": "Right"
+              },
+              "pitchHand": {
+                "code": "R",
+                "description": "Right"
+              },
+              "nameFirstLast": "Max Banks",
+              "nameSlug": "max-banks-822514",
+              "firstLastName": "Max Banks",
+              "lastFirstName": "Banks, Max",
+              "lastInitName": "Banks, M",
+              "initLastName": "M Banks",
+              "fullFMLName": "Maxwell Walter Banks",
+              "fullLFMName": "Banks, Maxwell Walter",
+              "strikeZoneTop": 3.388,
+              "strikeZoneBottom": 1.71
+            },
+            "team": {
+              "id": 145,
+              "name": "Chicago White Sox"
+            },
+            "draftType": {
+              "code": "JR",
+              "description": "Rule 4 / June Amateur Draft"
+            },
+            "isDrafted": true,
+            "isPass": false,
+            "year": "2025"
+          },
+          {
+            "bisPlayerId": 5027656,
+            "pickRound": "14",
+            "pickNumber": 407,
+            "displayPickNumber": 407,
+            "roundPickNumber": 2,
+            "pickValue": "0",
+            "signingBonus": "165000",
+            "home": {
+              "city": "Lincoln",
+              "state": "Nebraska",
+              "country": "USA"
+            },
+            "school": {
+              "name": "Nebraska",
+              "schoolClass": "4YR JR",
+              "city": "Lincoln",
+              "country": "USA",
+              "state": "NE"
+            },
+            "headshotLink": "https://img.mlbstatic.com/mlb-photos/image/upload/d_people:generic:headshot:silo:current.png/w_120,q_auto:best/v1/people/830153/headshot/draft/current",
+            "person": {
+              "id": 830153,
+              "fullName": "Luke Broderick",
+              "link": "/api/v1/people/830153",
+              "firstName": "Luke",
+              "lastName": "Broderick",
+              "birthDate": "2004-03-11",
+              "currentAge": 22,
+              "birthCity": "Lawrence",
+              "birthStateProvince": "KS",
+              "birthCountry": "USA",
+              "height": "6' 3\"",
+              "weight": 215,
+              "active": true,
+              "primaryPosition": {
+                "code": "1",
+                "name": "Pitcher",
+                "type": "Pitcher",
+                "abbreviation": "P"
+              },
+              "useName": "Luke",
+              "useLastName": "Broderick",
+              "middleName": "Thomas",
+              "boxscoreName": "Broderick",
+              "gender": "M",
+              "isPlayer": true,
+              "isVerified": true,
+              "draftYear": 2025,
+              "batSide": {
+                "code": "R",
+                "description": "Right"
+              },
+              "pitchHand": {
+                "code": "R",
+                "description": "Right"
+              },
+              "nameFirstLast": "Luke Broderick",
+              "nameSlug": "luke-broderick-830153",
+              "firstLastName": "Luke Broderick",
+              "lastFirstName": "Broderick, Luke",
+              "lastInitName": "Broderick, L",
+              "initLastName": "L Broderick",
+              "fullFMLName": "Luke Thomas Broderick",
+              "fullLFMName": "Broderick, Luke Thomas",
+              "strikeZoneTop": 3.344,
+              "strikeZoneBottom": 1.688
+            },
+            "team": {
+              "id": 115,
+              "name": "Colorado Rockies"
+            },
+            "draftType": {
+              "code": "JR",
+              "description": "Rule 4 / June Amateur Draft"
+            },
+            "isDrafted": true,
+            "isPass": false,
+            "year": "2025"
+          }
+        ]
+      },
+      {
+        "round": "15",
+        "picks": [
+          {
+            "bisPlayerId": 5017046,
+            "pickRound": "15",
+            "pickNumber": 436,
+            "displayPickNumber": 436,
+            "roundPickNumber": 1,
+            "pickValue": "0",
+            "signingBonus": "150000",
+            "home": {
+              "city": "Fort Worth",
+              "state": "Texas",
+              "country": "USA"
+            },
+            "school": {
+              "name": "TCU",
+              "schoolClass": "4YR JR",
+              "city": "Fort Worth",
+              "country": "USA",
+              "state": "TX"
+            },
+            "headshotLink": "https://img.mlbstatic.com/mlb-photos/image/upload/d_people:generic:headshot:silo:current.png/w_120,q_auto:best/v1/people/696488/headshot/draft/current",
+            "person": {
+              "id": 696488,
+              "fullName": "Caedmon Parker",
+              "link": "/api/v1/people/696488",
+              "firstName": "Caedmon",
+              "lastName": "Parker",
+              "birthDate": "2003-06-03",
+              "currentAge": 23,
+              "birthCity": "The Woodlands",
+              "birthStateProvince": "TX",
+              "birthCountry": "USA",
+              "height": "6' 4\"",
+              "weight": 190,
+              "active": true,
+              "primaryPosition": {
+                "code": "1",
+                "name": "Pitcher",
+                "type": "Pitcher",
+                "abbreviation": "P"
+              },
+              "useName": "Caedmon",
+              "useLastName": "Parker",
+              "middleName": "Scott",
+              "boxscoreName": "Parker",
+              "gender": "M",
+              "isPlayer": true,
+              "isVerified": true,
+              "draftYear": 2025,
+              "batSide": {
+                "code": "R",
+                "description": "Right"
+              },
+              "pitchHand": {
+                "code": "R",
+                "description": "Right"
+              },
+              "nameFirstLast": "Caedmon Parker",
+              "nameSlug": "caedmon-parker-696488",
+              "firstLastName": "Caedmon Parker",
+              "lastFirstName": "Parker, Caedmon",
+              "lastInitName": "Parker, C",
+              "initLastName": "C Parker",
+              "fullFMLName": "Caedmon Scott Parker",
+              "fullLFMName": "Parker, Caedmon Scott",
+              "strikeZoneTop": 3.388,
+              "strikeZoneBottom": 1.71
+            },
+            "team": {
+              "id": 145,
+              "name": "Chicago White Sox"
+            },
+            "draftType": {
+              "code": "JR",
+              "description": "Rule 4 / June Amateur Draft"
+            },
+            "isDrafted": true,
+            "isPass": false,
+            "year": "2025"
+          },
+          {
+            "bisPlayerId": 5026883,
+            "pickRound": "15",
+            "pickNumber": 437,
+            "displayPickNumber": 437,
+            "roundPickNumber": 2,
+            "pickValue": "0",
+            "signingBonus": "175000",
+            "home": {
+              "city": "Euless",
+              "state": "Texas",
+              "country": "USA"
+            },
+            "school": {
+              "name": "Oklahoma",
+              "schoolClass": "4YR SR",
+              "city": "Norman",
+              "country": "USA",
+              "state": "OK"
+            },
+            "headshotLink": "https://img.mlbstatic.com/mlb-photos/image/upload/d_people:generic:headshot:silo:current.png/w_120,q_auto:best/v1/people/822043/headshot/draft/current",
+            "person": {
+              "id": 822043,
+              "fullName": "Dylan Crooks",
+              "link": "/api/v1/people/822043",
+              "firstName": "Dylan",
+              "lastName": "Crooks",
+              "birthDate": "2003-03-03",
+              "currentAge": 23,
+              "birthCity": "Bedford",
+              "birthStateProvince": "TX",
+              "birthCountry": "USA",
+              "height": "6' 0\"",
+              "weight": 185,
+              "active": true,
+              "primaryPosition": {
+                "code": "1",
+                "name": "Pitcher",
+                "type": "Pitcher",
+                "abbreviation": "P"
+              },
+              "useName": "Dylan",
+              "useLastName": "Crooks",
+              "middleName": "John",
+              "boxscoreName": "Crooks",
+              "gender": "M",
+              "isPlayer": true,
+              "isVerified": true,
+              "draftYear": 2025,
+              "batSide": {
+                "code": "R",
+                "description": "Right"
+              },
+              "pitchHand": {
+                "code": "R",
+                "description": "Right"
+              },
+              "nameFirstLast": "Dylan Crooks",
+              "nameSlug": "dylan-crooks-822043",
+              "firstLastName": "Dylan Crooks",
+              "lastFirstName": "Crooks, Dylan",
+              "lastInitName": "Crooks, D",
+              "initLastName": "D Crooks",
+              "fullFMLName": "Dylan John Crooks",
+              "fullLFMName": "Crooks, Dylan John",
+              "strikeZoneTop": 3.21,
+              "strikeZoneBottom": 1.62
+            },
+            "team": {
+              "id": 115,
+              "name": "Colorado Rockies"
+            },
+            "draftType": {
+              "code": "JR",
+              "description": "Rule 4 / June Amateur Draft"
+            },
+            "isDrafted": true,
+            "isPass": false,
+            "year": "2025"
+          }
+        ]
+      },
+      {
+        "round": "16",
+        "picks": [
+          {
+            "bisPlayerId": 5017229,
+            "pickRound": "16",
+            "pickNumber": 466,
+            "displayPickNumber": 466,
+            "roundPickNumber": 1,
+            "pickValue": "0",
+            "signingBonus": "150000",
+            "home": {
+              "city": "Flowery Branch",
+              "state": "Georgia",
+              "country": "USA"
+            },
+            "school": {
+              "name": "Georgia State",
+              "schoolClass": "4YR SR",
+              "city": "Decatur",
+              "country": "USA",
+              "state": "GA"
+            },
+            "headshotLink": "https://img.mlbstatic.com/mlb-photos/image/upload/d_people:generic:headshot:silo:current.png/w_120,q_auto:best/v1/people/807461/headshot/draft/current",
+            "person": {
+              "id": 807461,
+              "fullName": "Kaleb Freeman",
+              "link": "/api/v1/people/807461",
+              "firstName": "Kaleb",
+              "lastName": "Freeman",
+              "birthDate": "2002-11-11",
+              "currentAge": 23,
+              "birthCity": "Gainesville",
+              "birthStateProvince": "GA",
+              "birthCountry": "USA",
+              "height": "6' 0\"",
+              "weight": 203,
+              "active": true,
+              "primaryPosition": {
+                "code": "2",
+                "name": "Catcher",
+                "type": "Catcher",
+                "abbreviation": "C"
+              },
+              "useName": "Kaleb",
+              "useLastName": "Freeman",
+              "middleName": "James",
+              "boxscoreName": "Freeman",
+              "gender": "M",
+              "isPlayer": true,
+              "isVerified": true,
+              "draftYear": 2025,
+              "batSide": {
+                "code": "S",
+                "description": "Switch"
+              },
+              "pitchHand": {
+                "code": "R",
+                "description": "Right"
+              },
+              "nameFirstLast": "Kaleb Freeman",
+              "nameSlug": "kaleb-freeman-807461",
+              "firstLastName": "Kaleb Freeman",
+              "lastFirstName": "Freeman, Kaleb",
+              "lastInitName": "Freeman, K",
+              "initLastName": "K Freeman",
+              "fullFMLName": "Kaleb Freeman",
+              "fullLFMName": "Freeman, Kaleb",
+              "strikeZoneTop": 3.21,
+              "strikeZoneBottom": 1.62
+            },
+            "team": {
+              "id": 145,
+              "name": "Chicago White Sox"
+            },
+            "draftType": {
+              "code": "JR",
+              "description": "Rule 4 / June Amateur Draft"
+            },
+            "isDrafted": true,
+            "isPass": false,
+            "year": "2025"
+          },
+          {
+            "bisPlayerId": 5029943,
+            "pickRound": "16",
+            "pickNumber": 467,
+            "displayPickNumber": 467,
+            "roundPickNumber": 2,
+            "pickValue": "0",
+            "signingBonus": "50000",
+            "home": {
+              "city": "Bettendorf",
+              "state": "Iowa",
+              "country": "USA"
+            },
+            "school": {
+              "name": "Minnesota",
+              "schoolClass": "4YR SR",
+              "city": "Minneapolis",
+              "country": "USA",
+              "state": "MN"
+            },
+            "headshotLink": "https://img.mlbstatic.com/mlb-photos/image/upload/d_people:generic:headshot:silo:current.png/w_120,q_auto:best/v1/people/703523/headshot/draft/current",
+            "person": {
+              "id": 703523,
+              "fullName": "Seth Clausen",
+              "link": "/api/v1/people/703523",
+              "firstName": "Seth",
+              "lastName": "Clausen",
+              "birthDate": "2003-03-08",
+              "currentAge": 23,
+              "birthCity": "Bettendorf",
+              "birthStateProvince": "IA",
+              "birthCountry": "USA",
+              "height": "6' 1\"",
+              "weight": 210,
+              "active": true,
+              "primaryPosition": {
+                "code": "1",
+                "name": "Pitcher",
+                "type": "Pitcher",
+                "abbreviation": "P"
+              },
+              "useName": "Seth",
+              "useLastName": "Clausen",
+              "middleName": "Alan",
+              "boxscoreName": "Clausen",
+              "gender": "M",
+              "isPlayer": true,
+              "isVerified": true,
+              "draftYear": 2025,
+              "batSide": {
+                "code": "R",
+                "description": "Right"
+              },
+              "pitchHand": {
+                "code": "R",
+                "description": "Right"
+              },
+              "nameFirstLast": "Seth Clausen",
+              "nameSlug": "seth-clausen-703523",
+              "firstLastName": "Seth Clausen",
+              "lastFirstName": "Clausen, Seth",
+              "lastInitName": "Clausen, S",
+              "initLastName": "S Clausen",
+              "fullFMLName": "Seth  Clausen",
+              "fullLFMName": "Clausen, Seth",
+              "strikeZoneTop": 3.255,
+              "strikeZoneBottom": 1.643
+            },
+            "team": {
+              "id": 115,
+              "name": "Colorado Rockies"
+            },
+            "draftType": {
+              "code": "JR",
+              "description": "Rule 4 / June Amateur Draft"
+            },
+            "isDrafted": true,
+            "isPass": false,
+            "year": "2025"
+          }
+        ]
+      },
+      {
+        "round": "17",
+        "picks": [
+          {
+            "bisPlayerId": 5033273,
+            "pickRound": "17",
+            "pickNumber": 496,
+            "displayPickNumber": 496,
+            "roundPickNumber": 1,
+            "pickValue": "0",
+            "signingBonus": "150000",
+            "home": {
+              "city": "Altus",
+              "state": "Oklahoma",
+              "country": "USA"
+            },
+            "school": {
+              "name": "Kansas",
+              "schoolClass": "4YR JR",
+              "city": "Lawrence",
+              "country": "USA",
+              "state": "KS"
+            },
+            "headshotLink": "https://img.mlbstatic.com/mlb-photos/image/upload/d_people:generic:headshot:silo:current.png/w_120,q_auto:best/v1/people/832213/headshot/draft/current",
+            "person": {
+              "id": 832213,
+              "fullName": "Derek Cerda",
+              "link": "/api/v1/people/832213",
+              "firstName": "Derek",
+              "lastName": "Cerda",
+              "birthDate": "2003-02-10",
+              "currentAge": 23,
+              "birthCity": "Santiago",
+              "birthCountry": "Dominican Republic",
+              "height": "6' 1\"",
+              "weight": 190,
+              "active": true,
+              "primaryPosition": {
+                "code": "O",
+                "name": "Outfield",
+                "type": "Outfielder",
+                "abbreviation": "OF"
+              },
+              "useName": "Derek",
+              "useLastName": "Cerda",
+              "boxscoreName": "Cerda",
+              "gender": "M",
+              "isPlayer": true,
+              "isVerified": true,
+              "draftYear": 2025,
+              "batSide": {
+                "code": "R",
+                "description": "Right"
+              },
+              "pitchHand": {
+                "code": "R",
+                "description": "Right"
+              },
+              "nameFirstLast": "Derek Cerda",
+              "nameSlug": "derek-cerda-832213",
+              "firstLastName": "Derek Cerda",
+              "lastFirstName": "Cerda, Derek",
+              "lastInitName": "Cerda, D",
+              "initLastName": "D Cerda",
+              "fullFMLName": "Derek Cerda",
+              "fullLFMName": "Cerda, Derek ",
+              "strikeZoneTop": 3.255,
+              "strikeZoneBottom": 1.643
+            },
+            "team": {
+              "id": 145,
+              "name": "Chicago White Sox"
+            },
+            "draftType": {
+              "code": "JR",
+              "description": "Rule 4 / June Amateur Draft"
+            },
+            "isDrafted": true,
+            "isPass": false,
+            "year": "2025"
+          },
+          {
+            "bisPlayerId": 5020374,
+            "pickRound": "17",
+            "pickNumber": 497,
+            "displayPickNumber": 497,
+            "roundPickNumber": 2,
+            "pickValue": "0",
+            "signingBonus": "100000",
+            "home": {
+              "city": "Saint Paul",
+              "state": "Minnesota",
+              "country": "USA"
+            },
+            "school": {
+              "name": "NC State",
+              "schoolClass": "4YR JR",
+              "city": "Raleigh",
+              "country": "USA",
+              "state": "NC"
+            },
+            "headshotLink": "https://img.mlbstatic.com/mlb-photos/image/upload/d_people:generic:headshot:silo:current.png/w_120,q_auto:best/v1/people/805003/headshot/draft/current",
+            "person": {
+              "id": 805003,
+              "fullName": "Derrick Smith",
+              "link": "/api/v1/people/805003",
+              "firstName": "Derrick",
+              "lastName": "Smith",
+              "birthDate": "2003-12-01",
+              "currentAge": 22,
+              "birthCity": "Maplewood",
+              "birthStateProvince": "MN",
+              "birthCountry": "USA",
+              "height": "6' 2\"",
+              "weight": 221,
+              "active": true,
+              "primaryPosition": {
+                "code": "1",
+                "name": "Pitcher",
+                "type": "Pitcher",
+                "abbreviation": "P"
+              },
+              "useName": "Derrick",
+              "useLastName": "Smith",
+              "middleName": "Alan",
+              "boxscoreName": "Smith",
+              "gender": "M",
+              "isPlayer": true,
+              "isVerified": true,
+              "draftYear": 2025,
+              "batSide": {
+                "code": "R",
+                "description": "Right"
+              },
+              "pitchHand": {
+                "code": "R",
+                "description": "Right"
+              },
+              "nameFirstLast": "Derrick Smith",
+              "nameSlug": "derrick-smith-805003",
+              "firstLastName": "Derrick Smith",
+              "lastFirstName": "Smith, Derrick",
+              "lastInitName": "Smith, D",
+              "initLastName": "D Smith",
+              "fullFMLName": "Derrick Alan Smith",
+              "fullLFMName": "Smith, Derrick Alan",
+              "strikeZoneTop": 3.299,
+              "strikeZoneBottom": 1.665
+            },
+            "team": {
+              "id": 115,
+              "name": "Colorado Rockies"
+            },
+            "draftType": {
+              "code": "JR",
+              "description": "Rule 4 / June Amateur Draft"
+            },
+            "isDrafted": true,
+            "isPass": false,
+            "year": "2025"
+          }
+        ]
+      },
+      {
+        "round": "18",
+        "picks": [
+          {
+            "bisPlayerId": 5030537,
+            "pickRound": "18",
+            "pickNumber": 526,
+            "displayPickNumber": 526,
+            "roundPickNumber": 1,
+            "pickValue": "0",
+            "signingBonus": "150000",
+            "home": {
+              "city": "Ocean Springs",
+              "state": "Mississippi",
+              "country": "USA"
+            },
+            "school": {
+              "name": "Southern Mississippi",
+              "schoolClass": "4YR SR",
+              "city": "Hattiesburg",
+              "country": "USA",
+              "state": "MS"
+            },
+            "headshotLink": "https://img.mlbstatic.com/mlb-photos/image/upload/d_people:generic:headshot:silo:current.png/w_120,q_auto:best/v1/people/811167/headshot/draft/current",
+            "person": {
+              "id": 811167,
+              "fullName": "Landen Payne",
+              "link": "/api/v1/people/811167",
+              "firstName": "Landen",
+              "lastName": "Payne",
+              "birthDate": "2003-05-17",
+              "currentAge": 23,
+              "birthCity": "Biloxi",
+              "birthStateProvince": "MS",
+              "birthCountry": "USA",
+              "height": "6' 2\"",
+              "weight": 226,
+              "active": true,
+              "primaryPosition": {
+                "code": "1",
+                "name": "Pitcher",
+                "type": "Pitcher",
+                "abbreviation": "P"
+              },
+              "useName": "Landen",
+              "useLastName": "Payne",
+              "middleName": "Wesley",
+              "boxscoreName": "Payne",
+              "gender": "M",
+              "isPlayer": true,
+              "isVerified": true,
+              "draftYear": 2025,
+              "batSide": {
+                "code": "R",
+                "description": "Right"
+              },
+              "pitchHand": {
+                "code": "R",
+                "description": "Right"
+              },
+              "nameFirstLast": "Landen Payne",
+              "nameSlug": "landen-payne-811167",
+              "firstLastName": "Landen Payne",
+              "lastFirstName": "Payne, Landen",
+              "lastInitName": "Payne, L",
+              "initLastName": "L Payne",
+              "fullFMLName": "Landen Wesley Payne",
+              "fullLFMName": "Payne, Landen Wesley",
+              "strikeZoneTop": 3.299,
+              "strikeZoneBottom": 1.665
+            },
+            "team": {
+              "id": 145,
+              "name": "Chicago White Sox"
+            },
+            "draftType": {
+              "code": "JR",
+              "description": "Rule 4 / June Amateur Draft"
+            },
+            "isDrafted": true,
+            "isPass": false,
+            "year": "2025"
+          },
+          {
+            "bisPlayerId": 5018026,
+            "pickRound": "18",
+            "pickNumber": 527,
+            "displayPickNumber": 527,
+            "roundPickNumber": 2,
+            "pickValue": "0",
+            "signingBonus": "125000",
+            "home": {
+              "city": "Kamloops",
+              "state": "British Columbia",
+              "country": "CAN"
+            },
+            "school": {
+              "name": "Illinois State",
+              "schoolClass": "4YR JR",
+              "city": "Normal",
+              "country": "USA",
+              "state": "IL"
+            },
+            "headshotLink": "https://img.mlbstatic.com/mlb-photos/image/upload/d_people:generic:headshot:silo:current.png/w_120,q_auto:best/v1/people/692165/headshot/draft/current",
+            "person": {
+              "id": 692165,
+              "fullName": "Tyrelle Chadwick",
+              "link": "/api/v1/people/692165",
+              "firstName": "Tyrelle",
+              "lastName": "Chadwick",
+              "birthDate": "2003-06-22",
+              "currentAge": 23,
+              "birthCity": "Burnaby",
+              "birthStateProvince": "BC",
+              "birthCountry": "Canada",
+              "height": "6' 4\"",
+              "weight": 220,
+              "active": true,
+              "primaryPosition": {
+                "code": "1",
+                "name": "Pitcher",
+                "type": "Pitcher",
+                "abbreviation": "P"
+              },
+              "useName": "Tyrelle",
+              "useLastName": "Chadwick",
+              "middleName": "Zachari",
+              "boxscoreName": "Chadwick",
+              "gender": "M",
+              "isPlayer": true,
+              "isVerified": true,
+              "draftYear": 2025,
+              "batSide": {
+                "code": "R",
+                "description": "Right"
+              },
+              "pitchHand": {
+                "code": "R",
+                "description": "Right"
+              },
+              "nameFirstLast": "Tyrelle Chadwick",
+              "nameSlug": "tyrelle-chadwick-692165",
+              "firstLastName": "Tyrelle Chadwick",
+              "lastFirstName": "Chadwick, Tyrelle",
+              "lastInitName": "Chadwick, T",
+              "initLastName": "T Chadwick",
+              "fullFMLName": "Tyrelle  Chadwick",
+              "fullLFMName": "Chadwick, Tyrelle ",
+              "strikeZoneTop": 3.388,
+              "strikeZoneBottom": 1.71
+            },
+            "team": {
+              "id": 115,
+              "name": "Colorado Rockies"
+            },
+            "draftType": {
+              "code": "JR",
+              "description": "Rule 4 / June Amateur Draft"
+            },
+            "isDrafted": true,
+            "isPass": false,
+            "year": "2025"
+          }
+        ]
+      },
+      {
+        "round": "19",
+        "picks": [
+          {
+            "bisPlayerId": 5029078,
+            "pickRound": "19",
+            "pickNumber": 556,
+            "displayPickNumber": 556,
+            "roundPickNumber": 1,
+            "pickValue": "0",
+            "signingBonus": "10000",
+            "home": {
+              "city": "London",
+              "state": "Ohio",
+              "country": "USA"
+            },
+            "school": {
+              "name": "Marshall",
+              "schoolClass": "4YR SR",
+              "city": "Huntington",
+              "country": "USA",
+              "state": "WV"
+            },
+            "headshotLink": "https://img.mlbstatic.com/mlb-photos/image/upload/d_people:generic:headshot:silo:current.png/w_120,q_auto:best/v1/people/811721/headshot/draft/current",
+            "person": {
+              "id": 811721,
+              "fullName": "Nick Weyrich",
+              "link": "/api/v1/people/811721",
+              "firstName": "Nicholas",
+              "lastName": "Weyrich",
+              "birthDate": "2003-03-11",
+              "currentAge": 23,
+              "birthCity": "Columbus",
+              "birthStateProvince": "OH",
+              "birthCountry": "USA",
+              "height": "6' 4\"",
+              "weight": 200,
+              "active": true,
+              "primaryPosition": {
+                "code": "1",
+                "name": "Pitcher",
+                "type": "Pitcher",
+                "abbreviation": "P"
+              },
+              "useName": "Nick",
+              "useLastName": "Weyrich",
+              "middleName": "Craig",
+              "boxscoreName": "Weyrich",
+              "gender": "M",
+              "isPlayer": true,
+              "isVerified": true,
+              "draftYear": 2025,
+              "batSide": {
+                "code": "R",
+                "description": "Right"
+              },
+              "pitchHand": {
+                "code": "R",
+                "description": "Right"
+              },
+              "nameFirstLast": "Nick Weyrich",
+              "nameSlug": "nick-weyrich-811721",
+              "firstLastName": "Nick Weyrich",
+              "lastFirstName": "Weyrich, Nick",
+              "lastInitName": "Weyrich, N",
+              "initLastName": "N Weyrich",
+              "fullFMLName": "Nicholas Craig Weyrich",
+              "fullLFMName": "Weyrich, Nicholas Craig",
+              "strikeZoneTop": 3.388,
+              "strikeZoneBottom": 1.71
+            },
+            "team": {
+              "id": 145,
+              "name": "Chicago White Sox"
+            },
+            "draftType": {
+              "code": "JR",
+              "description": "Rule 4 / June Amateur Draft"
+            },
+            "isDrafted": true,
+            "isPass": false,
+            "year": "2025"
+          },
+          {
+            "bisPlayerId": 5035791,
+            "pickRound": "19",
+            "pickNumber": 557,
+            "displayPickNumber": 557,
+            "roundPickNumber": 2,
+            "pickValue": "0",
+            "signingBonus": "150000",
+            "home": {
+              "city": "Denver",
+              "state": "Colorado",
+              "country": "USA"
+            },
+            "school": {
+              "name": "Florida International",
+              "schoolClass": "4YR JR",
+              "city": "Miami",
+              "country": "USA",
+              "state": "FL"
+            },
+            "headshotLink": "https://img.mlbstatic.com/mlb-photos/image/upload/d_people:generic:headshot:silo:current.png/w_120,q_auto:best/v1/people/831560/headshot/draft/current",
+            "person": {
+              "id": 831560,
+              "fullName": "Easton Marks",
+              "link": "/api/v1/people/831560",
+              "firstName": "Easton",
+              "lastName": "Marks",
+              "birthDate": "2003-11-15",
+              "currentAge": 22,
+              "birthCity": "Denver",
+              "birthStateProvince": "CO",
+              "birthCountry": "USA",
+              "height": "6' 1\"",
+              "weight": 200,
+              "active": true,
+              "primaryPosition": {
+                "code": "1",
+                "name": "Pitcher",
+                "type": "Pitcher",
+                "abbreviation": "P"
+              },
+              "useName": "Easton",
+              "useLastName": "Marks",
+              "boxscoreName": "Marks",
+              "gender": "M",
+              "isPlayer": true,
+              "isVerified": true,
+              "draftYear": 2025,
+              "batSide": {
+                "code": "R",
+                "description": "Right"
+              },
+              "pitchHand": {
+                "code": "R",
+                "description": "Right"
+              },
+              "nameFirstLast": "Easton Marks",
+              "nameSlug": "easton-marks-831560",
+              "firstLastName": "Easton Marks",
+              "lastFirstName": "Marks, Easton",
+              "lastInitName": "Marks, E",
+              "initLastName": "E Marks",
+              "fullFMLName": "Easton Marks",
+              "fullLFMName": "Marks, Easton ",
+              "strikeZoneTop": 3.255,
+              "strikeZoneBottom": 1.643
+            },
+            "team": {
+              "id": 115,
+              "name": "Colorado Rockies"
+            },
+            "draftType": {
+              "code": "JR",
+              "description": "Rule 4 / June Amateur Draft"
+            },
+            "isDrafted": true,
+            "isPass": false,
+            "year": "2025"
+          }
+        ]
+      },
+      {
+        "round": "20",
+        "picks": [
+          {
+            "bisPlayerId": 5036987,
+            "pickRound": "20",
+            "pickNumber": 586,
+            "displayPickNumber": 586,
+            "roundPickNumber": 1,
+            "pickValue": "0",
+            "signingBonus": "150000",
+            "home": {
+              "city": "Charlotte",
+              "state": "North Carolina",
+              "country": "USA"
+            },
+            "school": {
+              "name": "Virginia Tech",
+              "schoolClass": "4YR JR",
+              "city": "Blacksburg",
+              "country": "USA",
+              "state": "VA"
+            },
+            "headshotLink": "https://img.mlbstatic.com/mlb-photos/image/upload/d_people:generic:headshot:silo:current.png/w_120,q_auto:best/v1/people/811106/headshot/draft/current",
+            "person": {
+              "id": 811106,
+              "fullName": "Andrew Sentlinger",
+              "link": "/api/v1/people/811106",
+              "firstName": "Andrew",
+              "lastName": "Sentlinger",
+              "birthDate": "2003-10-13",
+              "currentAge": 22,
+              "birthCity": "Summit",
+              "birthStateProvince": "NJ",
+              "birthCountry": "USA",
+              "height": "6' 2\"",
+              "weight": 200,
+              "active": true,
+              "primaryPosition": {
+                "code": "1",
+                "name": "Pitcher",
+                "type": "Pitcher",
+                "abbreviation": "P"
+              },
+              "useName": "Andrew",
+              "useLastName": "Sentlinger",
+              "boxscoreName": "Sentlinger",
+              "gender": "M",
+              "isPlayer": true,
+              "isVerified": true,
+              "draftYear": 2025,
+              "batSide": {
+                "code": "L",
+                "description": "Left"
+              },
+              "pitchHand": {
+                "code": "L",
+                "description": "Left"
+              },
+              "nameFirstLast": "Andrew Sentlinger",
+              "nameSlug": "andrew-sentlinger-811106",
+              "firstLastName": "Andrew Sentlinger",
+              "lastFirstName": "Sentlinger, Andrew",
+              "lastInitName": "Sentlinger, A",
+              "initLastName": "A Sentlinger",
+              "fullFMLName": "Andrew Sentlinger",
+              "fullLFMName": "Sentlinger, Andrew ",
+              "strikeZoneTop": 3.299,
+              "strikeZoneBottom": 1.665
+            },
+            "team": {
+              "id": 145,
+              "name": "Chicago White Sox"
+            },
+            "draftType": {
+              "code": "JR",
+              "description": "Rule 4 / June Amateur Draft"
+            },
+            "isDrafted": true,
+            "isPass": false,
+            "year": "2025"
+          },
+          {
+            "bisPlayerId": 5035822,
+            "pickRound": "20",
+            "pickNumber": 587,
+            "displayPickNumber": 587,
+            "roundPickNumber": 2,
+            "pickValue": "0",
+            "signingBonus": "150000",
+            "home": {
+              "city": "Fond du Lac",
+              "state": "Wisconsin",
+              "country": "USA"
+            },
+            "school": {
+              "name": "Augustana U",
+              "schoolClass": "4YR JR",
+              "city": "Sioux Falls",
+              "country": "USA",
+              "state": "SD"
+            },
+            "headshotLink": "https://img.mlbstatic.com/mlb-photos/image/upload/d_people:generic:headshot:silo:current.png/w_120,q_auto:best/v1/people/836087/headshot/draft/current",
+            "person": {
+              "id": 836087,
+              "fullName": "Ethan Cole",
+              "link": "/api/v1/people/836087",
+              "firstName": "Ethan",
+              "lastName": "Cole",
+              "birthDate": "2003-11-26",
+              "currentAge": 22,
+              "birthCity": "Fond du Lac",
+              "birthStateProvince": "WI",
+              "birthCountry": "USA",
+              "height": "6' 2\"",
+              "weight": 225,
+              "active": true,
+              "primaryPosition": {
+                "code": "1",
+                "name": "Pitcher",
+                "type": "Pitcher",
+                "abbreviation": "P"
+              },
+              "useName": "Ethan",
+              "useLastName": "Cole",
+              "middleName": "James",
+              "boxscoreName": "Cole",
+              "gender": "M",
+              "isPlayer": true,
+              "isVerified": true,
+              "draftYear": 2025,
+              "batSide": {
+                "code": "L",
+                "description": "Left"
+              },
+              "pitchHand": {
+                "code": "L",
+                "description": "Left"
+              },
+              "nameFirstLast": "Ethan Cole",
+              "nameSlug": "ethan-cole-836087",
+              "firstLastName": "Ethan Cole",
+              "lastFirstName": "Cole, Ethan",
+              "lastInitName": "Cole, E",
+              "initLastName": "E Cole",
+              "fullFMLName": "Ethan James Cole",
+              "fullLFMName": "Cole, Ethan James",
+              "strikeZoneTop": 3.299,
+              "strikeZoneBottom": 1.665
+            },
+            "team": {
+              "id": 115,
+              "name": "Colorado Rockies"
+            },
+            "draftType": {
+              "code": "JR",
+              "description": "Rule 4 / June Amateur Draft"
+            },
+            "isDrafted": true,
+            "isPass": false,
+            "year": "2025"
+          }
+        ]
+      },
+      {
+        "round": "5",
+        "picks": [
+          {
+            "pickRound": "5",
+            "pickNumber": 999,
+            "roundPickNumber": 15,
+            "pickValue": "125000",
+            "home": {},
+            "school": {},
+            "team": {
+              "id": 108,
+              "name": "Los Angeles Angels"
+            },
+            "draftType": {
+              "code": "JR",
+              "description": "Rule 4 / June Amateur Draft"
+            },
+            "isDrafted": false,
+            "isPass": true,
+            "year": "2025"
+          }
+        ]
+      }
+    ]
+  }
+}

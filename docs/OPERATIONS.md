@@ -10,36 +10,44 @@ Run a local SQLite-backed tracker that:
 
 ## 2. Components
 - `python_app/main.py` — main CLI
+- `python_app/mlb_tracker/mlb_stats_api.py` — official MLB Stats API client:
+  draft order scaffold + live pick reconciliation, no R dependency
 - `sql/schema.sql` — SQLite schema
-- `r_prototype/fetch_prospects.R` — R/baseballr sync prototype
-- `r_prototype/live_monitor.R` — R/baseballr live pick sync prototype
+- `r_prototype/fetch_prospects.R` — R/baseballr sync prototype (prospect board only now)
+- `r_prototype/live_monitor.R` — R/baseballr live pick sync prototype (legacy; see `live-monitor-api`)
 - Telegram delivery via bot token + chat id env vars
 - `Makefile` + `scripts/` — automation helpers for the workflows below (see §5a)
 
 ## 3. Suggested schedules
 ### Pre-draft (now through draft week)
-- `sync-prospects`: daily at 7:00 UTC
-- `seed-draft-order`: on demand whenever MLB updates the official order
+- `sync-draft-order-api`: daily (order rarely changes, but comp-round assignments can)
+- `sync-prospects` (or the no-R fallback): daily at 7:00 UTC
 - `generate-predictions`: daily at 8:00 UTC
 
 ### Draft week
+- `sync-draft-order-api`: every 6 hours
 - `sync-prospects`: every 6 hours
 - `generate-predictions`: every 4 hours
-- manual verification of seed CSV against official MLB order page
 
 ### Draft live window
-Recommended poll cadence:
-- 60 sec polling from 30 min before draft start through first round
-- 90 sec polling for later rounds if alert fatigue is a concern
-
-Live jobs:
-- `live-monitor`: every 60 sec
+Per MLB's own guidance, poll the lightweight `/latest`-backed
+`on-the-clock-api` frequently and do full reconciliation less often:
+- `on-the-clock-api`: every 15-30 sec for "who's up now" display
+- `live-monitor-api`: every 60 sec (does a full reconcile each call; safe to
+  run this alone without `on-the-clock-api` if you don't need the faster
+  "who's up next" signal separately)
 - optional `generate-predictions`: every 15 min if ingesting fresh mock intel
 
+Only poll this frequently during the actual draft windows (see the 2026
+schedule in the README's Predictions/Modes sections); a slow hourly refresh
+is enough outside of live picking.
+
 ## 4. Draft-day runbook
-1. `make pre-draft-sync` — initialize database, seed official order, sync prospects, generate predictions
+1. `make pre-draft-sync` — initialize database, sync official order via the
+   MLB Stats API, sync prospects (baseballr or fallback), generate predictions
 2. `make test-telegram` — confirm Telegram delivery with a dry-run message
-3. `make poll-draft-day` — start the live-monitor polling loop
+3. `make poll-draft-day` — start the live-monitor polling loop (uses
+   `live-monitor-api` by default — no R dependency)
 4. Verify first 3 picks manually against MLB.com
 5. `make live-monitor-status` — spot-check the poller, log, and recorded picks at any point
 6. Watch for duplicates / missing picks in `telegram_events_sent`
@@ -48,10 +56,10 @@ Live jobs:
 ```bash
 cd python_app
 python3 main.py init-db
+python3 main.py sync-draft-order-api --year 2026
 python3 main.py sync-prospects --year 2026
-python3 main.py seed-draft-order --year 2026 --csv ../examples/draft_order_seed_2026.csv
 python3 main.py generate-predictions --year 2026 --top-n 5 --max-pick 50
-python3 main.py live-monitor --year 2026
+python3 main.py live-monitor-api --year 2026
 ```
 
 ## 5a. Scripts and make targets
@@ -62,12 +70,13 @@ app's built-in db path) overrides, e.g. `make pre-draft-sync YEAR=2025`.
 
 | Command | What it does |
 | --- | --- |
-| `make pre-draft-sync` | `scripts/pre_draft_sync.sh` — init db, seed draft order, sync prospects (baseballr if available, else no-R fallback), generate heuristic predictions, and (2026 only) seed real mock draft picks + consensus predictions. Idempotent — safe to re-run on a schedule. |
-| `make poll-draft-day` | `scripts/poll_draft_day.sh` — runs `live-monitor` on a loop (default every 60s, override with `POLL_INTERVAL_SECONDS`). Refuses to start a second poller for the same year, and stops itself after 5 consecutive failures instead of looping forever. |
+| `make pre-draft-sync` | `scripts/pre_draft_sync.sh` — init db, sync draft order via the MLB Stats API, sync prospects (baseballr if its live call succeeds, else CSV/no-R fallback — this now recovers even when baseballr is installed but its live call fails), generate heuristic predictions, and (2026 only) seed real mock draft picks + consensus predictions. Idempotent — safe to re-run on a schedule. |
+| `make poll-draft-day` | `scripts/poll_draft_day.sh` — runs `live-monitor-api` on a loop by default (override with `LIVE_MONITOR_CMD=live-monitor` for the legacy baseballr path), default every 60s via `POLL_INTERVAL_SECONDS`. Refuses to start a second poller for the same year, and stops itself after 5 consecutive failures instead of looping forever. |
 | `make live-monitor-status` | `scripts/live_monitor_status.sh` — shows whether a poller is running, the tail of its log, and the most recently recorded picks. Use this before restarting after a crash. |
 | `make test-telegram` | Sends a one-off Telegram message via `main.py test-telegram` to confirm delivery. See §7. |
 | `make seed-mock-drafts` / `seed-mock-consensus` | Loads real, dated mock draft picks into `mock_draft_picks`, then aggregates them into `mock_consensus_v2` predictions (`seed-mock-consensus` runs `seed-mock-drafts` first automatically). See the README's Predictions section for how these are sourced and combined. |
-| `make init-db` / `sync-prospects` / `seed-no-r-prospects` / `seed-prospects-csv` / `seed-draft-order` / `generate-predictions` / `verify-baseballr` / `live-monitor` | Thin wrappers around the matching `main.py` subcommand. `seed-prospects-csv` loads the full top-250 board from `examples/prospects_top250_seed_2026.csv` when baseballr is unavailable — `pre_draft_sync.sh` picks this automatically when a CSV exists for the requested year, falling back to the smaller live `seed-no-r-prospects` scrape otherwise. |
+| `make sync-draft-order-api` / `live-monitor-api` / `on-the-clock-api` | The MLB Stats API path (no R dependency): full draft scaffold, full reconciliation + Telegram alerts, and the lightweight "who's on the clock" endpoint, respectively. See the README's Modes section. |
+| `make init-db` / `sync-prospects` / `seed-no-r-prospects` / `seed-prospects-csv` / `seed-draft-order` / `generate-predictions` / `verify-baseballr` / `live-monitor` | Thin wrappers around the matching `main.py` subcommand. `seed-draft-order` (CSV) and `live-monitor` (baseballr) are the legacy paths, superseded by `sync-draft-order-api` / `live-monitor-api` above. `seed-prospects-csv` loads the full top-250 board from `examples/prospects_top250_seed_2026.csv` when baseballr is unavailable. |
 | `make dashboard` | Runs the local dashboard on `:8000`. |
 
 Run `make help` for the full list.
@@ -87,10 +96,10 @@ Run `make help` for the full list.
 You can also run the equivalent commands directly:
 ```bash
 cd python_app
+python3 main.py sync-draft-order-api --year 2026
 python3 main.py sync-prospects --year 2026
-python3 main.py seed-draft-order --year 2026 --csv ../examples/draft_order_seed_2026.csv
 python3 main.py generate-predictions --year 2026 --top-n 5 --max-pick 50
-python3 main.py live-monitor --year 2026
+python3 main.py live-monitor-api --year 2026
 ```
 
 ## 7. Telegram config
@@ -114,16 +123,26 @@ If credentials are missing, this fails fast with a clear error instead of
 silently no-op'ing, so you'll know before draft day whether alerts will fire.
 
 ## 8. Risk areas
-- baseballr may lag MLB’s live site by some minutes
-- official draft order CSV placeholders must be replaced before draft day
+- baseballr's live call can fail even when R/packages are installed
+  correctly (hit in production: `mlb_draft_prospects(year = 2026)` erroring
+  with `object 'draft_prospects' not found`) — this only affects the
+  prospect board now, since draft order/live picks use the Stats API
+  directly; `pre_draft_sync.sh` falls back automatically when it happens
 - pick ownership can change due to compensation / traded comp-balance selections
-- names may require fuzzy matching when IDs are absent
+- names may require fuzzy matching when IDs are absent (mainly relevant to
+  the baseballr/no-R prospect-board paths; the Stats API path matches on
+  the numeric `person.id` directly)
+- the MLB Stats API's `/latest` endpoint hasn't been observed against an
+  actually-live draft yet (verified pre-draft only) — re-check its exact
+  shape once a draft is in progress before relying on more of it than
+  `nextUp` (see `mlb_stats_api.get_on_the_clock`)
 
 ## 9. Recommended hardening
-- add a second live source from official MLB draft tracker endpoints
+- ~~add a second live source from official MLB draft tracker endpoints~~ done — see `mlb_tracker/mlb_stats_api.py`
 - store HTML/JSON snapshots of each poll for debugging
 - add a dashboard view of top available prospects + actual picks
 - add quality checks to flag missing picks or duplicate pick numbers
+- fully retire the R/baseballr path once a live source covers the pre-draft prospect board too
 
 ## 10. Safe restart / recovery
 The live monitor and its dedupe tables are designed so restarting mid-draft
@@ -150,8 +169,10 @@ is safe, but follow this sequence rather than blindly re-launching:
    send (e.g. a correction to the player/school) — that's intentional.
 5. **Automatic backoff**: `poll_draft_day.sh` stops itself after 5
    consecutive failed runs rather than looping forever against a broken
-   source — treat that as a signal to investigate (`Rscript`/baseballr
-   availability, network access, MLB source changes) before restarting.
+   source — treat that as a signal to investigate (network access to
+   statsapi.mlb.com, MLB source changes, or `Rscript`/baseballr
+   availability if you've overridden `LIVE_MONITOR_CMD=live-monitor`)
+   before restarting.
 6. **Back up before draft day**: the sqlite db (`data/*.db` by default) is
    a single file — copy it somewhere safe before the draft window starts so
    a bad restart or corrupted write has a known-good fallback.

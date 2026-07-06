@@ -1,0 +1,1137 @@
+{
+  "copyright": "Copyright 2026 MLB Advanced Media, L.P.  Use of any content on this page acknowledges agreement to the terms posted here http://gdx.mlb.com/components/copyright.txt",
+  "drafts": {
+    "rounds": [
+      {
+        "round": "1",
+        "picks": [
+          {
+            "pickRound": "1",
+            "pickNumber": 1,
+            "displayPickNumber": 1,
+            "roundPickNumber": 1,
+            "pickValue": "11350600",
+            "home": {},
+            "school": {},
+            "team": {
+              "id": 145,
+              "name": "Chicago White Sox"
+            },
+            "draftType": {
+              "code": "JR",
+              "description": "Rule 4 / June Amateur Draft"
+            },
+            "isDrafted": false,
+            "isPass": false,
+            "year": "2026"
+          },
+          {
+            "pickRound": "1",
+            "pickNumber": 2,
+            "displayPickNumber": 2,
+            "roundPickNumber": 2,
+            "pickValue": "10507000",
+            "home": {},
+            "school": {},
+            "team": {
+              "id": 139,
+              "name": "Tampa Bay Rays"
+            },
+            "draftType": {
+              "code": "JR",
+              "description": "Rule 4 / June Amateur Draft"
+            },
+            "isDrafted": false,
+            "isPass": false,
+            "year": "2026"
+          }
+        ]
+      },
+      {
+        "round": "PPI",
+        "picks": [
+          {
+            "pickRound": "PPI",
+            "pickNumber": 26,
+            "displayPickNumber": 26,
+            "roundPickNumber": 1,
+            "pickValue": "3578800",
+            "home": {},
+            "school": {},
+            "team": {
+              "id": 144,
+              "name": "Atlanta Braves"
+            },
+            "draftType": {
+              "code": "JR",
+              "description": "Rule 4 / June Amateur Draft"
+            },
+            "isDrafted": false,
+            "isPass": false,
+            "year": "2026"
+          },
+          {
+            "pickRound": "PPI",
+            "pickNumber": 28,
+            "displayPickNumber": 28,
+            "roundPickNumber": 2,
+            "pickValue": "3363600",
+            "home": {},
+            "school": {},
+            "team": {
+              "id": 117,
+              "name": "Houston Astros"
+            },
+            "draftType": {
+              "code": "JR",
+              "description": "Rule 4 / June Amateur Draft"
+            },
+            "isDrafted": false,
+            "isPass": false,
+            "year": "2026"
+          }
+        ]
+      },
+      {
+        "round": "CB-A",
+        "picks": [
+          {
+            "pickRound": "CB-A",
+            "pickNumber": 29,
+            "displayPickNumber": 29,
+            "roundPickNumber": 1,
+            "pickValue": "3270200",
+            "home": {},
+            "school": {},
+            "team": {
+              "id": 137,
+              "name": "San Francisco Giants"
+            },
+            "draftType": {
+              "code": "JR",
+              "description": "Rule 4 / June Amateur Draft"
+            },
+            "isDrafted": false,
+            "isPass": false,
+            "year": "2026"
+          },
+          {
+            "pickRound": "CB-A",
+            "pickNumber": 30,
+            "displayPickNumber": 30,
+            "roundPickNumber": 2,
+            "pickValue": "3190500",
+            "home": {},
+            "school": {},
+            "team": {
+              "id": 118,
+              "name": "Kansas City Royals"
+            },
+            "draftType": {
+              "code": "JR",
+              "description": "Rule 4 / June Amateur Draft"
+            },
+            "isDrafted": false,
+            "isPass": false,
+            "year": "2026"
+          }
+        ]
+      },
+      {
+        "round": "2",
+        "picks": [
+          {
+            "pickRound": "2",
+            "pickNumber": 38,
+            "displayPickNumber": 38,
+            "roundPickNumber": 1,
+            "pickValue": "2633100",
+            "home": {},
+            "school": {},
+            "team": {
+              "id": 115,
+              "name": "Colorado Rockies"
+            },
+            "draftType": {
+              "code": "JR",
+              "description": "Rule 4 / June Amateur Draft"
+            },
+            "isDrafted": false,
+            "isPass": false,
+            "year": "2026"
+          },
+          {
+            "pickRound": "2",
+            "pickNumber": 41,
+            "displayPickNumber": 41,
+            "roundPickNumber": 2,
+            "pickValue": "2446100",
+            "home": {},
+            "school": {},
+            "team": {
+              "id": 145,
+              "name": "Chicago White Sox"
+            },
+            "draftType": {
+              "code": "JR",
+              "description": "Rule 4 / June Amateur Draft"
+            },
+            "isDrafted": false,
+            "isPass": false,
+            "year": "2026"
+          }
+        ]
+      },
+      {
+        "round": "SUP-2",
+        "picks": [
+          {
+            "pickRound": "SUP-2",
+            "pickNumber": 51,
+            "displayPickNumber": 51,
+            "roundPickNumber": 1,
+            "pickValue": "1938100",
+            "home": {},
+            "school": {},
+            "team": {
+              "id": 134,
+              "name": "Pittsburgh Pirates"
+            },
+            "draftType": {
+              "code": "JR",
+              "description": "Rule 4 / June Amateur Draft"
+            },
+            "isDrafted": false,
+            "isPass": false,
+            "year": "2026"
+          }
+        ]
+      },
+      {
+        "round": "CB-B",
+        "picks": [
+          {
+            "pickRound": "CB-B",
+            "pickNumber": 67,
+            "displayPickNumber": 67,
+            "roundPickNumber": 1,
+            "pickValue": "1317300",
+            "home": {},
+            "school": {},
+            "team": {
+              "id": 111,
+              "name": "Boston Red Sox"
+            },
+            "draftType": {
+              "code": "JR",
+              "description": "Rule 4 / June Amateur Draft"
+            },
+            "isDrafted": false,
+            "isPass": false,
+            "year": "2026"
+          },
+          {
+            "pickRound": "CB-B",
+            "pickNumber": 68,
+            "displayPickNumber": 68,
+            "roundPickNumber": 2,
+            "pickValue": "1285500",
+            "home": {},
+            "school": {},
+            "team": {
+              "id": 138,
+              "name": "St. Louis Cardinals"
+            },
+            "draftType": {
+              "code": "JR",
+              "description": "Rule 4 / June Amateur Draft"
+            },
+            "isDrafted": false,
+            "isPass": false,
+            "year": "2026"
+          }
+        ]
+      },
+      {
+        "round": "2C",
+        "picks": [
+          {
+            "pickRound": "2C",
+            "pickNumber": 75,
+            "displayPickNumber": 75,
+            "roundPickNumber": 1,
+            "pickValue": "1120900",
+            "home": {},
+            "school": {},
+            "team": {
+              "id": 112,
+              "name": "Chicago Cubs"
+            },
+            "draftType": {
+              "code": "JR",
+              "description": "Rule 4 / June Amateur Draft"
+            },
+            "isDrafted": false,
+            "isPass": false,
+            "year": "2026"
+          }
+        ]
+      },
+      {
+        "round": "3",
+        "picks": [
+          {
+            "pickRound": "3",
+            "pickNumber": 76,
+            "displayPickNumber": 76,
+            "roundPickNumber": 1,
+            "pickValue": "1103500",
+            "home": {},
+            "school": {},
+            "team": {
+              "id": 115,
+              "name": "Colorado Rockies"
+            },
+            "draftType": {
+              "code": "JR",
+              "description": "Rule 4 / June Amateur Draft"
+            },
+            "isDrafted": false,
+            "isPass": false,
+            "year": "2026"
+          },
+          {
+            "pickRound": "3",
+            "pickNumber": 77,
+            "displayPickNumber": 77,
+            "roundPickNumber": 2,
+            "pickValue": "1086600",
+            "home": {},
+            "school": {},
+            "team": {
+              "id": 145,
+              "name": "Chicago White Sox"
+            },
+            "draftType": {
+              "code": "JR",
+              "description": "Rule 4 / June Amateur Draft"
+            },
+            "isDrafted": false,
+            "isPass": false,
+            "year": "2026"
+          }
+        ]
+      },
+      {
+        "round": "4",
+        "picks": [
+          {
+            "pickRound": "4",
+            "pickNumber": 104,
+            "displayPickNumber": 104,
+            "roundPickNumber": 1,
+            "pickValue": "755300",
+            "home": {},
+            "school": {},
+            "team": {
+              "id": 115,
+              "name": "Colorado Rockies"
+            },
+            "draftType": {
+              "code": "JR",
+              "description": "Rule 4 / June Amateur Draft"
+            },
+            "isDrafted": false,
+            "isPass": false,
+            "year": "2026"
+          },
+          {
+            "pickRound": "4",
+            "pickNumber": 105,
+            "displayPickNumber": 105,
+            "roundPickNumber": 2,
+            "pickValue": "747700",
+            "home": {},
+            "school": {},
+            "team": {
+              "id": 145,
+              "name": "Chicago White Sox"
+            },
+            "draftType": {
+              "code": "JR",
+              "description": "Rule 4 / June Amateur Draft"
+            },
+            "isDrafted": false,
+            "isPass": false,
+            "year": "2026"
+          }
+        ]
+      },
+      {
+        "round": "4C",
+        "picks": [
+          {
+            "pickRound": "4C",
+            "pickNumber": 133,
+            "displayPickNumber": 133,
+            "roundPickNumber": 1,
+            "pickValue": "569600",
+            "home": {},
+            "school": {},
+            "team": {
+              "id": 117,
+              "name": "Houston Astros"
+            },
+            "draftType": {
+              "code": "JR",
+              "description": "Rule 4 / June Amateur Draft"
+            },
+            "isDrafted": false,
+            "isPass": false,
+            "year": "2026"
+          },
+          {
+            "pickRound": "4C",
+            "pickNumber": 134,
+            "displayPickNumber": 134,
+            "roundPickNumber": 2,
+            "pickValue": "563900",
+            "home": {},
+            "school": {},
+            "team": {
+              "id": 135,
+              "name": "San Diego Padres"
+            },
+            "draftType": {
+              "code": "JR",
+              "description": "Rule 4 / June Amateur Draft"
+            },
+            "isDrafted": false,
+            "isPass": false,
+            "year": "2026"
+          }
+        ]
+      },
+      {
+        "round": "5",
+        "picks": [
+          {
+            "pickRound": "5",
+            "pickNumber": 136,
+            "displayPickNumber": 136,
+            "roundPickNumber": 1,
+            "pickValue": "553100",
+            "home": {},
+            "school": {},
+            "team": {
+              "id": 115,
+              "name": "Colorado Rockies"
+            },
+            "draftType": {
+              "code": "JR",
+              "description": "Rule 4 / June Amateur Draft"
+            },
+            "isDrafted": false,
+            "isPass": false,
+            "year": "2026"
+          },
+          {
+            "pickRound": "5",
+            "pickNumber": 137,
+            "displayPickNumber": 137,
+            "roundPickNumber": 2,
+            "pickValue": "547700",
+            "home": {},
+            "school": {},
+            "team": {
+              "id": 145,
+              "name": "Chicago White Sox"
+            },
+            "draftType": {
+              "code": "JR",
+              "description": "Rule 4 / June Amateur Draft"
+            },
+            "isDrafted": false,
+            "isPass": false,
+            "year": "2026"
+          }
+        ]
+      },
+      {
+        "round": "6",
+        "picks": [
+          {
+            "pickRound": "6",
+            "pickNumber": 165,
+            "displayPickNumber": 165,
+            "roundPickNumber": 1,
+            "pickValue": "417400",
+            "home": {},
+            "school": {},
+            "team": {
+              "id": 115,
+              "name": "Colorado Rockies"
+            },
+            "draftType": {
+              "code": "JR",
+              "description": "Rule 4 / June Amateur Draft"
+            },
+            "isDrafted": false,
+            "isPass": false,
+            "year": "2026"
+          },
+          {
+            "pickRound": "6",
+            "pickNumber": 166,
+            "displayPickNumber": 166,
+            "roundPickNumber": 2,
+            "pickValue": "413900",
+            "home": {},
+            "school": {},
+            "team": {
+              "id": 145,
+              "name": "Chicago White Sox"
+            },
+            "draftType": {
+              "code": "JR",
+              "description": "Rule 4 / June Amateur Draft"
+            },
+            "isDrafted": false,
+            "isPass": false,
+            "year": "2026"
+          }
+        ]
+      },
+      {
+        "round": "7",
+        "picks": [
+          {
+            "pickRound": "7",
+            "pickNumber": 194,
+            "displayPickNumber": 194,
+            "roundPickNumber": 1,
+            "pickValue": "327700",
+            "home": {},
+            "school": {},
+            "team": {
+              "id": 115,
+              "name": "Colorado Rockies"
+            },
+            "draftType": {
+              "code": "JR",
+              "description": "Rule 4 / June Amateur Draft"
+            },
+            "isDrafted": false,
+            "isPass": false,
+            "year": "2026"
+          },
+          {
+            "pickRound": "7",
+            "pickNumber": 195,
+            "displayPickNumber": 195,
+            "roundPickNumber": 2,
+            "pickValue": "325100",
+            "home": {},
+            "school": {},
+            "team": {
+              "id": 145,
+              "name": "Chicago White Sox"
+            },
+            "draftType": {
+              "code": "JR",
+              "description": "Rule 4 / June Amateur Draft"
+            },
+            "isDrafted": false,
+            "isPass": false,
+            "year": "2026"
+          }
+        ]
+      },
+      {
+        "round": "8",
+        "picks": [
+          {
+            "pickRound": "8",
+            "pickNumber": 224,
+            "displayPickNumber": 224,
+            "roundPickNumber": 1,
+            "pickValue": "258400",
+            "home": {},
+            "school": {},
+            "team": {
+              "id": 115,
+              "name": "Colorado Rockies"
+            },
+            "draftType": {
+              "code": "JR",
+              "description": "Rule 4 / June Amateur Draft"
+            },
+            "isDrafted": false,
+            "isPass": false,
+            "year": "2026"
+          },
+          {
+            "pickRound": "8",
+            "pickNumber": 225,
+            "displayPickNumber": 225,
+            "roundPickNumber": 2,
+            "pickValue": "256500",
+            "home": {},
+            "school": {},
+            "team": {
+              "id": 145,
+              "name": "Chicago White Sox"
+            },
+            "draftType": {
+              "code": "JR",
+              "description": "Rule 4 / June Amateur Draft"
+            },
+            "isDrafted": false,
+            "isPass": false,
+            "year": "2026"
+          }
+        ]
+      },
+      {
+        "round": "9",
+        "picks": [
+          {
+            "pickRound": "9",
+            "pickNumber": 254,
+            "displayPickNumber": 254,
+            "roundPickNumber": 1,
+            "pickValue": "217800",
+            "home": {},
+            "school": {},
+            "team": {
+              "id": 115,
+              "name": "Colorado Rockies"
+            },
+            "draftType": {
+              "code": "JR",
+              "description": "Rule 4 / June Amateur Draft"
+            },
+            "isDrafted": false,
+            "isPass": false,
+            "year": "2026"
+          },
+          {
+            "pickRound": "9",
+            "pickNumber": 255,
+            "displayPickNumber": 255,
+            "roundPickNumber": 2,
+            "pickValue": "217000",
+            "home": {},
+            "school": {},
+            "team": {
+              "id": 145,
+              "name": "Chicago White Sox"
+            },
+            "draftType": {
+              "code": "JR",
+              "description": "Rule 4 / June Amateur Draft"
+            },
+            "isDrafted": false,
+            "isPass": false,
+            "year": "2026"
+          }
+        ]
+      },
+      {
+        "round": "10",
+        "picks": [
+          {
+            "pickRound": "10",
+            "pickNumber": 284,
+            "displayPickNumber": 284,
+            "roundPickNumber": 1,
+            "pickValue": "201500",
+            "home": {},
+            "school": {},
+            "team": {
+              "id": 115,
+              "name": "Colorado Rockies"
+            },
+            "draftType": {
+              "code": "JR",
+              "description": "Rule 4 / June Amateur Draft"
+            },
+            "isDrafted": false,
+            "isPass": false,
+            "year": "2026"
+          },
+          {
+            "pickRound": "10",
+            "pickNumber": 285,
+            "displayPickNumber": 285,
+            "roundPickNumber": 2,
+            "pickValue": "200900",
+            "home": {},
+            "school": {},
+            "team": {
+              "id": 145,
+              "name": "Chicago White Sox"
+            },
+            "draftType": {
+              "code": "JR",
+              "description": "Rule 4 / June Amateur Draft"
+            },
+            "isDrafted": false,
+            "isPass": false,
+            "year": "2026"
+          }
+        ]
+      },
+      {
+        "round": "11",
+        "picks": [
+          {
+            "pickRound": "11",
+            "pickNumber": 314,
+            "displayPickNumber": 314,
+            "roundPickNumber": 1,
+            "pickValue": "0",
+            "home": {},
+            "school": {},
+            "team": {
+              "id": 115,
+              "name": "Colorado Rockies"
+            },
+            "draftType": {
+              "code": "JR",
+              "description": "Rule 4 / June Amateur Draft"
+            },
+            "isDrafted": false,
+            "isPass": false,
+            "year": "2026"
+          },
+          {
+            "pickRound": "11",
+            "pickNumber": 315,
+            "displayPickNumber": 315,
+            "roundPickNumber": 2,
+            "pickValue": "0",
+            "home": {},
+            "school": {},
+            "team": {
+              "id": 145,
+              "name": "Chicago White Sox"
+            },
+            "draftType": {
+              "code": "JR",
+              "description": "Rule 4 / June Amateur Draft"
+            },
+            "isDrafted": false,
+            "isPass": false,
+            "year": "2026"
+          }
+        ]
+      },
+      {
+        "round": "12",
+        "picks": [
+          {
+            "pickRound": "12",
+            "pickNumber": 344,
+            "displayPickNumber": 344,
+            "roundPickNumber": 1,
+            "pickValue": "0",
+            "home": {},
+            "school": {},
+            "team": {
+              "id": 115,
+              "name": "Colorado Rockies"
+            },
+            "draftType": {
+              "code": "JR",
+              "description": "Rule 4 / June Amateur Draft"
+            },
+            "isDrafted": false,
+            "isPass": false,
+            "year": "2026"
+          },
+          {
+            "pickRound": "12",
+            "pickNumber": 345,
+            "displayPickNumber": 345,
+            "roundPickNumber": 2,
+            "pickValue": "0",
+            "home": {},
+            "school": {},
+            "team": {
+              "id": 145,
+              "name": "Chicago White Sox"
+            },
+            "draftType": {
+              "code": "JR",
+              "description": "Rule 4 / June Amateur Draft"
+            },
+            "isDrafted": false,
+            "isPass": false,
+            "year": "2026"
+          }
+        ]
+      },
+      {
+        "round": "13",
+        "picks": [
+          {
+            "pickRound": "13",
+            "pickNumber": 374,
+            "displayPickNumber": 374,
+            "roundPickNumber": 1,
+            "pickValue": "0",
+            "home": {},
+            "school": {},
+            "team": {
+              "id": 115,
+              "name": "Colorado Rockies"
+            },
+            "draftType": {
+              "code": "JR",
+              "description": "Rule 4 / June Amateur Draft"
+            },
+            "isDrafted": false,
+            "isPass": false,
+            "year": "2026"
+          },
+          {
+            "pickRound": "13",
+            "pickNumber": 375,
+            "displayPickNumber": 375,
+            "roundPickNumber": 2,
+            "pickValue": "0",
+            "home": {},
+            "school": {},
+            "team": {
+              "id": 145,
+              "name": "Chicago White Sox"
+            },
+            "draftType": {
+              "code": "JR",
+              "description": "Rule 4 / June Amateur Draft"
+            },
+            "isDrafted": false,
+            "isPass": false,
+            "year": "2026"
+          }
+        ]
+      },
+      {
+        "round": "14",
+        "picks": [
+          {
+            "pickRound": "14",
+            "pickNumber": 404,
+            "displayPickNumber": 404,
+            "roundPickNumber": 1,
+            "pickValue": "0",
+            "home": {},
+            "school": {},
+            "team": {
+              "id": 115,
+              "name": "Colorado Rockies"
+            },
+            "draftType": {
+              "code": "JR",
+              "description": "Rule 4 / June Amateur Draft"
+            },
+            "isDrafted": false,
+            "isPass": false,
+            "year": "2026"
+          },
+          {
+            "pickRound": "14",
+            "pickNumber": 405,
+            "displayPickNumber": 405,
+            "roundPickNumber": 2,
+            "pickValue": "0",
+            "home": {},
+            "school": {},
+            "team": {
+              "id": 145,
+              "name": "Chicago White Sox"
+            },
+            "draftType": {
+              "code": "JR",
+              "description": "Rule 4 / June Amateur Draft"
+            },
+            "isDrafted": false,
+            "isPass": false,
+            "year": "2026"
+          }
+        ]
+      },
+      {
+        "round": "15",
+        "picks": [
+          {
+            "pickRound": "15",
+            "pickNumber": 434,
+            "displayPickNumber": 434,
+            "roundPickNumber": 1,
+            "pickValue": "0",
+            "home": {},
+            "school": {},
+            "team": {
+              "id": 115,
+              "name": "Colorado Rockies"
+            },
+            "draftType": {
+              "code": "JR",
+              "description": "Rule 4 / June Amateur Draft"
+            },
+            "isDrafted": false,
+            "isPass": false,
+            "year": "2026"
+          },
+          {
+            "pickRound": "15",
+            "pickNumber": 435,
+            "displayPickNumber": 435,
+            "roundPickNumber": 2,
+            "pickValue": "0",
+            "home": {},
+            "school": {},
+            "team": {
+              "id": 145,
+              "name": "Chicago White Sox"
+            },
+            "draftType": {
+              "code": "JR",
+              "description": "Rule 4 / June Amateur Draft"
+            },
+            "isDrafted": false,
+            "isPass": false,
+            "year": "2026"
+          }
+        ]
+      },
+      {
+        "round": "16",
+        "picks": [
+          {
+            "pickRound": "16",
+            "pickNumber": 464,
+            "displayPickNumber": 464,
+            "roundPickNumber": 1,
+            "pickValue": "0",
+            "home": {},
+            "school": {},
+            "team": {
+              "id": 115,
+              "name": "Colorado Rockies"
+            },
+            "draftType": {
+              "code": "JR",
+              "description": "Rule 4 / June Amateur Draft"
+            },
+            "isDrafted": false,
+            "isPass": false,
+            "year": "2026"
+          },
+          {
+            "pickRound": "16",
+            "pickNumber": 465,
+            "displayPickNumber": 465,
+            "roundPickNumber": 2,
+            "pickValue": "0",
+            "home": {},
+            "school": {},
+            "team": {
+              "id": 145,
+              "name": "Chicago White Sox"
+            },
+            "draftType": {
+              "code": "JR",
+              "description": "Rule 4 / June Amateur Draft"
+            },
+            "isDrafted": false,
+            "isPass": false,
+            "year": "2026"
+          }
+        ]
+      },
+      {
+        "round": "17",
+        "picks": [
+          {
+            "pickRound": "17",
+            "pickNumber": 494,
+            "displayPickNumber": 494,
+            "roundPickNumber": 1,
+            "pickValue": "0",
+            "home": {},
+            "school": {},
+            "team": {
+              "id": 115,
+              "name": "Colorado Rockies"
+            },
+            "draftType": {
+              "code": "JR",
+              "description": "Rule 4 / June Amateur Draft"
+            },
+            "isDrafted": false,
+            "isPass": false,
+            "year": "2026"
+          },
+          {
+            "pickRound": "17",
+            "pickNumber": 495,
+            "displayPickNumber": 495,
+            "roundPickNumber": 2,
+            "pickValue": "0",
+            "home": {},
+            "school": {},
+            "team": {
+              "id": 145,
+              "name": "Chicago White Sox"
+            },
+            "draftType": {
+              "code": "JR",
+              "description": "Rule 4 / June Amateur Draft"
+            },
+            "isDrafted": false,
+            "isPass": false,
+            "year": "2026"
+          }
+        ]
+      },
+      {
+        "round": "18",
+        "picks": [
+          {
+            "pickRound": "18",
+            "pickNumber": 524,
+            "displayPickNumber": 524,
+            "roundPickNumber": 1,
+            "pickValue": "0",
+            "home": {},
+            "school": {},
+            "team": {
+              "id": 115,
+              "name": "Colorado Rockies"
+            },
+            "draftType": {
+              "code": "JR",
+              "description": "Rule 4 / June Amateur Draft"
+            },
+            "isDrafted": false,
+            "isPass": false,
+            "year": "2026"
+          },
+          {
+            "pickRound": "18",
+            "pickNumber": 525,
+            "displayPickNumber": 525,
+            "roundPickNumber": 2,
+            "pickValue": "0",
+            "home": {},
+            "school": {},
+            "team": {
+              "id": 145,
+              "name": "Chicago White Sox"
+            },
+            "draftType": {
+              "code": "JR",
+              "description": "Rule 4 / June Amateur Draft"
+            },
+            "isDrafted": false,
+            "isPass": false,
+            "year": "2026"
+          }
+        ]
+      },
+      {
+        "round": "19",
+        "picks": [
+          {
+            "pickRound": "19",
+            "pickNumber": 554,
+            "displayPickNumber": 554,
+            "roundPickNumber": 1,
+            "pickValue": "0",
+            "home": {},
+            "school": {},
+            "team": {
+              "id": 115,
+              "name": "Colorado Rockies"
+            },
+            "draftType": {
+              "code": "JR",
+              "description": "Rule 4 / June Amateur Draft"
+            },
+            "isDrafted": false,
+            "isPass": false,
+            "year": "2026"
+          },
+          {
+            "pickRound": "19",
+            "pickNumber": 555,
+            "displayPickNumber": 555,
+            "roundPickNumber": 2,
+            "pickValue": "0",
+            "home": {},
+            "school": {},
+            "team": {
+              "id": 145,
+              "name": "Chicago White Sox"
+            },
+            "draftType": {
+              "code": "JR",
+              "description": "Rule 4 / June Amateur Draft"
+            },
+            "isDrafted": false,
+            "isPass": false,
+            "year": "2026"
+          }
+        ]
+      },
+      {
+        "round": "20",
+        "picks": [
+          {
+            "pickRound": "20",
+            "pickNumber": 584,
+            "displayPickNumber": 584,
+            "roundPickNumber": 1,
+            "pickValue": "0",
+            "home": {},
+            "school": {},
+            "team": {
+              "id": 115,
+              "name": "Colorado Rockies"
+            },
+            "draftType": {
+              "code": "JR",
+              "description": "Rule 4 / June Amateur Draft"
+            },
+            "isDrafted": false,
+            "isPass": false,
+            "year": "2026"
+          },
+          {
+            "pickRound": "20",
+            "pickNumber": 585,
+            "displayPickNumber": 585,
+            "roundPickNumber": 2,
+            "pickValue": "0",
+            "home": {},
+            "school": {},
+            "team": {
+              "id": 145,
+              "name": "Chicago White Sox"
+            },
+            "draftType": {
+              "code": "JR",
+              "description": "Rule 4 / June Amateur Draft"
+            },
+            "isDrafted": false,
+            "isPass": false,
+            "year": "2026"
+          }
+        ]
+      }
+    ]
+  }
+}
