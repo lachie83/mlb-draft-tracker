@@ -1,5 +1,8 @@
 from __future__ import annotations
 
+import pytest
+import requests
+
 from mlb_tracker.db import get_sent_event
 from mlb_tracker.telegram import TelegramNotifier, make_pick_message, send_pick_if_new
 
@@ -84,3 +87,25 @@ def test_send_pick_if_new_resends_when_pick_details_change(conn, monkeypatch):
     send_pick_if_new(conn, notifier, draft_year=2026, pick_row=corrected_pick_row)
 
     assert len(calls) == 1
+
+
+def test_send_raises_with_telegrams_error_description(monkeypatch):
+    monkeypatch.setenv("TELEGRAM_BOT_TOKEN", "fake-token")
+    monkeypatch.setenv("TELEGRAM_CHAT_ID", "fake-chat-id")
+    notifier = TelegramNotifier()
+    assert notifier.enabled is True
+
+    class FakeResponse:
+        status_code = 400
+        text = '{"ok": false, "error_code": 400, "description": "Bad Request: chat not found"}'
+
+        def raise_for_status(self):
+            raise requests.exceptions.HTTPError("400 Client Error: Bad Request", response=self)
+
+        def json(self):
+            return {"ok": False, "error_code": 400, "description": "Bad Request: chat not found"}
+
+    monkeypatch.setattr(requests, "post", lambda *a, **k: FakeResponse())
+
+    with pytest.raises(requests.exceptions.HTTPError, match="chat not found"):
+        notifier.send("hello")
