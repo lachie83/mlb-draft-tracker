@@ -5,6 +5,7 @@ from pathlib import Path
 
 from mlb_tracker.db import DEFAULT_DB_PATH, get_connection, init_db, insert_or_replace_predictions, upsert_draft_slot, upsert_prospect
 from mlb_tracker.live_monitor import reconcile_live_picks
+from mlb_tracker.mlb_stats_api import fetch_latest, get_on_the_clock, reconcile_picks_from_api, sync_draft_order
 from mlb_tracker.mock_ingest import generate_mock_consensus_predictions, ingest_real_mock_draft_picks
 from mlb_tracker.no_r_ingest import build_no_r_seed
 from mlb_tracker.predictions import generate_predictions
@@ -111,6 +112,36 @@ def cmd_live_monitor(args):
     print(f"Observed {len(new_picks)} new picks")
 
 
+def cmd_sync_draft_order_api(args):
+    init_db(args.db)
+    conn = get_connection(args.db)
+    rows = sync_draft_order(conn, draft_year=args.year)
+    conn.commit()
+    conn.close()
+    print(f"Synced {len(rows)} draft slots from the MLB Stats API for {args.year}")
+
+
+def cmd_live_monitor_api(args):
+    init_db(args.db)
+    conn = get_connection(args.db)
+    notifier = TelegramNotifier()
+    new_picks = reconcile_picks_from_api(conn, draft_year=args.year, notifier=notifier)
+    conn.commit()
+    conn.close()
+    print(f"Observed {len(new_picks)} new picks via the MLB Stats API")
+
+
+def cmd_on_the_clock_api(args):
+    payload = fetch_latest(args.year)
+    on_the_clock = get_on_the_clock(payload)
+    if not on_the_clock:
+        print("No upcoming picks reported (draft may not be live right now).")
+        return
+    for pick in on_the_clock:
+        team = pick.get("team") or {}
+        print(f"Pick #{pick.get('pickNumber')} ({pick.get('pickRound')}): {team.get('name', 'Unknown team')}")
+
+
 def cmd_verify_baseballr(_args):
     ok, message = verify_baseballr_setup()
     if ok:
@@ -174,6 +205,18 @@ def build_parser() -> argparse.ArgumentParser:
     p = sub.add_parser("live-monitor")
     p.add_argument("--year", type=int, default=2026)
     p.set_defaults(func=cmd_live_monitor)
+
+    p = sub.add_parser("sync-draft-order-api")
+    p.add_argument("--year", type=int, default=2026)
+    p.set_defaults(func=cmd_sync_draft_order_api)
+
+    p = sub.add_parser("live-monitor-api")
+    p.add_argument("--year", type=int, default=2026)
+    p.set_defaults(func=cmd_live_monitor_api)
+
+    p = sub.add_parser("on-the-clock-api")
+    p.add_argument("--year", type=int, default=2026)
+    p.set_defaults(func=cmd_on_the_clock_api)
 
     p = sub.add_parser("verify-baseballr")
     p.set_defaults(func=cmd_verify_baseballr)

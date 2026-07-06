@@ -1,0 +1,110 @@
+{
+  "copyright": "Copyright 2026 MLB Advanced Media, L.P.  Use of any content on this page acknowledges agreement to the terms posted here http://gdx.mlb.com/components/copyright.txt",
+  "nextUp": [
+    {
+      "pickRound": "1",
+      "pickNumber": 1,
+      "displayPickNumber": 1,
+      "roundPickNumber": 1,
+      "pickValue": "11350600",
+      "home": {},
+      "school": {},
+      "team": {
+        "id": 145,
+        "name": "Chicago White Sox",
+        "abbreviation": "CWS"
+      },
+      "draftType": {
+        "code": "JR",
+        "description": "Rule 4 / June Amateur Draft"
+      },
+      "isDrafted": false,
+      "isPass": false,
+      "year": "2026"
+    },
+    {
+      "pickRound": "1",
+      "pickNumber": 2,
+      "displayPickNumber": 2,
+      "roundPickNumber": 2,
+      "pickValue": "10507000",
+      "home": {},
+      "school": {},
+      "team": {
+        "id": 139,
+        "name": "Tampa Bay Rays",
+        "abbreviation": "TB"
+      },
+      "draftType": {
+        "code": "JR",
+        "description": "Rule 4 / June Amateur Draft"
+      },
+      "isDrafted": false,
+      "isPass": false,
+      "year": "2026"
+    },
+    {
+      "pickRound": "1",
+      "pickNumber": 3,
+      "displayPickNumber": 3,
+      "roundPickNumber": 3,
+      "pickValue": "9740100",
+      "home": {},
+      "school": {},
+      "team": {
+        "id": 142,
+        "name": "Minnesota Twins",
+        "abbreviation": "MIN"
+      },
+      "draftType": {
+        "code": "JR",
+        "description": "Rule 4 / June Amateur Draft"
+      },
+      "isDrafted": false,
+      "isPass": false,
+      "year": "2026"
+    },
+    {
+      "pickRound": "1",
+      "pickNumber": 4,
+      "displayPickNumber": 4,
+      "roundPickNumber": 4,
+      "pickValue": "8988400",
+      "home": {},
+      "school": {},
+      "team": {
+        "id": 137,
+        "name": "San Francisco Giants",
+        "abbreviation": "SF"
+      },
+      "draftType": {
+        "code": "JR",
+        "description": "Rule 4 / June Amateur Draft"
+      },
+      "isDrafted": false,
+      "isPass": false,
+      "year": "2026"
+    },
+    {
+      "pickRound": "1",
+      "pickNumber": 5,
+      "displayPickNumber": 5,
+      "roundPickNumber": 5,
+      "pickValue": "8336500",
+      "home": {},
+      "school": {},
+      "team": {
+        "id": 134,
+        "name": "Pittsburgh Pirates",
+        "abbreviation": "PIT"
+      },
+      "draftType": {
+        "code": "JR",
+        "description": "Rule 4 / June Amateur Draft"
+      },
+      "isDrafted": false,
+      "isPass": false,
+      "year": "2026"
+    }
+  ]
+}
