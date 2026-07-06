@@ -4,6 +4,7 @@ import argparse
 from pathlib import Path
 
 from mlb_tracker.db import DEFAULT_DB_PATH, get_connection, init_db, insert_or_replace_predictions, upsert_draft_slot, upsert_prospect
+from mlb_tracker.draft_rehearsal import rehearse_draft_day
 from mlb_tracker.live_monitor import reconcile_live_picks
 from mlb_tracker.mlb_stats_api import fetch_latest, get_on_the_clock, reconcile_picks_from_api, sync_draft_order
 from mlb_tracker.mock_ingest import generate_mock_consensus_predictions, ingest_real_mock_draft_picks
@@ -142,6 +143,41 @@ def cmd_on_the_clock_api(args):
         print(f"Pick #{pick.get('pickNumber')} ({pick.get('pickRound')}): {team.get('name', 'Unknown team')}")
 
 
+def cmd_rehearse_draft_day(args):
+    if args.year in (2025, 2026):
+        print(
+            f"WARNING: --year {args.year} looks like a real draft year. Rehearsal data "
+            "will be written into that year's rows in this database, mixed in with real "
+            "data. Strongly recommended: leave --year at its default (9999) and/or pass "
+            "--db pointing at a dedicated rehearsal database, e.g. --db ../data/rehearsal.db"
+        )
+    init_db(args.db)
+    conn = get_connection(args.db)
+    notifier = TelegramNotifier()
+    if notifier.enabled:
+        print(f"Telegram is configured: this rehearsal will send up to {args.picks} real alert(s) to your chat.")
+    else:
+        print("Telegram is not configured: picks will be simulated without sending alerts.")
+    print(f"Rehearsing up to {args.picks} picks from the {args.source_year} draft into draft_year={args.year} at {args.db} ...")
+
+    def on_tick(new_picks, revealed, total):
+        for pick in new_picks:
+            print(f"  [{revealed}/{total}] Pick #{pick['pick_number']}: {pick['team_name']} selects {pick['player_name']}")
+
+    total_simulated = rehearse_draft_day(
+        conn,
+        source_year=args.source_year,
+        target_year=args.year,
+        picks=args.picks,
+        batch_size=args.batch_size,
+        delay_seconds=args.delay,
+        notifier=notifier,
+        on_tick=on_tick,
+    )
+    conn.close()
+    print(f"Rehearsal complete: simulated {total_simulated} picks.")
+
+
 def cmd_verify_baseballr(_args):
     ok, message = verify_baseballr_setup()
     if ok:
@@ -217,6 +253,14 @@ def build_parser() -> argparse.ArgumentParser:
     p = sub.add_parser("on-the-clock-api")
     p.add_argument("--year", type=int, default=2026)
     p.set_defaults(func=cmd_on_the_clock_api)
+
+    p = sub.add_parser("rehearse-draft-day")
+    p.add_argument("--year", type=int, default=9999, help="draft_year tag for simulated picks (default 9999 - a sentinel that can't collide with a real draft)")
+    p.add_argument("--source-year", type=int, default=2025, help="completed draft year to replay real picks from")
+    p.add_argument("--picks", type=int, default=10, help="number of picks to simulate (default 10; the full source draft has 600+)")
+    p.add_argument("--batch-size", type=int, default=1, help="picks revealed per tick (default 1)")
+    p.add_argument("--delay", type=float, default=5.0, help="seconds between simulated picks (default 5.0)")
+    p.set_defaults(func=cmd_rehearse_draft_day)
 
     p = sub.add_parser("verify-baseballr")
     p.set_defaults(func=cmd_verify_baseballr)

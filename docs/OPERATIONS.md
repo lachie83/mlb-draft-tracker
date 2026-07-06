@@ -1,5 +1,28 @@
 # MLB Draft 2026 Tracker — Operations Plan
 
+## TL;DR — what to actually run
+Everything below is reference material; day-to-day you only need these few
+commands. All accept `YEAR=<year>` / `DB=<path>` overrides.
+
+**Anytime before draft day** (repeatable, safe to re-run):
+```bash
+make pre-draft-sync       # refresh board, order, and predictions
+make test-telegram        # confirm a real alert reaches your phone
+make rehearse-draft-day   # replay a real past draft through the whole pipeline
+                           # (order sync -> live pick detection -> Telegram -> dashboard),
+                           # entirely in a separate rehearsal database - see §4a
+```
+
+**On draft day**, in order:
+```bash
+make pre-draft-sync    # one final refresh before things start
+make poll-draft-day    # start this and leave it running for the whole draft
+make dashboard         # in another terminal/tab, to watch live
+```
+That's the whole day. Everything else in this doc is either what those
+three commands do under the hood, a fallback path, or a recovery procedure
+for when something goes wrong.
+
 ## 1. Objective
 Run a local SQLite-backed tracker that:
 - stores the 2026 draft prospect board
@@ -52,6 +75,40 @@ is enough outside of live picking.
 5. `make live-monitor-status` — spot-check the poller, log, and recorded picks at any point
 6. Watch for duplicates / missing picks in `telegram_events_sent`
 
+## 4a. Rehearse before draft day
+`rehearse-draft-day` replays a real, completed past draft (2025 by default)
+through the *exact same* code path used on the real day —
+`mlb_stats_api.reconcile_picks_from_api` — revealing picks a few at a time
+instead of all at once. This is the way to test the whole pipeline (draft
+order seeding, live pick detection, Telegram alerts, dashboard rendering)
+before it matters, using real data instead of guesswork.
+
+```bash
+make rehearse-draft-day                          # 10 picks, 5s apart, default
+make rehearse-draft-day PICKS=30 DELAY=2         # a longer/faster rehearsal
+make rehearse-draft-day PICKS=615 DELAY=0        # replay the entire 2025 draft instantly
+```
+
+While it's running, watch it live in another terminal:
+```bash
+cd python_app && python3 dashboard.py
+# then open http://localhost:8000/?year=9999
+```
+(Year 9999 doesn't have a quick-toggle button in the dashboard header, but
+the URL works directly — it's a sentinel year used only for rehearsals.)
+
+**Safety**: this writes to a dedicated `data/rehearsal.db` by default
+(`REHEARSAL_DB=` to change it) and tags all simulated data with
+`draft_year=9999` by default, so it can never mix with your real 2026 data
+even if you point it at the same database file. If Telegram is configured,
+it **will** send real alerts — one per simulated pick — so start with a
+small `PICKS` count (the default is 10) the first time.
+
+To rehearse again from scratch: `rm data/rehearsal.db` first (otherwise
+already-simulated picks are skipped, since reconciliation is idempotent —
+which is itself worth confirming once, by running the same command twice
+in a row and seeing the second pass report 0 new picks).
+
 ## 5. Example commands
 ```bash
 cd python_app
@@ -76,6 +133,7 @@ app's built-in db path) overrides, e.g. `make pre-draft-sync YEAR=2025`.
 | `make test-telegram` | Sends a one-off Telegram message via `main.py test-telegram` to confirm delivery. See §7. |
 | `make seed-mock-drafts` / `seed-mock-consensus` | Loads real, dated mock draft picks into `mock_draft_picks`, then aggregates them into `mock_consensus_v2` predictions (`seed-mock-consensus` runs `seed-mock-drafts` first automatically). See the README's Predictions section for how these are sourced and combined. |
 | `make sync-draft-order-api` / `live-monitor-api` / `on-the-clock-api` | The MLB Stats API path (no R dependency): full draft scaffold, full reconciliation + Telegram alerts, and the lightweight "who's on the clock" endpoint, respectively. See the README's Modes section. |
+| `make rehearse-draft-day` | Replays a real past draft through the full pipeline into a dedicated rehearsal database (override with `PICKS=`, `BATCH_SIZE=`, `DELAY=`, `REHEARSAL_DB=`). See §4a. |
 | `make init-db` / `sync-prospects` / `seed-no-r-prospects` / `seed-prospects-csv` / `seed-draft-order` / `generate-predictions` / `verify-baseballr` / `live-monitor` | Thin wrappers around the matching `main.py` subcommand. `seed-draft-order` (CSV) and `live-monitor` (baseballr) are the legacy paths, superseded by `sync-draft-order-api` / `live-monitor-api` above. `seed-prospects-csv` loads the full top-250 board from `examples/prospects_top250_seed_2026.csv` when baseballr is unavailable. |
 | `make dashboard` | Runs the local dashboard on `:8000`. |
 
@@ -103,9 +161,33 @@ python3 main.py live-monitor-api --year 2026
 ```
 
 ## 7. Telegram config
-Set:
-- `TELEGRAM_BOT_TOKEN`
-- `TELEGRAM_CHAT_ID`
+### One-time setup
+1. **Create a bot**: in Telegram, message [@BotFather](https://t.me/BotFather)
+   and send `/newbot`. Follow the prompts (pick a display name, then a
+   username ending in `bot`). BotFather replies with an API token that
+   looks like `123456789:AAExampleTokenTextGoesHere` — this is
+   `TELEGRAM_BOT_TOKEN`.
+2. **Get a chat id**:
+   - *Personal chat*: open a chat with your new bot and send it any
+     message first (bots can't message you until you've messaged them).
+     Then visit `https://api.telegram.org/bot<TOKEN>/getUpdates` in a
+     browser (substitute your real token) and find `"chat":{"id":...}` in
+     the JSON response — that number is `TELEGRAM_CHAT_ID`. (Alternatively,
+     message a helper bot like `@userinfobot` to get your own id directly.)
+   - *Group chat* (e.g. a league draft-day group): add your bot to the
+     group, send any message in the group, then hit the same `getUpdates`
+     URL — the group's chat id will be a negative number.
+3. **Set the env vars**: copy `.env.example` to `.env` and fill in both
+   values (or export them in your shell). Never commit `.env` — it's
+   already gitignored.
+   ```bash
+   cp .env.example .env
+   # edit .env:
+   # TELEGRAM_BOT_TOKEN=123456789:AAExampleTokenTextGoesHere
+   # TELEGRAM_CHAT_ID=987654321
+   ```
+4. **Verify**: `make test-telegram` (see below). You should see the test
+   message appear in Telegram within a few seconds.
 
 Draft pick messages are de-duplicated with `telegram_events_sent`.
 
