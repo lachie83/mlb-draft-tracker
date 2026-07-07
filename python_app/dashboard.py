@@ -521,7 +521,7 @@ def render_on_the_clock(otc):
     """
 
 
-def render_draft_order(groups, on_the_clock_pick_number):
+def render_draft_order(groups, on_the_clock_pick_number, teams):
     if not groups:
         return """
         <section class="panel" id="draft-order">
@@ -548,7 +548,7 @@ def render_draft_order(groups, on_the_clock_pick_number):
             f'{esc(group["round_label"])}</button>'
         )
         pick_rows = "".join(
-            f"""<tr class="{'otc-row' if p['pick_number'] == on_the_clock_pick_number else ''}">
+            f"""<tr class="{'otc-row' if p['pick_number'] == on_the_clock_pick_number else ''}" data-team="{esc(slugify(p['team_name']))}">
                   <td data-label="Pick">{esc(p['pick_number'])}</td>
                   <td data-label="Team">{team_logo_html(p['team_name'])}{esc(p['team_name'])}</td>
                   <td data-label="Player">{esc(p.get('player_name')) or ('<span class="badge badge-accent">On the Clock</span>' if p['pick_number'] == on_the_clock_pick_number else '<span class="muted">&mdash;</span>')}</td>
@@ -569,14 +569,24 @@ def render_draft_order(groups, on_the_clock_pick_number):
             """
         )
 
+    team_options = "".join(
+        f'<option value="{esc(slugify(t))}">{esc(t)}</option>' for t in teams
+    )
+
     total_picks = sum(len(group["picks"]) for group in groups)
     return f"""
     <section class="panel" id="draft-order">
       <div class="panel-header">
         <h2>Draft Order</h2>
-        <span class="badge">{total_picks} picks</span>
+        <div class="draft-order-controls">
+          <select id="draft-order-team-filter" class="draft-order-team-select" onchange="filterDraftOrderByTeam()">
+            <option value="">All teams</option>
+            {team_options}
+          </select>
+          <span class="badge">{total_picks} picks</span>
+        </div>
       </div>
-      <div class="round-tabs">{''.join(tab_buttons)}</div>
+      <div class="round-tabs" id="round-tabs">{''.join(tab_buttons)}</div>
       {''.join(round_panels)}
     </section>
     """
@@ -891,6 +901,17 @@ main { padding: 28px 32px 60px; max-width: 1440px; margin: 0 auto; }
 .panel-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 14px; flex-wrap: wrap; gap: 8px; }
 .panel-header h2 { margin: 0; font-size: 17px; }
 
+.draft-order-controls { display: flex; align-items: center; gap: 10px; }
+.draft-order-team-select {
+  background: var(--bg-elevated);
+  border: 1px solid var(--border);
+  color: var(--text);
+  padding: 7px 10px;
+  border-radius: 8px;
+  font-size: 13px;
+}
+.draft-order-team-select:focus { outline: 2px solid var(--accent); outline-offset: 1px; }
+
 .badge {
   font-size: 12px;
   font-weight: 600;
@@ -1082,6 +1103,39 @@ function showRound(btn) {
   });
 }
 
+// Draft Order has two mutually-exclusive browsing modes: round-first (the
+// tabs, one round visible at a time) and team-first (this filter, every
+// round visible but narrowed to one team's picks). All 613 picks are
+// already in the DOM across the round panels, so switching modes is just
+// a visibility toggle - no extra data fetch needed.
+function filterDraftOrderByTeam() {
+  const team = document.getElementById('draft-order-team-filter').value;
+  const tabsBar = document.getElementById('round-tabs');
+  const panels = document.querySelectorAll('.round-panel');
+
+  if (!team) {
+    if (tabsBar) tabsBar.style.display = '';
+    const activeTab = document.querySelector('.round-tab.active');
+    const activeTarget = activeTab ? activeTab.getAttribute('data-target') : null;
+    panels.forEach(function (p) {
+      p.querySelectorAll('tbody tr').forEach(function (row) { row.style.display = ''; });
+      p.style.display = (p.id === activeTarget) ? '' : 'none';
+    });
+    return;
+  }
+
+  if (tabsBar) tabsBar.style.display = 'none';
+  panels.forEach(function (p) {
+    let anyVisible = false;
+    p.querySelectorAll('tbody tr').forEach(function (row) {
+      const match = row.dataset.team === team;
+      row.style.display = match ? '' : 'none';
+      if (match) anyVisible = true;
+    });
+    p.style.display = anyVisible ? '' : 'none';
+  });
+}
+
 function initAutoRefresh() {
   const toggle = document.getElementById('auto-refresh');
   const stored = localStorage.getItem('mlb_autorefresh') === '1';
@@ -1160,7 +1214,7 @@ def app_factory(db_path: str):
         filter_bar = render_filter_bar(data["positions"], data["teams"], data["models"])
         on_the_clock = render_on_the_clock(data["on_the_clock"])
         otc_pick_number = data["on_the_clock"]["pick_number"] if data["on_the_clock"] else None
-        draft_order_panel = render_draft_order(data["draft_order"], otc_pick_number)
+        draft_order_panel = render_draft_order(data["draft_order"], otc_pick_number, data["teams"])
         model_comparison_panel = render_model_comparison(data["model_comparison"], data["models"])
 
         best_available_panel = filterable_table(
