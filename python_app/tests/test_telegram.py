@@ -4,9 +4,62 @@ import pytest
 import requests
 
 from mlb_tracker.db import get_sent_event
-from mlb_tracker.telegram import TelegramNotifier, make_pick_message, send_pick_if_new
+from mlb_tracker.telegram import (
+    TelegramNotifier,
+    format_pick_summary,
+    format_pick_title,
+    make_pick_message,
+    round_display_name,
+    send_pick_if_new,
+)
 
 from .factories import seed_prospect
+
+
+def test_round_display_name_maps_known_codes():
+    assert round_display_name("PPI") == "Prospect Promotion Incentive"
+    assert round_display_name("CB-A") == "Competitive Balance Round A"
+    assert round_display_name("CB-B") == "Competitive Balance Round B"
+    assert round_display_name("SUP-2") == "Supplemental Round 2"
+
+
+def test_round_display_name_formats_numeric_rounds():
+    assert round_display_name("1") == "Round 1"
+    assert round_display_name("20") == "Round 20"
+
+
+def test_round_display_name_falls_back_for_unrecognized_codes():
+    # "2C" isn't in the known-code map and isn't purely numeric, so it
+    # should be shown as-is rather than guessing at a real MLB term.
+    assert round_display_name("2C") == "Round 2C"
+    assert round_display_name(None) == "Round"
+
+
+def test_format_pick_title_combines_round_and_pick_number():
+    assert format_pick_title({"round_label": "1", "pick_number": 5}) == "Round 1 · Pick 5"
+    assert format_pick_title({"round_label": "PPI", "pick_number": 26}) == "Prospect Promotion Incentive · Pick 26"
+
+
+def test_format_pick_summary_fills_in_defaults_for_missing_fields():
+    summary = format_pick_summary({"team_name": "Seattle Mariners", "player_name": "Someone"})
+
+    assert summary == "Seattle Mariners select Someone (N/A, Unknown School)"
+
+
+def test_make_pick_message_reuses_shared_formatting(conn):
+    pick_row = {
+        "pick_number": 3,
+        "round_label": "1",
+        "team_name": "Seattle Mariners",
+        "player_name": "Someone Picked",
+        "player_position": "OF",
+        "school_name": "Some School",
+    }
+
+    message = make_pick_message(conn, draft_year=2026, pick_row=pick_row)
+
+    assert format_pick_title(pick_row) in message
+    assert format_pick_summary(pick_row) in message
 
 
 def disabled_notifier(monkeypatch) -> TelegramNotifier:

@@ -35,6 +35,40 @@ class TelegramNotifier:
         return resp.json()
 
 
+# Shared with the dashboard (which imports this rather than keeping its own
+# copy) so a round code is described identically everywhere - the round-tabs
+# UI, the in-browser toast, and the Telegram message.
+ROUND_LABEL_NAMES = {
+    "PPI": "Prospect Promotion Incentive",
+    "CB-A": "Competitive Balance Round A",
+    "CB-B": "Competitive Balance Round B",
+    "SUP-2": "Supplemental Round 2",
+}
+
+
+def round_display_name(round_label):
+    if round_label in ROUND_LABEL_NAMES:
+        return ROUND_LABEL_NAMES[round_label]
+    if round_label and str(round_label).isdigit():
+        return f"Round {round_label}"
+    return f"Round {round_label}" if round_label else "Round"
+
+
+def format_pick_title(pick_row: dict[str, Any]) -> str:
+    """"Round 1 · Pick 5" style header, shared by the Telegram message and
+    the dashboard's in-browser pick notifications."""
+    return f"{round_display_name(pick_row.get('round_label'))} · Pick {pick_row['pick_number']}"
+
+
+def format_pick_summary(pick_row: dict[str, Any]) -> str:
+    """The one-line "who got picked" summary, shared by the Telegram message
+    and the dashboard's in-browser pick notifications so both channels
+    describe a pick with identical wording."""
+    position = pick_row.get("player_position") or "N/A"
+    school = pick_row.get("school_name") or "Unknown School"
+    return f"{pick_row['team_name']} select {pick_row['player_name']} ({position}, {school})"
+
+
 def make_pick_message(conn, draft_year: int, pick_row: dict[str, Any]) -> str:
     best = get_best_available(conn, draft_year, limit=3)
     remaining = ", ".join(f"#{row['rank']} {row['full_name']}" for row in best)
@@ -44,9 +78,8 @@ def make_pick_message(conn, draft_year: int, pick_row: dict[str, Any]) -> str:
         if r and r[0] is not None:
             board_rank = r[0]
     return (
-        f"MLB Draft {draft_year} — Pick {pick_row['pick_number']}\n"
-        f"{pick_row['team_name']} select {pick_row['player_name']}"
-        f" ({pick_row.get('player_position') or 'N/A'}, {pick_row.get('school_name') or 'Unknown School'})\n"
+        f"MLB Draft {draft_year} — {format_pick_title(pick_row)}\n"
+        f"{format_pick_summary(pick_row)}\n"
         f"Board rank: #{board_rank}\n"
         f"Best available: {remaining}"
     )
