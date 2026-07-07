@@ -4,6 +4,7 @@ import argparse
 import html
 import re
 import sqlite3
+from collections import defaultdict
 from urllib.parse import parse_qs
 from wsgiref.simple_server import make_server
 
@@ -38,6 +39,22 @@ def school_type(school_class):
     if sc == "NS":
         return "Unknown"
     return "College"
+
+
+ROUND_LABEL_NAMES = {
+    "PPI": "Prospect Promotion Incentive",
+    "CB-A": "Competitive Balance Round A",
+    "CB-B": "Competitive Balance Round B",
+    "SUP-2": "Supplemental Round 2",
+}
+
+
+def round_display_name(round_label):
+    if round_label in ROUND_LABEL_NAMES:
+        return ROUND_LABEL_NAMES[round_label]
+    if round_label and str(round_label).isdigit():
+        return f"Round {round_label}"
+    return f"Round {round_label}" if round_label else "Round"
 
 
 def get_selected_year(environ, default_year: int = 2026) -> int:
@@ -229,6 +246,32 @@ def fetch_dashboard_data(conn: sqlite3.Connection, year: int):
             "candidates": candidates,
         }
 
+    draft_order_rows = [
+        dict(r)
+        for r in q(
+            conn,
+            """
+            SELECT s.pick_number, s.round_label, s.team_name, ap.player_name
+            FROM draft_slots s
+            LEFT JOIN actual_picks ap
+                ON ap.draft_year = s.draft_year AND ap.pick_number = s.pick_number
+            WHERE s.draft_year = ?
+            ORDER BY s.pick_number
+            """,
+            (year,),
+        )
+    ]
+    round_first_pick: dict[str, int] = {}
+    round_picks: dict[str, list[dict]] = defaultdict(list)
+    for row in draft_order_rows:
+        label = row["round_label"]
+        round_first_pick.setdefault(label, row["pick_number"])
+        round_picks[label].append(row)
+    draft_order = [
+        {"round_label": label, "round_name": round_display_name(label), "picks": round_picks[label]}
+        for label in sorted(round_picks, key=lambda l: round_first_pick[l])
+    ]
+
     positions = [
         r["position_name"]
         for r in q(
@@ -314,6 +357,7 @@ def fetch_dashboard_data(conn: sqlite3.Connection, year: int):
         "predictions": predictions,
         "fallers": fallers,
         "on_the_clock": on_the_clock,
+        "draft_order": draft_order,
         "positions": positions,
         "teams": teams,
         "models": models,
@@ -403,6 +447,51 @@ def render_on_the_clock(otc):
           <tbody>{candidate_rows}</tbody>
         </table>
       </div>
+    </section>
+    """
+
+
+def render_draft_order(groups, on_the_clock_pick_number):
+    if not groups:
+        return """
+        <section class="panel" id="draft-order">
+          <div class="panel-header"><h2>Draft Order</h2></div>
+          <p class="muted">No draft order loaded yet for this draft year.</p>
+        </section>
+        """
+
+    group_html = []
+    for group in groups:
+        pick_rows = "".join(
+            f"""<tr class="{'otc-row' if p['pick_number'] == on_the_clock_pick_number else ''}">
+                  <td>{esc(p['pick_number'])}</td>
+                  <td>{esc(p['team_name'])}</td>
+                  <td>{esc(p.get('player_name')) or ('<span class="badge badge-accent">On the Clock</span>' if p['pick_number'] == on_the_clock_pick_number else '<span class="muted">&mdash;</span>')}</td>
+                </tr>"""
+            for p in group["picks"]
+        )
+        group_html.append(
+            f"""
+            <div class="round-group">
+              <h3 class="round-heading">{esc(group['round_name'])}</h3>
+              <div class="table-wrap">
+                <table>
+                  <thead><tr><th>Pick</th><th>Team</th><th>Player</th></tr></thead>
+                  <tbody>{pick_rows}</tbody>
+                </table>
+              </div>
+            </div>
+            """
+        )
+
+    total_picks = sum(len(group["picks"]) for group in groups)
+    return f"""
+    <section class="panel" id="draft-order">
+      <div class="panel-header">
+        <h2>Draft Order</h2>
+        <span class="badge">{total_picks} picks</span>
+      </div>
+      {''.join(group_html)}
     </section>
     """
 
@@ -711,6 +800,19 @@ tbody tr:nth-child(even) { background: rgba(255, 255, 255, 0.015); }
 
 .table-empty { display: none; padding: 18px 4px; color: var(--text-muted); font-size: 13px; }
 
+.round-group { margin-bottom: 18px; }
+.round-group:last-child { margin-bottom: 0; }
+.round-heading {
+  margin: 0 0 8px;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+tr.otc-row { background: var(--accent-soft); }
+tr.otc-row:hover { background: var(--accent-soft); }
+
 .muted { color: var(--text-muted); }
 
 footer { text-align: center; padding: 20px; color: var(--text-muted); font-size: 12px; }
@@ -806,6 +908,8 @@ def app_factory(db_path: str):
 
         filter_bar = render_filter_bar(data["positions"], data["teams"], data["models"])
         on_the_clock = render_on_the_clock(data["on_the_clock"])
+        otc_pick_number = data["on_the_clock"]["pick_number"] if data["on_the_clock"] else None
+        draft_order_panel = render_draft_order(data["draft_order"], otc_pick_number)
         model_comparison_panel = render_model_comparison(data["model_comparison"], data["models"])
 
         best_available_panel = filterable_table(
@@ -887,6 +991,7 @@ def app_factory(db_path: str):
 
           <nav class="subnav">
             <a href="#on-the-clock">On the Clock</a>
+            <a href="#draft-order">Draft Order</a>
             <a href="#best-available">Best Available</a>
             <a href="#fallers">Fallers</a>
             <a href="#actual-picks">Actual Picks</a>
@@ -898,6 +1003,7 @@ def app_factory(db_path: str):
           <main>
             {cards}
             {on_the_clock}
+            {draft_order_panel}
             {filter_bar}
             {best_available_panel}
             {fallers_panel}
