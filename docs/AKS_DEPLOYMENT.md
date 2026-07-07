@@ -135,12 +135,27 @@ helm repo add jetstack https://charts.jetstack.io
 helm repo update
 
 helm install ingress-nginx ingress-nginx/ingress-nginx \
-  --namespace ingress-nginx --create-namespace
+  --namespace ingress-nginx --create-namespace \
+  --set controller.service.externalTrafficPolicy=Local
 
 helm install cert-manager jetstack/cert-manager \
   --namespace cert-manager --create-namespace \
   --set crds.enabled=true
 ```
+`externalTrafficPolicy=Local` matters more than it looks: the chart's
+default (`Cluster`) makes Azure's cloud-provider configure the Standard
+Load Balancer's backend rule with `EnableFloatingIP: true` (a
+Direct-Server-Return-style rule). On at least one real deployment, that
+specific rule got stuck on Azure's data plane — the control-plane API
+showed everything correctly configured (NSG, backend pool, health probes),
+traffic worked fine from inside the VNet, and it still failed identically
+after swapping to a completely fresh node — while `Local` mode uses a
+plain NodePort + `/healthz` probe that Azure's LB picked up correctly
+within seconds. It also has the side benefit of preserving real client
+IPs in nginx's access logs. If you ever need to change this after install,
+`helm upgrade ingress-nginx ingress-nginx/ingress-nginx --namespace
+ingress-nginx --reuse-values --set controller.service.externalTrafficPolicy=Local`
+applies it without losing other settings.
 Wait for the ingress controller's public IP (needed for DNS in §5):
 ```bash
 kubectl get svc -n ingress-nginx ingress-nginx-controller \
