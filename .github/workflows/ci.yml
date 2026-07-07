@@ -1,0 +1,51 @@
+name: CI
+
+on:
+  pull_request:
+    branches: [main]
+  push:
+    branches: [main]
+
+jobs:
+  test:
+    name: Python tests
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: "pip"
+          cache-dependency-path: python_app/requirements*.txt
+
+      - name: Install dependencies
+        working-directory: python_app
+        run: pip install -r requirements.txt -r requirements-dev.txt
+
+      - name: Run tests
+        working-directory: python_app
+        run: pytest tests/ -v
+
+  docker-build:
+    name: Docker build
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        dockerfile: [Dockerfile, Dockerfile.k8s]
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Build ${{ matrix.dockerfile }}
+        run: docker build -f ${{ matrix.dockerfile }} -t mlb-draft-tracker:ci .
+
+  k8s-manifests:
+    name: Validate k8s manifests
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: azure/setup-kubectl@v4
+
+      - name: Render kustomization (catches YAML/reference errors)
+        run: kubectl kustomize k8s/ > /dev/null
