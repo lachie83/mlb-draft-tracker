@@ -41,6 +41,62 @@ def school_type(school_class):
     return "College"
 
 
+# MLB's official team IDs (matches what the MLB Stats API returns in
+# draft_slots.team_id / actual_picks.team_id) - kept as a static lookup
+# here too since several dashboard rows only carry team_name text (e.g.
+# the mock_team join in Best Available comes from the predictions table,
+# which has no team_id path back to a specific franchise record).
+MLB_TEAM_IDS = {
+    "Arizona Diamondbacks": 109,
+    "Athletics": 133,
+    "Atlanta Braves": 144,
+    "Baltimore Orioles": 110,
+    "Boston Red Sox": 111,
+    "Chicago Cubs": 112,
+    "Chicago White Sox": 145,
+    "Cincinnati Reds": 113,
+    "Cleveland Guardians": 114,
+    "Colorado Rockies": 115,
+    "Detroit Tigers": 116,
+    "Houston Astros": 117,
+    "Kansas City Royals": 118,
+    "Los Angeles Angels": 108,
+    "Los Angeles Dodgers": 119,
+    "Miami Marlins": 146,
+    "Milwaukee Brewers": 158,
+    "Minnesota Twins": 142,
+    "New York Mets": 121,
+    "New York Yankees": 147,
+    "Philadelphia Phillies": 143,
+    "Pittsburgh Pirates": 134,
+    "San Diego Padres": 135,
+    "San Francisco Giants": 137,
+    "Seattle Mariners": 136,
+    "St. Louis Cardinals": 138,
+    "Tampa Bay Rays": 139,
+    "Texas Rangers": 140,
+    "Toronto Blue Jays": 141,
+    "Washington Nationals": 120,
+}
+
+
+def team_logo_html(team_name):
+    team_id = MLB_TEAM_IDS.get(team_name)
+    if not team_id:
+        return ""
+    alt = esc(team_name)
+    # MLB serves theme-matched logo variants directly - render both and let
+    # CSS show the one matching the active theme, so the logo updates
+    # instantly when the user toggles light/dark with no JS or re-fetch.
+    return (
+        f'<img class="team-logo team-logo-dark" src="https://www.mlbstatic.com/team-logos/team-cap-on-dark/{team_id}.svg" alt="{alt}" loading="lazy">'
+        f'<img class="team-logo team-logo-light" src="https://www.mlbstatic.com/team-logos/team-cap-on-light/{team_id}.svg" alt="{alt}" loading="lazy">'
+    )
+
+
+TEAM_LOGO_HEADERS = {"Team", "Mock Team", "Drafted By"}
+
+
 ROUND_LABEL_NAMES = {
     "PPI": "Prospect Promotion Incentive",
     "CB-A": "Competitive Balance Round A",
@@ -404,7 +460,10 @@ def filterable_table(table_id, title, headers, rows, cell_keys, *, count_label="
         position = row.get("position_name")
         model = row.get("model_version")
         attrs = row_attrs(status=status, position=position, school=school, team=team, model=model)
-        cells = "".join(f'<td data-label="{esc(h)}">{esc(row.get(k, ""))}</td>' for h, k in zip(headers, cell_keys))
+        cells = "".join(
+            f'<td data-label="{esc(h)}">{team_logo_html(row.get(k, "")) if h in TEAM_LOGO_HEADERS else ""}{esc(row.get(k, ""))}</td>'
+            for h, k in zip(headers, cell_keys)
+        )
         body_rows.append(f"<tr class=\"frow\" {attrs}>{cells}</tr>")
 
     return f"""
@@ -451,7 +510,7 @@ def render_on_the_clock(otc):
         <h2>On the Clock</h2>
         <span class="badge badge-accent">Pick #{esc(otc['pick_number'])}</span>
       </div>
-      <p class="on-the-clock-team">{esc(otc['team_name'])} <span class="muted">&middot; {esc(otc.get('round_label') or '')}</span></p>
+      <p class="on-the-clock-team">{team_logo_html(otc['team_name'])}{esc(otc['team_name'])} <span class="muted">&middot; {esc(otc.get('round_label') or '')}</span></p>
       <div class="table-wrap">
         <table>
           <thead><tr><th>Player</th><th>Position</th><th>School</th><th title="{esc(HEADER_TOOLTIPS['Win Prob.'])}">Win Prob.</th><th>Models</th></tr></thead>
@@ -491,7 +550,7 @@ def render_draft_order(groups, on_the_clock_pick_number):
         pick_rows = "".join(
             f"""<tr class="{'otc-row' if p['pick_number'] == on_the_clock_pick_number else ''}">
                   <td data-label="Pick">{esc(p['pick_number'])}</td>
-                  <td data-label="Team">{esc(p['team_name'])}</td>
+                  <td data-label="Team">{team_logo_html(p['team_name'])}{esc(p['team_name'])}</td>
                   <td data-label="Player">{esc(p.get('player_name')) or ('<span class="badge badge-accent">On the Clock</span>' if p['pick_number'] == on_the_clock_pick_number else '<span class="muted">&mdash;</span>')}</td>
                 </tr>"""
             for p in group["picks"]
@@ -614,7 +673,7 @@ def render_model_comparison(rows, models):
         )
         body_rows.append(
             f"<tr><td data-label=\"Pick\">{esc(row['pick_number'])}</td>"
-            f"<td data-label=\"Team\">{esc(row['team_name'])}</td>{''.join(cells)}{agreement_cell}</tr>"
+            f"<td data-label=\"Team\">{team_logo_html(row['team_name'])}{esc(row['team_name'])}</td>{''.join(cells)}{agreement_cell}</tr>"
         )
 
     return f"""
@@ -844,6 +903,11 @@ main { padding: 28px 32px 60px; max-width: 1440px; margin: 0 auto; }
 .badge-accent { color: white; background: var(--accent); border-color: var(--accent); }
 
 .on-the-clock-team { font-size: 20px; font-weight: 700; margin: 0 0 14px; }
+
+.team-logo { width: 18px; height: 18px; vertical-align: -4px; margin-right: 6px; }
+.team-logo-light { display: none; }
+:root[data-theme="light"] .team-logo-dark { display: none; }
+:root[data-theme="light"] .team-logo-light { display: inline; }
 
 .table-wrap { overflow-x: auto; }
 table { border-collapse: collapse; width: 100%; font-size: 13.5px; }
