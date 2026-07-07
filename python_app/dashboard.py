@@ -534,11 +534,14 @@ def render_filter_bar(positions, teams, models):
         f'<option value="{esc(slugify(m))}">{esc(m)}</option>' for m in models
     )
     return f"""
-    <div class="filter-bar">
-      <div class="filter-group">
+    <div class="filter-bar" id="filter-bar">
+      <div class="filter-group filter-group-search">
         <label for="f-search">Search</label>
         <input id="f-search" type="text" placeholder="Search player, school, team&hellip;" oninput="applyFilters()">
       </div>
+      <button type="button" class="btn-ghost filter-toggle-btn" onclick="toggleFilterBar()" aria-label="Show more filters">
+        Filters <span id="filter-toggle-icon">&#9662;</span>
+      </button>
       <div class="filter-group">
         <label for="f-status">Status</label>
         <select id="f-status" onchange="applyFilters()">
@@ -577,7 +580,7 @@ def render_filter_bar(positions, teams, models):
           {model_options}
         </select>
       </div>
-      <button type="button" class="btn-ghost" onclick="resetFilters()">Reset</button>
+      <button type="button" class="btn-ghost filter-reset-btn" onclick="resetFilters()">Reset</button>
     </div>
     """
 
@@ -788,6 +791,8 @@ main { padding: 28px 32px 60px; max-width: 1440px; margin: 0 auto; }
   z-index: 15;
   box-shadow: var(--shadow);
 }
+.filter-toggle-btn { display: none; }
+
 .filter-group { display: flex; flex-direction: column; gap: 6px; }
 .filter-group label { font-size: 11px; text-transform: uppercase; letter-spacing: 0.5px; color: var(--text-muted); }
 .filter-group input, .filter-group select {
@@ -898,7 +903,17 @@ footer { text-align: center; padding: 20px; color: var(--text-muted); font-size:
 
 @media (max-width: 720px) {
   .topbar, .subnav, main { padding-left: 16px; padding-right: 16px; }
-  .filter-bar { position: static; }
+
+  /* Keep the filter bar sticky like on desktop, but collapsed to just the
+     search box + a toggle by default - with 6 filter groups it would
+     otherwise stack into several rows and, combined with the sticky
+     topbar/subnav above it, eat most of a phone screen before any real
+     content is visible. */
+  .filter-toggle-btn { display: inline-flex; align-items: center; gap: 6px; }
+  .filter-bar:not(.expanded) .filter-group:not(.filter-group-search),
+  .filter-bar:not(.expanded) .filter-reset-btn {
+    display: none;
+  }
 
   /* Wide tables would otherwise need horizontal scrolling to see every
      column - stack each row into a label/value card instead so nothing
@@ -984,6 +999,13 @@ function resetFilters() {
   document.getElementById('f-team').value = '';
   document.getElementById('f-model').value = '';
   applyFilters();
+}
+
+function toggleFilterBar() {
+  const bar = document.getElementById('filter-bar');
+  const expanded = bar.classList.toggle('expanded');
+  const icon = document.getElementById('filter-toggle-icon');
+  if (icon) icon.innerHTML = expanded ? '&#9652;' : '&#9662;';
 }
 
 function showRound(btn) {
