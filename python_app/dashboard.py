@@ -380,8 +380,19 @@ def row_attrs(*, status=None, position=None, school=None, team=None, model=None)
     return " ".join(attrs)
 
 
+HEADER_TOOLTIPS = {
+    "Win Prob.": "Modeled probability this player goes at this pick. See the Model/Models column for which "
+    "prediction model produced it — magnitudes aren't directly comparable across models.",
+    "Mock Prob.": "Share of real published mock drafts that projected this player to this team — actual "
+    "analyst consensus, not a formula.",
+}
+
+
 def filterable_table(table_id, title, headers, rows, cell_keys, *, count_label="rows", empty_text="No matching rows.", default_status=None):
-    head = "".join(f"<th>{esc(h)}</th>" for h in headers)
+    head = "".join(
+        f'<th title="{esc(HEADER_TOOLTIPS[h])}">{esc(h)}</th>' if h in HEADER_TOOLTIPS else f"<th>{esc(h)}</th>"
+        for h in headers
+    )
     body_rows = []
     for row in rows:
         if "is_drafted" in row:
@@ -443,7 +454,7 @@ def render_on_the_clock(otc):
       <p class="on-the-clock-team">{esc(otc['team_name'])} <span class="muted">&middot; {esc(otc.get('round_label') or '')}</span></p>
       <div class="table-wrap">
         <table>
-          <thead><tr><th>Player</th><th>Position</th><th>School</th><th>Win Prob.</th><th>Models</th></tr></thead>
+          <thead><tr><th>Player</th><th>Position</th><th>School</th><th title="{esc(HEADER_TOOLTIPS['Win Prob.'])}">Win Prob.</th><th>Models</th></tr></thead>
           <tbody>{candidate_rows}</tbody>
         </table>
       </div>
