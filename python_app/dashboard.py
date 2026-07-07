@@ -404,7 +404,7 @@ def filterable_table(table_id, title, headers, rows, cell_keys, *, count_label="
         position = row.get("position_name")
         model = row.get("model_version")
         attrs = row_attrs(status=status, position=position, school=school, team=team, model=model)
-        cells = "".join(f"<td>{esc(row.get(k, ''))}</td>" for k in cell_keys)
+        cells = "".join(f'<td data-label="{esc(h)}">{esc(row.get(k, ""))}</td>' for h, k in zip(headers, cell_keys))
         body_rows.append(f"<tr class=\"frow\" {attrs}>{cells}</tr>")
 
     return f"""
@@ -434,11 +434,11 @@ def render_on_the_clock(otc):
         """
     candidate_rows = "".join(
         f"""<tr>
-              <td>{esc(c.get('player_name'))}</td>
-              <td>{esc(c.get('position_name'))}</td>
-              <td>{esc(c.get('school_name'))}</td>
-              <td>{esc(c.get('predicted_probability'))}</td>
-              <td>{'<span class="badge badge-accent">Agree</span>' if c.get('model_count', 1) > 1 else ''}</td>
+              <td data-label="Player">{esc(c.get('player_name'))}</td>
+              <td data-label="Position">{esc(c.get('position_name'))}</td>
+              <td data-label="School">{esc(c.get('school_name'))}</td>
+              <td data-label="Win Prob." title="{esc(HEADER_TOOLTIPS['Win Prob.'])}">{esc(c.get('predicted_probability'))}</td>
+              <td data-label="Models">{'<span class="badge badge-accent">Agree</span>' if c.get('model_count', 1) > 1 else ''}</td>
             </tr>"""
         for c in otc["candidates"]
     )
@@ -490,9 +490,9 @@ def render_draft_order(groups, on_the_clock_pick_number):
         )
         pick_rows = "".join(
             f"""<tr class="{'otc-row' if p['pick_number'] == on_the_clock_pick_number else ''}">
-                  <td>{esc(p['pick_number'])}</td>
-                  <td>{esc(p['team_name'])}</td>
-                  <td>{esc(p.get('player_name')) or ('<span class="badge badge-accent">On the Clock</span>' if p['pick_number'] == on_the_clock_pick_number else '<span class="muted">&mdash;</span>')}</td>
+                  <td data-label="Pick">{esc(p['pick_number'])}</td>
+                  <td data-label="Team">{esc(p['team_name'])}</td>
+                  <td data-label="Player">{esc(p.get('player_name')) or ('<span class="badge badge-accent">On the Clock</span>' if p['pick_number'] == on_the_clock_pick_number else '<span class="muted">&mdash;</span>')}</td>
                 </tr>"""
             for p in group["picks"]
         )
@@ -601,12 +601,17 @@ def render_model_comparison(rows, models):
         for m in models:
             pick = row["models"].get(m)
             if pick:
-                cells.append(f"<td>{esc(pick['player_name'])} <span class=\"muted\">({esc(pick['predicted_probability'])})</span></td>")
+                cells.append(f"<td data-label=\"{esc(m)}\">{esc(pick['player_name'])} <span class=\"muted\">({esc(pick['predicted_probability'])})</span></td>")
             else:
-                cells.append('<td class="muted">&mdash;</td>')
-        agreement_cell = '<td><span class="badge badge-accent">Agree</span></td>' if agree else "<td></td>"
+                cells.append(f'<td data-label="{esc(m)}" class="muted">&mdash;</td>')
+        agreement_cell = (
+            '<td data-label="Agreement"><span class="badge badge-accent">Agree</span></td>'
+            if agree
+            else '<td data-label="Agreement"></td>'
+        )
         body_rows.append(
-            f"<tr><td>{esc(row['pick_number'])}</td><td>{esc(row['team_name'])}</td>{''.join(cells)}{agreement_cell}</tr>"
+            f"<tr><td data-label=\"Pick\">{esc(row['pick_number'])}</td>"
+            f"<td data-label=\"Team\">{esc(row['team_name'])}</td>{''.join(cells)}{agreement_cell}</tr>"
         )
 
     return f"""
@@ -626,7 +631,7 @@ def render_model_comparison(rows, models):
 
 
 STYLE = """
-:root {
+:root, :root[data-theme="dark"] {
   --bg: #0b1120;
   --bg-elevated: #131c31;
   --bg-card: #161f38;
@@ -641,6 +646,31 @@ STYLE = """
   --warning-soft: rgba(245, 158, 11, 0.15);
   --radius: 12px;
   --shadow: 0 8px 24px rgba(0, 0, 0, 0.25);
+  --body-gradient-center: #101a30;
+  --chrome-bg: rgba(11, 17, 32, 0.92);
+  --chrome-bg-soft: rgba(11, 17, 32, 0.85);
+  --row-stripe: rgba(255, 255, 255, 0.015);
+}
+
+:root[data-theme="light"] {
+  --bg: #eef1f8;
+  --bg-elevated: #ffffff;
+  --bg-card: #ffffff;
+  --border: #d9e0ee;
+  --text: #101828;
+  --text-muted: #5b6578;
+  --accent: #2563eb;
+  --accent-soft: rgba(37, 99, 235, 0.12);
+  --success: #16a34a;
+  --success-soft: rgba(22, 163, 74, 0.12);
+  --warning: #d97706;
+  --warning-soft: rgba(217, 119, 6, 0.12);
+  --radius: 12px;
+  --shadow: 0 8px 24px rgba(16, 24, 40, 0.08);
+  --body-gradient-center: #e3e9f7;
+  --chrome-bg: rgba(255, 255, 255, 0.9);
+  --chrome-bg-soft: rgba(255, 255, 255, 0.8);
+  --row-stripe: rgba(16, 24, 40, 0.02);
 }
 
 * { box-sizing: border-box; }
@@ -648,7 +678,7 @@ STYLE = """
 body {
   font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
   margin: 0;
-  background: radial-gradient(circle at top, #101a30 0%, var(--bg) 55%);
+  background: radial-gradient(circle at top, var(--body-gradient-center) 0%, var(--bg) 55%);
   color: var(--text);
   min-height: 100vh;
 }
@@ -663,7 +693,7 @@ body {
   flex-wrap: wrap;
   gap: 12px;
   padding: 18px 32px;
-  background: rgba(11, 17, 32, 0.92);
+  background: var(--chrome-bg);
   backdrop-filter: blur(10px);
   border-bottom: 1px solid var(--border);
 }
@@ -702,7 +732,7 @@ body {
   display: flex;
   gap: 4px;
   padding: 10px 32px;
-  background: rgba(11, 17, 32, 0.85);
+  background: var(--chrome-bg-soft);
   backdrop-filter: blur(10px);
   border-bottom: 1px solid var(--border);
   overflow-x: auto;
@@ -782,6 +812,8 @@ main { padding: 28px 32px 60px; max-width: 1440px; margin: 0 auto; }
 }
 .btn-ghost:hover { color: var(--text); border-color: var(--accent); }
 
+.theme-toggle-btn { padding: 9px 12px; font-size: 15px; line-height: 1; }
+
 .panel {
   background: var(--bg-card);
   border: 1px solid var(--border);
@@ -821,9 +853,9 @@ thead th {
   letter-spacing: 0.5px;
   border-bottom: 1px solid var(--border);
 }
-tbody tr { border-bottom: 1px solid rgba(37, 51, 82, 0.6); }
+tbody tr { border-bottom: 1px solid var(--border); }
 tbody tr:hover { background: rgba(59, 130, 246, 0.08); }
-tbody tr:nth-child(even) { background: rgba(255, 255, 255, 0.015); }
+tbody tr:nth-child(even) { background: var(--row-stripe); }
 
 .table-empty { display: none; padding: 18px 4px; color: var(--text-muted); font-size: 13px; }
 
@@ -867,7 +899,49 @@ footer { text-align: center; padding: 20px; color: var(--text-muted); font-size:
 @media (max-width: 720px) {
   .topbar, .subnav, main { padding-left: 16px; padding-right: 16px; }
   .filter-bar { position: static; }
-  .subnav { top: 0; }
+
+  /* Wide tables would otherwise need horizontal scrolling to see every
+     column - stack each row into a label/value card instead so nothing
+     is hidden or requires swiping. */
+  .table-wrap { overflow-x: visible; }
+  .table-wrap table thead { display: none; }
+  .table-wrap table, .table-wrap table tbody, .table-wrap table tr, .table-wrap table td {
+    display: block;
+    width: 100%;
+  }
+  .table-wrap table tr {
+    margin-bottom: 10px;
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 4px 12px;
+    background: var(--bg-elevated);
+  }
+  .table-wrap table tr:last-child { margin-bottom: 0; }
+  .table-wrap table td {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 12px;
+    padding: 8px 0;
+    border-bottom: 1px solid var(--border);
+    white-space: normal;
+    text-align: right;
+  }
+  .table-wrap table td:last-child { border-bottom: none; }
+  .table-wrap table td[data-label]::before {
+    content: attr(data-label);
+    font-weight: 600;
+    color: var(--text-muted);
+    text-transform: uppercase;
+    font-size: 10.5px;
+    letter-spacing: 0.4px;
+    text-align: left;
+    flex-shrink: 0;
+  }
+  .table-wrap table td[colspan] {
+    display: block;
+    text-align: left;
+  }
 }
 """
 
@@ -937,10 +1011,44 @@ function scheduleRefresh() {
   setTimeout(function () { window.location.reload(); }, 30000);
 }
 
+function toggleTheme() {
+  const current = document.documentElement.getAttribute('data-theme') || 'dark';
+  const next = current === 'light' ? 'dark' : 'light';
+  localStorage.setItem('mlb_theme', next);
+  applyThemeUi(next);
+}
+
+function applyThemeUi(theme) {
+  document.documentElement.setAttribute('data-theme', theme);
+  const btn = document.getElementById('theme-toggle');
+  if (btn) btn.textContent = theme === 'light' ? '🌙' : '☀️';
+}
+
+// The topbar/subnav/filter-bar stack on top of each other via
+// position:sticky - their offsets depend on the topbar's actual rendered
+// height, which varies (it wraps to two lines on narrow screens). Measure
+// it directly instead of hardcoding a breakpoint-specific pixel value, so
+// the sub-nav links stay reachable while scrolling at any viewport width.
+function syncStickyOffsets() {
+  const topbar = document.querySelector('.topbar');
+  const subnav = document.querySelector('.subnav');
+  const filterBar = document.querySelector('.filter-bar');
+  const topbarH = topbar ? topbar.offsetHeight : 0;
+  if (subnav) subnav.style.top = topbarH + 'px';
+  const subnavH = subnav ? subnav.offsetHeight : 0;
+  if (filterBar && getComputedStyle(filterBar).position === 'sticky') {
+    filterBar.style.top = (topbarH + subnavH) + 'px';
+  }
+}
+
 document.addEventListener('DOMContentLoaded', function () {
   initAutoRefresh();
   updateEmptyStates();
+  applyThemeUi(document.documentElement.getAttribute('data-theme') || 'dark');
+  syncStickyOffsets();
 });
+window.addEventListener('resize', syncStickyOffsets);
+window.addEventListener('load', syncStickyOffsets);
 """
 
 
@@ -1029,6 +1137,17 @@ def app_factory(db_path: str):
           <meta charset="utf-8">
           <meta name="viewport" content="width=device-width, initial-scale=1">
           <title>MLB Draft Tracker</title>
+          <script>
+            (function () {{
+              try {{
+                var stored = localStorage.getItem('mlb_theme');
+                var theme = (stored === 'light' || stored === 'dark')
+                  ? stored
+                  : (window.matchMedia('(prefers-color-scheme: light)').matches ? 'light' : 'dark');
+                document.documentElement.setAttribute('data-theme', theme);
+              }} catch (e) {{}}
+            }})();
+          </script>
           <style>{STYLE}</style>
         </head>
         <body>
@@ -1042,6 +1161,7 @@ def app_factory(db_path: str):
                 <input type="checkbox" id="auto-refresh">
                 Auto-refresh (30s)
               </label>
+              <button type="button" id="theme-toggle" class="btn-ghost theme-toggle-btn" onclick="toggleTheme()" aria-label="Toggle light/dark theme">🌙</button>
               <nav class="year-nav">{year_link(2025)}{year_link(2026)}</nav>
             </div>
           </header>
