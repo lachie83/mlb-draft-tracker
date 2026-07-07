@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from dashboard import fetch_dashboard_data, round_display_name
+from dashboard import fetch_dashboard_data, fetch_latest_picks, round_display_name
 
 from .factories import seed_actual_pick, seed_draft_slot, seed_prediction, seed_prospect
 
@@ -139,3 +139,43 @@ def test_draft_order_empty_when_no_slots_loaded(conn):
     data = fetch_dashboard_data(conn, 2026)
 
     assert data["draft_order"] == []
+
+
+def test_fetch_latest_picks_returns_ascending_order_with_summary(conn):
+    seed_actual_pick(
+        conn, pick_number=2, team_name="Team B", player_name="Second Player",
+        player_position="OF", school_name="School B",
+    )
+    seed_actual_pick(
+        conn, pick_number=1, team_name="Team A", player_name="First Player",
+        player_position="SS", school_name="School A",
+    )
+
+    picks = fetch_latest_picks(conn, 2026)
+
+    assert [p["pick_number"] for p in picks] == [1, 2]
+    assert picks[0]["summary"] == "Team A select First Player (SS, School A)"
+
+
+def test_fetch_latest_picks_respects_limit(conn):
+    for i in range(1, 6):
+        seed_actual_pick(conn, pick_number=i, team_name=f"Team {i}", player_name=f"Player {i}")
+
+    picks = fetch_latest_picks(conn, 2026, limit=3)
+
+    # bounded to the most recent `limit` picks, but still ascending by pick number
+    assert [p["pick_number"] for p in picks] == [3, 4, 5]
+
+
+def test_fetch_latest_picks_empty_when_no_picks(conn):
+    assert fetch_latest_picks(conn, 2026) == []
+
+
+def test_fetch_latest_picks_scoped_to_draft_year(conn):
+    seed_actual_pick(conn, draft_year=2025, pick_number=1, team_name="Old Team", player_name="Old Player")
+    seed_actual_pick(conn, draft_year=2026, pick_number=1, team_name="New Team", player_name="New Player")
+
+    picks = fetch_latest_picks(conn, 2026)
+
+    assert len(picks) == 1
+    assert picks[0]["team_name"] == "New Team"

@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import argparse
 import html
+import json
 import re
 import sqlite3
 from collections import defaultdict
@@ -9,6 +10,7 @@ from urllib.parse import parse_qs
 from wsgiref.simple_server import make_server
 
 from mlb_tracker.db import DEFAULT_DB_PATH, get_connection, init_db
+from mlb_tracker.telegram import format_pick_summary
 
 
 def q(conn: sqlite3.Connection, sql: str, params=()):
@@ -419,6 +421,28 @@ def fetch_dashboard_data(conn: sqlite3.Connection, year: int):
         "models": models,
         "model_comparison": model_comparison_rows,
     }
+
+
+def fetch_latest_picks(conn: sqlite3.Connection, year: int, limit: int = 20) -> list[dict]:
+    """Bounded, ascending-pick-number list of the most recent actual picks,
+    for the in-browser polling notification - the client only needs to
+    diff against picks newer than its own last-seen pick number, so this
+    intentionally doesn't return the full draft history."""
+    rows = conn.execute(
+        """
+        SELECT pick_number, team_name, player_name, player_position, school_name
+        FROM actual_picks
+        WHERE draft_year = ?
+        ORDER BY pick_number DESC
+        LIMIT ?
+        """,
+        (year, limit),
+    ).fetchall()
+    picks = [dict(r) for r in rows]
+    picks.reverse()
+    for p in picks:
+        p["summary"] = format_pick_summary(p)
+    return picks
 
 
 def row_attrs(*, status=None, position=None, school=None, team=None, model=None) -> str:
@@ -930,6 +954,49 @@ main { padding: 28px 32px 60px; max-width: 1440px; margin: 0 auto; }
 :root[data-theme="light"] .team-logo-dark { display: none; }
 :root[data-theme="light"] .team-logo-light { display: inline; }
 
+.toast-container {
+  position: fixed;
+  bottom: 20px;
+  right: 20px;
+  z-index: 200;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  max-width: 320px;
+}
+.pick-toast {
+  background: var(--bg-card);
+  border: 1px solid var(--accent);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+  padding: 14px 34px 14px 16px;
+  position: relative;
+  animation: pick-toast-in 0.25s ease-out;
+}
+.pick-toast-title { font-weight: 700; font-size: 13px; color: var(--accent); margin-bottom: 4px; }
+.pick-toast-body { font-size: 13.5px; color: var(--text); }
+.pick-toast-close {
+  position: absolute;
+  top: 6px;
+  right: 8px;
+  background: none;
+  border: none;
+  color: var(--text-muted);
+  font-size: 18px;
+  cursor: pointer;
+  line-height: 1;
+  padding: 4px;
+}
+.pick-toast-close:hover { color: var(--text); }
+@keyframes pick-toast-in {
+  from { transform: translateX(24px); opacity: 0; }
+  to { transform: translateX(0); opacity: 1; }
+}
+
+@media (max-width: 720px) {
+  .toast-container { left: 16px; right: 16px; bottom: 16px; max-width: none; }
+}
+
 .table-wrap { overflow-x: auto; }
 table { border-collapse: collapse; width: 100%; font-size: 13.5px; }
 th, td { padding: 10px 12px; text-align: left; white-space: nowrap; }
@@ -1181,11 +1248,126 @@ function syncStickyOffsets() {
   }
 }
 
+// In-browser pick notifications - polls the same actual_picks data the
+// Telegram poller alerts on, so a user watching the dashboard finds out
+// about a new pick without needing Telegram. Deliberately simple polling
+// rather than a websocket/SSE push: picks happen minutes apart at
+// fastest, so a 12s interval is plenty responsive without needing a
+// persistent connection.
+const PICK_POLL_INTERVAL_MS = 12000;
+
+function currentDraftYear() {
+  return new URLSearchParams(window.location.search).get('year') || '2026';
+}
+
+function lastSeenPickKey(year) {
+  return 'mlb_last_seen_pick_' + year;
+}
+
+function getLastSeenPick(year) {
+  return parseInt(localStorage.getItem(lastSeenPickKey(year)) || '0', 10);
+}
+
+function setLastSeenPick(year, pickNumber) {
+  localStorage.setItem(lastSeenPickKey(year), String(pickNumber));
+}
+
+function showPickToast(pick) {
+  const container = document.getElementById('toast-container');
+  if (!container) return;
+  const toast = document.createElement('div');
+  toast.className = 'pick-toast';
+  const title = document.createElement('div');
+  title.className = 'pick-toast-title';
+  title.textContent = 'Pick ' + pick.pick_number;
+  const body = document.createElement('div');
+  body.className = 'pick-toast-body';
+  body.textContent = pick.summary;
+  const close = document.createElement('button');
+  close.type = 'button';
+  close.className = 'pick-toast-close';
+  close.setAttribute('aria-label', 'Dismiss');
+  close.innerHTML = '&times;';
+  close.onclick = function () { toast.remove(); };
+  toast.appendChild(close);
+  toast.appendChild(title);
+  toast.appendChild(body);
+  container.appendChild(toast);
+  setTimeout(function () { if (toast.parentElement) toast.remove(); }, 10000);
+}
+
+function maybeNativeNotify(pick) {
+  if (localStorage.getItem('mlb_pick_alerts') !== '1') return;
+  if (typeof Notification === 'undefined' || Notification.permission !== 'granted') return;
+  if (!document.hidden) return; // tab is focused - the in-page toast already covers this
+  new Notification('Pick ' + pick.pick_number, { body: pick.summary });
+}
+
+function pollLatestPicks() {
+  const year = currentDraftYear();
+  fetch('/api/latest-picks?year=' + encodeURIComponent(year), { cache: 'no-store' })
+    .then(function (resp) { return resp.ok ? resp.json() : null; })
+    .then(function (data) {
+      if (!data || !data.picks.length) return;
+      const lastSeen = getLastSeenPick(year);
+      const newPicks = data.picks.filter(function (p) { return p.pick_number > lastSeen; });
+      newPicks.forEach(function (p) {
+        showPickToast(p);
+        maybeNativeNotify(p);
+      });
+      const maxPick = Math.max.apply(null, data.picks.map(function (p) { return p.pick_number; }));
+      setLastSeenPick(year, maxPick);
+    })
+    .catch(function () { /* transient network hiccup - next interval retries */ });
+}
+
+function initPickPolling() {
+  const year = currentDraftYear();
+  // Seed last-seen to whatever's already happened on first-ever visit so
+  // opening the dashboard mid-draft doesn't immediately dump a toast for
+  // every prior pick - only picks from this point forward should notify.
+  fetch('/api/latest-picks?year=' + encodeURIComponent(year), { cache: 'no-store' })
+    .then(function (resp) { return resp.ok ? resp.json() : null; })
+    .then(function (data) {
+      if (data && data.picks.length && getLastSeenPick(year) === 0) {
+        const maxPick = Math.max.apply(null, data.picks.map(function (p) { return p.pick_number; }));
+        setLastSeenPick(year, maxPick);
+      }
+    })
+    .finally(function () {
+      setInterval(pollLatestPicks, PICK_POLL_INTERVAL_MS);
+    });
+}
+
+function initPickAlertsToggle() {
+  const toggle = document.getElementById('pick-alerts-toggle');
+  if (!toggle) return;
+  const hasNotifications = typeof Notification !== 'undefined';
+  toggle.checked = hasNotifications && localStorage.getItem('mlb_pick_alerts') === '1' && Notification.permission === 'granted';
+  toggle.addEventListener('change', function () {
+    if (!toggle.checked) {
+      localStorage.setItem('mlb_pick_alerts', '0');
+      return;
+    }
+    if (!hasNotifications) {
+      toggle.checked = false;
+      return;
+    }
+    Notification.requestPermission().then(function (permission) {
+      const granted = permission === 'granted';
+      toggle.checked = granted;
+      localStorage.setItem('mlb_pick_alerts', granted ? '1' : '0');
+    });
+  });
+}
+
 document.addEventListener('DOMContentLoaded', function () {
   initAutoRefresh();
   updateEmptyStates();
   applyThemeUi(document.documentElement.getAttribute('data-theme') || 'dark');
   syncStickyOffsets();
+  initPickPolling();
+  initPickAlertsToggle();
 });
 window.addEventListener('resize', syncStickyOffsets);
 window.addEventListener('load', syncStickyOffsets);
@@ -1196,6 +1378,18 @@ def app_factory(db_path: str):
     def app(environ, start_response):
         init_db(db_path)
         year = get_selected_year(environ, default_year=2026)
+
+        if environ.get("PATH_INFO") == "/api/latest-picks":
+            conn = get_connection(db_path)
+            picks = fetch_latest_picks(conn, year)
+            conn.close()
+            body = json.dumps({"year": year, "picks": picks}).encode("utf-8")
+            start_response(
+                "200 OK",
+                [("Content-Type", "application/json; charset=utf-8"), ("Cache-Control", "no-store")],
+            )
+            return [body]
+
         conn = get_connection(db_path)
         data = fetch_dashboard_data(conn, year)
         conn.close()
@@ -1301,6 +1495,10 @@ def app_factory(db_path: str):
                 <input type="checkbox" id="auto-refresh">
                 Auto-refresh (30s)
               </label>
+              <label class="refresh-toggle" title="Also show a native browser notification when a new pick happens and this tab isn't focused">
+                <input type="checkbox" id="pick-alerts-toggle">
+                Pick alerts
+              </label>
               <button type="button" id="theme-toggle" class="btn-ghost theme-toggle-btn" onclick="toggleTheme()" aria-label="Toggle light/dark theme">🌙</button>
               <nav class="year-nav">{year_link(2025)}{year_link(2026)}</nav>
             </div>
@@ -1331,6 +1529,7 @@ def app_factory(db_path: str):
           </main>
 
           <footer>MLB Draft Tracker &middot; local dashboard</footer>
+          <div class="toast-container" id="toast-container"></div>
           <script>{SCRIPT}</script>
         </body>
         </html>

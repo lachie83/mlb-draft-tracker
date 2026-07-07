@@ -4,9 +4,34 @@ import pytest
 import requests
 
 from mlb_tracker.db import get_sent_event
-from mlb_tracker.telegram import TelegramNotifier, make_pick_message, send_pick_if_new
+from mlb_tracker.telegram import (
+    TelegramNotifier,
+    format_pick_summary,
+    make_pick_message,
+    send_pick_if_new,
+)
 
 from .factories import seed_prospect
+
+
+def test_format_pick_summary_fills_in_defaults_for_missing_fields():
+    summary = format_pick_summary({"team_name": "Seattle Mariners", "player_name": "Someone"})
+
+    assert summary == "Seattle Mariners select Someone (N/A, Unknown School)"
+
+
+def test_make_pick_message_reuses_format_pick_summary(conn):
+    pick_row = {
+        "pick_number": 3,
+        "team_name": "Seattle Mariners",
+        "player_name": "Someone Picked",
+        "player_position": "OF",
+        "school_name": "Some School",
+    }
+
+    message = make_pick_message(conn, draft_year=2026, pick_row=pick_row)
+
+    assert format_pick_summary(pick_row) in message
 
 
 def disabled_notifier(monkeypatch) -> TelegramNotifier:
