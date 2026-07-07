@@ -6,24 +6,26 @@ DB ?=
 DB_FLAG = $(if $(DB),--db $(DB),)
 
 REHEARSAL_DB ?= ../data/rehearsal.db
+REHEARSAL_YEAR ?= 9999
 PICKS ?= 10
 BATCH_SIZE ?= 1
 DELAY ?= 5
 
 .PHONY: help init-db pre-draft-sync sync-prospects seed-no-r-prospects seed-prospects-csv seed-draft-order \
 	sync-draft-order-api generate-predictions seed-mock-drafts seed-mock-consensus verify-baseballr \
-	live-monitor live-monitor-api on-the-clock-api rehearse-draft-day poll-draft-day live-monitor-status \
-	test-telegram dashboard
+	live-monitor live-monitor-api on-the-clock-api rehearse-draft-day rehearse-draft-day-cleanup \
+	poll-draft-day live-monitor-status test-telegram dashboard
 
 help:
 	@echo "Common targets (override with YEAR=<year> DB=<path>):"
-	@echo "  make pre-draft-sync      init db + sync order (API) + sync prospects + predictions + mock consensus"
-	@echo "  make rehearse-draft-day  replay a real past draft to test the whole pipeline + Telegram + dashboard"
-	@echo "  make poll-draft-day      run the draft-day live-monitor polling loop (MLB Stats API, no R needed)"
-	@echo "  make live-monitor-status show poller status, recent log lines, and recent picks"
-	@echo "  make on-the-clock-api    print who's on the clock right now via the MLB Stats API"
-	@echo "  make test-telegram       send a one-off Telegram test message"
-	@echo "  make dashboard           run the local dashboard on :8000"
+	@echo "  make pre-draft-sync            init db + sync order (API) + sync prospects + predictions + mock consensus"
+	@echo "  make rehearse-draft-day        replay a real past draft to test the whole pipeline + Telegram + dashboard"
+	@echo "  make rehearse-draft-day-cleanup  delete a rehearsal's rows (default draft_year=9999) so it can be rerun"
+	@echo "  make poll-draft-day            run the draft-day live-monitor polling loop (MLB Stats API, no R needed)"
+	@echo "  make live-monitor-status       show poller status, recent log lines, and recent picks"
+	@echo "  make on-the-clock-api          print who's on the clock right now via the MLB Stats API"
+	@echo "  make test-telegram             send a one-off Telegram test message"
+	@echo "  make dashboard                 run the local dashboard on :8000"
 	@echo "  make init-db / sync-prospects / seed-no-r-prospects / seed-prospects-csv / seed-draft-order / sync-draft-order-api"
 	@echo "  make generate-predictions / seed-mock-drafts / seed-mock-consensus / verify-baseballr / live-monitor / live-monitor-api"
 
@@ -72,6 +74,9 @@ on-the-clock-api:
 rehearse-draft-day:
 	cd python_app && $(PYTHON) main.py --db $(REHEARSAL_DB) rehearse-draft-day \
 		--picks $(PICKS) --batch-size $(BATCH_SIZE) --delay $(DELAY)
+
+rehearse-draft-day-cleanup:
+	cd python_app && $(PYTHON) main.py --db $(REHEARSAL_DB) rehearse-draft-day-cleanup --year $(REHEARSAL_YEAR)
 
 poll-draft-day:
 	DRAFT_YEAR=$(YEAR) DRAFT_DB=$(DB) ./scripts/poll_draft_day.sh

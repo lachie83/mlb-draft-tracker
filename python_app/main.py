@@ -4,7 +4,7 @@ import argparse
 from pathlib import Path
 
 from mlb_tracker.db import DEFAULT_DB_PATH, get_connection, init_db, insert_or_replace_predictions, upsert_draft_slot, upsert_prospect
-from mlb_tracker.draft_rehearsal import rehearse_draft_day
+from mlb_tracker.draft_rehearsal import cleanup_rehearsal_data, rehearse_draft_day
 from mlb_tracker.live_monitor import reconcile_live_picks
 from mlb_tracker.mlb_stats_api import fetch_latest, get_on_the_clock, reconcile_picks_from_api, sync_draft_order
 from mlb_tracker.mock_ingest import generate_mock_consensus_predictions, ingest_real_mock_draft_picks
@@ -178,6 +178,16 @@ def cmd_rehearse_draft_day(args):
     print(f"Rehearsal complete: simulated {total_simulated} picks.")
 
 
+def cmd_rehearse_draft_day_cleanup(args):
+    init_db(args.db)
+    conn = get_connection(args.db)
+    deleted = cleanup_rehearsal_data(conn, year=args.year)
+    conn.close()
+    for table, count in deleted.items():
+        print(f"  {table}: {count} row(s) deleted")
+    print(f"Cleanup complete: {sum(deleted.values())} row(s) removed for draft_year={args.year} at {args.db}.")
+
+
 def cmd_verify_baseballr(_args):
     ok, message = verify_baseballr_setup()
     if ok:
@@ -261,6 +271,10 @@ def build_parser() -> argparse.ArgumentParser:
     p.add_argument("--batch-size", type=int, default=1, help="picks revealed per tick (default 1)")
     p.add_argument("--delay", type=float, default=5.0, help="seconds between simulated picks (default 5.0)")
     p.set_defaults(func=cmd_rehearse_draft_day)
+
+    p = sub.add_parser("rehearse-draft-day-cleanup")
+    p.add_argument("--year", type=int, default=9999, help="draft_year tag to delete rehearsal rows for (default 9999, matching rehearse-draft-day's sentinel)")
+    p.set_defaults(func=cmd_rehearse_draft_day_cleanup)
 
     p = sub.add_parser("verify-baseballr")
     p.set_defaults(func=cmd_verify_baseballr)

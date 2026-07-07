@@ -11,6 +11,7 @@ make test-telegram        # confirm a real alert reaches your phone
 make rehearse-draft-day   # replay a real past draft through the whole pipeline
                            # (order sync -> live pick detection -> Telegram -> dashboard),
                            # entirely in a separate rehearsal database - see §4a
+make rehearse-draft-day-cleanup  # delete a rehearsal's rows so it can be rerun - see §4a
 ```
 
 **On draft day**, in order:
@@ -106,10 +107,29 @@ even if you point it at the same database file. If Telegram is configured,
 it **will** send real alerts — one per simulated pick — so start with a
 small `PICKS` count (the default is 10) the first time.
 
-To rehearse again from scratch: `rm data/rehearsal.db` first (otherwise
-already-simulated picks are skipped, since reconciliation is idempotent —
-which is itself worth confirming once, by running the same command twice
-in a row and seeing the second pass report 0 new picks).
+To rehearse again from scratch when using the default dedicated database:
+`rm data/rehearsal.db` first (otherwise already-simulated picks are
+skipped, since reconciliation is idempotent — which is itself worth
+confirming once, by running the same command twice in a row and seeing the
+second pass report 0 new picks).
+
+**If you rehearsed against a shared database instead** (e.g. you pointed
+`--db`/`DB=` at a live pod's `mlb_draft_2026.db` to test the real deployment
+rather than a local file) — `rm`ing the whole file isn't an option since it
+also holds real data. Use `rehearse-draft-day-cleanup` instead: it deletes
+only the rehearsal's rows (`draft_slots`, `prospects`, `actual_picks`, and
+the matching `telegram_events_sent` entries) for one sentinel `draft_year`,
+and refuses outright to run against `--year 2025` or `2026`:
+
+```bash
+make rehearse-draft-day-cleanup                          # cleans draft_year=9999 in data/rehearsal.db
+make rehearse-draft-day-cleanup REHEARSAL_DB=/app/data/mlb_draft_2026.db   # same, against a shared db
+```
+
+It prints how many rows it removed from each table, so you can confirm
+there was actually something to clean up (an interrupted rehearsal that
+never got past its initial fetch of the source year's data won't have
+written anything yet).
 
 ## 5. Example commands
 ```bash
@@ -136,6 +156,7 @@ app's built-in db path) overrides, e.g. `make pre-draft-sync YEAR=2025`.
 | `make seed-mock-drafts` / `seed-mock-consensus` | Loads real, dated mock draft picks into `mock_draft_picks`, then aggregates them into `mock_consensus_v2` predictions (`seed-mock-consensus` runs `seed-mock-drafts` first automatically). See the README's Predictions section for how these are sourced and combined. |
 | `make sync-draft-order-api` / `live-monitor-api` / `on-the-clock-api` | The MLB Stats API path (no R dependency): full draft scaffold, full reconciliation + Telegram alerts, and the lightweight "who's on the clock" endpoint, respectively. See the README's Modes section. |
 | `make rehearse-draft-day` | Replays a real past draft through the full pipeline into a dedicated rehearsal database (override with `PICKS=`, `BATCH_SIZE=`, `DELAY=`, `REHEARSAL_DB=`). See §4a. |
+| `make rehearse-draft-day-cleanup` | Deletes one rehearsal's rows (`draft_slots`/`prospects`/`actual_picks`/`telegram_events_sent`) so it can be rerun, without needing to delete the whole database file — the only way to reset a rehearsal that was run against a shared/production db. Refuses to run against `--year 2025` or `2026`. Override with `REHEARSAL_DB=`, `REHEARSAL_YEAR=`. See §4a. |
 | `make init-db` / `sync-prospects` / `seed-no-r-prospects` / `seed-prospects-csv` / `seed-draft-order` / `generate-predictions` / `verify-baseballr` / `live-monitor` | Thin wrappers around the matching `main.py` subcommand. `seed-draft-order` (CSV) and `live-monitor` (baseballr) are the legacy paths, superseded by `sync-draft-order-api` / `live-monitor-api` above. `seed-prospects-csv` loads the full top-250 board from `examples/prospects_top250_seed_2026.csv` when baseballr is unavailable. |
 | `make dashboard` | Runs the local dashboard on `:8000`. |
 

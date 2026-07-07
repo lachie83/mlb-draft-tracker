@@ -3,9 +3,13 @@ from __future__ import annotations
 import json
 from pathlib import Path
 
-from mlb_tracker.db import get_best_available
-from mlb_tracker.draft_rehearsal import ReplayClient, rehearse_draft_day
+import pytest
+
+from mlb_tracker.db import get_best_available, mark_event_sent
+from mlb_tracker.draft_rehearsal import ReplayClient, cleanup_rehearsal_data, rehearse_draft_day
 from mlb_tracker.mlb_stats_api import iter_picks
+
+from .factories import seed_actual_pick, seed_draft_slot, seed_prospect
 
 FIXTURES = Path(__file__).parent / "fixtures"
 
@@ -121,3 +125,47 @@ def test_rehearse_draft_day_flips_a_players_prospect_row_when_drafted(conn, monk
     ).fetchone()
     assert row is not None
     assert row["is_drafted"] == 1
+
+
+def seed_rehearsal_rows(conn, year: int) -> None:
+    seed_draft_slot(conn, draft_year=year, pick_number=1, team_name="Team A")
+    seed_prospect(conn, draft_year=year, person_id=1, person_full_name="Some Prospect")
+    seed_actual_pick(conn, draft_year=year, pick_number=1, team_name="Team A", player_name="Some Prospect")
+    mark_event_sent(conn, f"draft_pick:{year}:1", "hash", 1, "message text")
+    conn.commit()
+
+
+def test_cleanup_rehearsal_data_deletes_only_the_target_year(conn):
+    seed_rehearsal_rows(conn, 9999)
+    seed_rehearsal_rows(conn, 2026)
+
+    cleanup_rehearsal_data(conn, year=9999)
+
+    for table in ("draft_slots", "prospects", "actual_picks"):
+        assert conn.execute(f"SELECT COUNT(*) c FROM {table} WHERE draft_year = 9999").fetchone()["c"] == 0
+        assert conn.execute(f"SELECT COUNT(*) c FROM {table} WHERE draft_year = 2026").fetchone()["c"] == 1
+    assert conn.execute(
+        "SELECT COUNT(*) c FROM telegram_events_sent WHERE event_key = 'draft_pick:9999:1'"
+    ).fetchone()["c"] == 0
+    assert conn.execute(
+        "SELECT COUNT(*) c FROM telegram_events_sent WHERE event_key = 'draft_pick:2026:1'"
+    ).fetchone()["c"] == 1
+
+
+def test_cleanup_rehearsal_data_returns_rowcounts_per_table(conn):
+    seed_rehearsal_rows(conn, 9999)
+
+    deleted = cleanup_rehearsal_data(conn, year=9999)
+
+    assert deleted == {
+        "draft_slots": 1,
+        "prospects": 1,
+        "actual_picks": 1,
+        "telegram_events_sent": 1,
+    }
+
+
+@pytest.mark.parametrize("protected_year", [2025, 2026])
+def test_cleanup_rehearsal_data_refuses_real_draft_years(conn, protected_year):
+    with pytest.raises(ValueError, match="real draft year"):
+        cleanup_rehearsal_data(conn, year=protected_year)

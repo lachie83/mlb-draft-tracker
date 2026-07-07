@@ -99,3 +99,36 @@ def rehearse_draft_day(
         if not replay.is_finished():
             time.sleep(delay_seconds)
     return total_simulated
+
+
+# Real draft years a rehearsal (and therefore this cleanup) must never touch,
+# even if someone points --db at the production database instead of a
+# dedicated rehearsal file.
+PROTECTED_DRAFT_YEARS = (2025, 2026)
+
+
+def cleanup_rehearsal_data(conn, year: int = 9999) -> dict[str, int]:
+    """Delete everything a rehearse_draft_day() run wrote for `year`, so the
+    same database can be reused for another rehearsal from a clean slate.
+
+    Only ever needed when rehearsing against a shared/production database
+    (e.g. the AKS pod's mlb_draft_2026.db) rather than a dedicated
+    data/rehearsal.db - in that case `rm`ing the whole file isn't an option
+    since it also holds real data, so this targets only the sentinel
+    draft_year's rows instead. Returns a dict of table name -> rows deleted.
+    """
+    if year in PROTECTED_DRAFT_YEARS:
+        raise ValueError(
+            f"Refusing to clean up draft_year={year}: that's a real draft year, not a "
+            "rehearsal sentinel. This command only ever deletes rehearsal data."
+        )
+    deleted: dict[str, int] = {}
+    for table in ("draft_slots", "prospects", "actual_picks"):
+        cur = conn.execute(f"DELETE FROM {table} WHERE draft_year = ?", (year,))
+        deleted[table] = cur.rowcount
+    cur = conn.execute(
+        "DELETE FROM telegram_events_sent WHERE event_key LIKE ?", (f"draft_pick:{year}:%",)
+    )
+    deleted["telegram_events_sent"] = cur.rowcount
+    conn.commit()
+    return deleted
