@@ -1,0 +1,141 @@
+from __future__ import annotations
+
+from dashboard import fetch_dashboard_data, round_display_name
+
+from .factories import seed_actual_pick, seed_draft_slot, seed_prediction, seed_prospect
+
+
+def test_round_display_name_maps_known_codes():
+    assert round_display_name("PPI") == "Prospect Promotion Incentive"
+    assert round_display_name("CB-A") == "Competitive Balance Round A"
+    assert round_display_name("CB-B") == "Competitive Balance Round B"
+    assert round_display_name("SUP-2") == "Supplemental Round 2"
+
+
+def test_round_display_name_formats_numeric_rounds():
+    assert round_display_name("1") == "Round 1"
+    assert round_display_name("20") == "Round 20"
+
+
+def test_round_display_name_falls_back_for_unrecognized_codes():
+    # "2C" isn't in the known-code map and isn't purely numeric, so it
+    # should be shown as-is rather than guessing at a real MLB term.
+    assert round_display_name("2C") == "Round 2C"
+    assert round_display_name(None) == "Round"
+
+
+def test_on_the_clock_dedupes_candidates_across_models(conn):
+    seed_draft_slot(conn, pick_number=1, team_name="Chicago White Sox")
+    player_a = seed_prospect(conn, person_id=1, person_full_name="Player A", rank=1)
+    player_b = seed_prospect(conn, person_id=2, person_full_name="Player B", rank=2)
+
+    # Player A is the top pick for both models - the old query returned one
+    # row per (player, model), so this player would show up twice and crowd
+    # out a genuinely distinct candidate like Player B.
+    seed_prediction(
+        conn, pick_number=1, team_name="Chicago White Sox", player_name="Player A",
+        predicted_probability=0.7, model_version="heuristic_v1",
+        mlb_person_id=player_a["mlb_person_id"],
+    )
+    seed_prediction(
+        conn, pick_number=1, team_name="Chicago White Sox", player_name="Player A",
+        predicted_probability=0.3, model_version="mock_consensus_v2",
+        mlb_person_id=player_a["mlb_person_id"],
+    )
+    seed_prediction(
+        conn, pick_number=1, team_name="Chicago White Sox", player_name="Player B",
+        predicted_probability=0.2, model_version="heuristic_v1",
+        mlb_person_id=player_b["mlb_person_id"],
+    )
+
+    data = fetch_dashboard_data(conn, 2026)
+    candidates = data["on_the_clock"]["candidates"]
+    names = [c["player_name"] for c in candidates]
+
+    assert names.count("Player A") == 1
+    assert names.count("Player B") == 1
+
+    by_name = {c["player_name"]: c for c in candidates}
+    assert by_name["Player A"]["predicted_probability"] == 0.7  # max across models
+    assert by_name["Player A"]["model_count"] == 2
+    assert by_name["Player B"]["model_count"] == 1
+
+
+def test_on_the_clock_is_none_once_draft_is_complete(conn):
+    seed_draft_slot(conn, pick_number=1, team_name="Chicago White Sox")
+    seed_actual_pick(conn, pick_number=1, team_name="Chicago White Sox", player_name="Someone")
+
+    data = fetch_dashboard_data(conn, 2026)
+
+    assert data["on_the_clock"] is None
+
+
+def test_best_available_excludes_drafted_and_adds_mock_team(conn):
+    seed_draft_slot(conn, pick_number=1, team_name="Some Team")
+    available = seed_prospect(
+        conn, person_id=1, person_full_name="Available Player", rank=1,
+        person_current_age=19, person_bat_side_code="L", person_pitch_hand_code="R",
+    )
+    seed_prospect(conn, person_id=2, person_full_name="Drafted Player", rank=2, is_drafted=True)
+    seed_prediction(
+        conn, pick_number=1, team_name="Some Team", player_name="Available Player",
+        predicted_probability=0.6, mlb_person_id=available["mlb_person_id"],
+    )
+
+    data = fetch_dashboard_data(conn, 2026)
+    names = [row["full_name"] for row in data["best_available"]]
+
+    assert "Available Player" in names
+    assert "Drafted Player" not in names
+
+    row = next(r for r in data["best_available"] if r["full_name"] == "Available Player")
+    assert row["current_age"] == 19
+    assert row["bats_throws"] == "L/R"
+    assert row["mock_team"] == "Some Team"
+    assert row["mock_probability"] == 0.6
+
+
+def test_best_available_bats_throws_blank_when_missing(conn):
+    seed_draft_slot(conn, pick_number=1, team_name="Some Team")
+    seed_prospect(conn, person_id=1, person_full_name="No B/T Player", rank=1)
+
+    data = fetch_dashboard_data(conn, 2026)
+    row = next(r for r in data["best_available"] if r["full_name"] == "No B/T Player")
+
+    assert row["bats_throws"] == ""
+    assert row["mock_team"] is None
+
+
+def test_draft_order_groups_by_round_in_first_pick_order(conn):
+    # Pick numbers interleave rounds the way real MLB drafts do (comp picks
+    # inserted between regular-round picks); the grouping should still come
+    # out ordered by each round's first appearance, not by pick number.
+    seed_draft_slot(conn, pick_number=1, team_name="Team A", round_label="1")
+    seed_draft_slot(conn, pick_number=2, team_name="Team B", round_label="PPI")
+    seed_draft_slot(conn, pick_number=3, team_name="Team C", round_label="1")
+
+    data = fetch_dashboard_data(conn, 2026)
+    labels = [g["round_label"] for g in data["draft_order"]]
+
+    assert labels == ["1", "PPI"]
+    round_1_picks = next(g for g in data["draft_order"] if g["round_label"] == "1")["picks"]
+    assert [p["pick_number"] for p in round_1_picks] == [1, 3]
+
+
+def test_draft_order_shows_player_name_once_drafted(conn):
+    seed_draft_slot(conn, pick_number=1, team_name="Team A", round_label="1")
+    seed_draft_slot(conn, pick_number=2, team_name="Team B", round_label="1")
+    seed_actual_pick(conn, pick_number=1, team_name="Team A", player_name="Drafted Player")
+
+    data = fetch_dashboard_data(conn, 2026)
+    picks = data["draft_order"][0]["picks"]
+    by_pick = {p["pick_number"]: p for p in picks}
+
+    assert by_pick[1]["player_name"] == "Drafted Player"
+    assert by_pick[2]["player_name"] is None
+
+
+def test_draft_order_empty_when_no_slots_loaded(conn):
+    data = fetch_dashboard_data(conn, 2026)
+
+    assert data["draft_order"] == []
