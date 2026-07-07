@@ -10,7 +10,7 @@ from urllib.parse import parse_qs
 from wsgiref.simple_server import make_server
 
 from mlb_tracker.db import DEFAULT_DB_PATH, get_connection, init_db
-from mlb_tracker.telegram import format_pick_summary
+from mlb_tracker.telegram import format_pick_summary, format_pick_title, round_display_name
 
 
 def q(conn: sqlite3.Connection, sql: str, params=()):
@@ -82,37 +82,29 @@ MLB_TEAM_IDS = {
 }
 
 
-def team_logo_html(team_name):
+def team_logo_url(team_name, variant="light"):
     team_id = MLB_TEAM_IDS.get(team_name)
     if not team_id:
+        return None
+    return f"https://www.mlbstatic.com/team-logos/team-cap-on-{variant}/{team_id}.svg"
+
+
+def team_logo_html(team_name):
+    dark_url = team_logo_url(team_name, "dark")
+    light_url = team_logo_url(team_name, "light")
+    if not dark_url or not light_url:
         return ""
     alt = esc(team_name)
     # MLB serves theme-matched logo variants directly - render both and let
     # CSS show the one matching the active theme, so the logo updates
     # instantly when the user toggles light/dark with no JS or re-fetch.
     return (
-        f'<img class="team-logo team-logo-dark" src="https://www.mlbstatic.com/team-logos/team-cap-on-dark/{team_id}.svg" alt="{alt}" loading="lazy">'
-        f'<img class="team-logo team-logo-light" src="https://www.mlbstatic.com/team-logos/team-cap-on-light/{team_id}.svg" alt="{alt}" loading="lazy">'
+        f'<img class="team-logo team-logo-dark" src="{dark_url}" alt="{alt}" loading="lazy">'
+        f'<img class="team-logo team-logo-light" src="{light_url}" alt="{alt}" loading="lazy">'
     )
 
 
 TEAM_LOGO_HEADERS = {"Team", "Mock Team", "Drafted By"}
-
-
-ROUND_LABEL_NAMES = {
-    "PPI": "Prospect Promotion Incentive",
-    "CB-A": "Competitive Balance Round A",
-    "CB-B": "Competitive Balance Round B",
-    "SUP-2": "Supplemental Round 2",
-}
-
-
-def round_display_name(round_label):
-    if round_label in ROUND_LABEL_NAMES:
-        return ROUND_LABEL_NAMES[round_label]
-    if round_label and str(round_label).isdigit():
-        return f"Round {round_label}"
-    return f"Round {round_label}" if round_label else "Round"
 
 
 def get_selected_year(environ, default_year: int = 2026) -> int:
@@ -430,7 +422,7 @@ def fetch_latest_picks(conn: sqlite3.Connection, year: int, limit: int = 20) -> 
     intentionally doesn't return the full draft history."""
     rows = conn.execute(
         """
-        SELECT pick_number, team_name, player_name, player_position, school_name
+        SELECT pick_number, round_label, team_name, player_name, player_position, school_name
         FROM actual_picks
         WHERE draft_year = ?
         ORDER BY pick_number DESC
@@ -441,7 +433,10 @@ def fetch_latest_picks(conn: sqlite3.Connection, year: int, limit: int = 20) -> 
     picks = [dict(r) for r in rows]
     picks.reverse()
     for p in picks:
+        p["title"] = format_pick_title(p)
         p["summary"] = format_pick_summary(p)
+        p["team_logo"] = team_logo_html(p["team_name"])
+        p["team_logo_url"] = team_logo_url(p["team_name"])
     return picks
 
 
@@ -956,7 +951,7 @@ main { padding: 28px 32px 60px; max-width: 1440px; margin: 0 auto; }
 
 .toast-container {
   position: fixed;
-  bottom: 20px;
+  top: 80px;
   right: 20px;
   z-index: 200;
   display: flex;
@@ -994,7 +989,7 @@ main { padding: 28px 32px 60px; max-width: 1440px; margin: 0 auto; }
 }
 
 @media (max-width: 720px) {
-  .toast-container { left: 16px; right: 16px; bottom: 16px; max-width: none; }
+  .toast-container { left: 16px; right: 16px; max-width: none; }
 }
 
 .table-wrap { overflow-x: auto; }
@@ -1240,12 +1235,17 @@ function syncStickyOffsets() {
   const topbar = document.querySelector('.topbar');
   const subnav = document.querySelector('.subnav');
   const filterBar = document.querySelector('.filter-bar');
+  const toastContainer = document.getElementById('toast-container');
   const topbarH = topbar ? topbar.offsetHeight : 0;
   if (subnav) subnav.style.top = topbarH + 'px';
   const subnavH = subnav ? subnav.offsetHeight : 0;
   if (filterBar && getComputedStyle(filterBar).position === 'sticky') {
     filterBar.style.top = (topbarH + subnavH) + 'px';
   }
+  // Toasts anchor top-right (not bottom) so they don't cover content at the
+  // bottom of a phone screen - but they still need to clear the sticky
+  // topbar/subnav stack, whose height varies once the topbar wraps.
+  if (toastContainer) toastContainer.style.top = (topbarH + subnavH + 12) + 'px';
 }
 
 // In-browser pick notifications - polls the same actual_picks data the
@@ -1279,10 +1279,11 @@ function showPickToast(pick) {
   toast.className = 'pick-toast';
   const title = document.createElement('div');
   title.className = 'pick-toast-title';
-  title.textContent = 'Pick ' + pick.pick_number;
+  title.textContent = pick.title;
   const body = document.createElement('div');
   body.className = 'pick-toast-body';
-  body.textContent = pick.summary;
+  body.innerHTML = pick.team_logo; // trusted, server-rendered <img> tags - same markup the dashboard tables use
+  body.appendChild(document.createTextNode(pick.summary));
   const close = document.createElement('button');
   close.type = 'button';
   close.className = 'pick-toast-close';
@@ -1300,7 +1301,9 @@ function maybeNativeNotify(pick) {
   if (localStorage.getItem('mlb_pick_alerts') !== '1') return;
   if (typeof Notification === 'undefined' || Notification.permission !== 'granted') return;
   if (!document.hidden) return; // tab is focused - the in-page toast already covers this
-  new Notification('Pick ' + pick.pick_number, { body: pick.summary });
+  // Native notifications can't render our two-variant light/dark <img> markup
+  // in the body, but the Notification API does support a single icon image.
+  new Notification(pick.title, { body: pick.summary, icon: pick.team_logo_url || undefined });
 }
 
 function pollLatestPicks() {

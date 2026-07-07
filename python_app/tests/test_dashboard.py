@@ -1,27 +1,8 @@
 from __future__ import annotations
 
-from dashboard import fetch_dashboard_data, fetch_latest_picks, round_display_name
+from dashboard import fetch_dashboard_data, fetch_latest_picks
 
 from .factories import seed_actual_pick, seed_draft_slot, seed_prediction, seed_prospect
-
-
-def test_round_display_name_maps_known_codes():
-    assert round_display_name("PPI") == "Prospect Promotion Incentive"
-    assert round_display_name("CB-A") == "Competitive Balance Round A"
-    assert round_display_name("CB-B") == "Competitive Balance Round B"
-    assert round_display_name("SUP-2") == "Supplemental Round 2"
-
-
-def test_round_display_name_formats_numeric_rounds():
-    assert round_display_name("1") == "Round 1"
-    assert round_display_name("20") == "Round 20"
-
-
-def test_round_display_name_falls_back_for_unrecognized_codes():
-    # "2C" isn't in the known-code map and isn't purely numeric, so it
-    # should be shown as-is rather than guessing at a real MLB term.
-    assert round_display_name("2C") == "Round 2C"
-    assert round_display_name(None) == "Round"
 
 
 def test_on_the_clock_dedupes_candidates_across_models(conn):
@@ -143,18 +124,30 @@ def test_draft_order_empty_when_no_slots_loaded(conn):
 
 def test_fetch_latest_picks_returns_ascending_order_with_summary(conn):
     seed_actual_pick(
-        conn, pick_number=2, team_name="Team B", player_name="Second Player",
+        conn, pick_number=2, round_label="1", team_name="Team B", player_name="Second Player",
         player_position="OF", school_name="School B",
     )
     seed_actual_pick(
-        conn, pick_number=1, team_name="Team A", player_name="First Player",
+        conn, pick_number=1, round_label="1", team_name="Chicago White Sox", player_name="First Player",
         player_position="SS", school_name="School A",
     )
 
     picks = fetch_latest_picks(conn, 2026)
 
     assert [p["pick_number"] for p in picks] == [1, 2]
-    assert picks[0]["summary"] == "Team A select First Player (SS, School A)"
+    assert picks[0]["title"] == "Round 1 · Pick 1"
+    assert picks[0]["summary"] == "Chicago White Sox select First Player (SS, School A)"
+    assert "team-cap-on-dark/145.svg" in picks[0]["team_logo"]
+    assert picks[0]["team_logo_url"] == "https://www.mlbstatic.com/team-logos/team-cap-on-light/145.svg"
+
+
+def test_fetch_latest_picks_handles_unmapped_team_name(conn):
+    seed_actual_pick(conn, pick_number=1, team_name="Not A Real Team", player_name="Someone")
+
+    picks = fetch_latest_picks(conn, 2026)
+
+    assert picks[0]["team_logo"] == ""
+    assert picks[0]["team_logo_url"] is None
 
 
 def test_fetch_latest_picks_respects_limit(conn):
