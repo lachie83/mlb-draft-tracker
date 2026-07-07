@@ -460,8 +460,23 @@ def render_draft_order(groups, on_the_clock_pick_number):
         </section>
         """
 
-    group_html = []
+    default_label = groups[0]["round_label"]
+    if on_the_clock_pick_number is not None:
+        for group in groups:
+            if any(p["pick_number"] == on_the_clock_pick_number for p in group["picks"]):
+                default_label = group["round_label"]
+                break
+
+    tab_buttons = []
+    round_panels = []
     for group in groups:
+        slug = f"round-{slugify(group['round_label'])}"
+        is_active = group["round_label"] == default_label
+        tab_buttons.append(
+            f'<button type="button" class="round-tab{" active" if is_active else ""}" '
+            f'data-target="{slug}" onclick="showRound(this)" title="{esc(group["round_name"])}">'
+            f'{esc(group["round_label"])}</button>'
+        )
         pick_rows = "".join(
             f"""<tr class="{'otc-row' if p['pick_number'] == on_the_clock_pick_number else ''}">
                   <td>{esc(p['pick_number'])}</td>
@@ -470,9 +485,9 @@ def render_draft_order(groups, on_the_clock_pick_number):
                 </tr>"""
             for p in group["picks"]
         )
-        group_html.append(
+        round_panels.append(
             f"""
-            <div class="round-group">
+            <div class="round-panel" id="{slug}"{'' if is_active else ' style="display:none"'}>
               <h3 class="round-heading">{esc(group['round_name'])}</h3>
               <div class="table-wrap">
                 <table>
@@ -491,7 +506,8 @@ def render_draft_order(groups, on_the_clock_pick_number):
         <h2>Draft Order</h2>
         <span class="badge">{total_picks} picks</span>
       </div>
-      {''.join(group_html)}
+      <div class="round-tabs">{''.join(tab_buttons)}</div>
+      {''.join(round_panels)}
     </section>
     """
 
@@ -800,8 +816,28 @@ tbody tr:nth-child(even) { background: rgba(255, 255, 255, 0.015); }
 
 .table-empty { display: none; padding: 18px 4px; color: var(--text-muted); font-size: 13px; }
 
-.round-group { margin-bottom: 18px; }
-.round-group:last-child { margin-bottom: 0; }
+.round-tabs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-bottom: 16px;
+  padding-bottom: 12px;
+  border-bottom: 1px solid var(--border);
+}
+.round-tab {
+  font-family: inherit;
+  background: var(--bg-elevated);
+  color: var(--text-muted);
+  border: 1px solid var(--border);
+  padding: 6px 12px;
+  border-radius: 999px;
+  font-size: 12.5px;
+  font-weight: 600;
+  cursor: pointer;
+}
+.round-tab:hover { color: var(--text); border-color: var(--accent); }
+.round-tab.active { background: var(--accent); color: white; border-color: var(--accent); }
+
 .round-heading {
   margin: 0 0 8px;
   font-size: 13px;
@@ -863,6 +899,16 @@ function resetFilters() {
   document.getElementById('f-team').value = '';
   document.getElementById('f-model').value = '';
   applyFilters();
+}
+
+function showRound(btn) {
+  const target = btn.getAttribute('data-target');
+  document.querySelectorAll('.round-tab').forEach(function (t) {
+    t.classList.toggle('active', t === btn);
+  });
+  document.querySelectorAll('.round-panel').forEach(function (p) {
+    p.style.display = (p.id === target) ? '' : 'none';
+  });
 }
 
 function initAutoRefresh() {
