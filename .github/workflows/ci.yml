@@ -36,8 +36,17 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
+      - uses: docker/setup-buildx-action@v3
+
       - name: Build ${{ matrix.dockerfile }}
-        run: docker build -f ${{ matrix.dockerfile }} -t mlb-draft-tracker:ci .
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          file: ${{ matrix.dockerfile }}
+          tags: mlb-draft-tracker:ci
+          push: false
+          cache-from: type=gha,scope=${{ matrix.dockerfile }}
+          cache-to: type=gha,mode=max,scope=${{ matrix.dockerfile }}
 
   k8s-manifests:
     name: Validate k8s manifests
