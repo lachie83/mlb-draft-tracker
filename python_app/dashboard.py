@@ -6,11 +6,15 @@ import json
 import re
 import sqlite3
 from collections import defaultdict
+from pathlib import Path
 from urllib.parse import parse_qs
 from wsgiref.simple_server import make_server
 
 from mlb_tracker.db import DEFAULT_DB_PATH, get_connection, get_prospect_sources, init_db
 from mlb_tracker.telegram import format_pick_summary, format_pick_title, round_display_name
+
+FAVICON_PATH = Path(__file__).resolve().parent / "static" / "favicon.ico"
+FAVICON_BYTES = FAVICON_PATH.read_bytes()
 
 PROSPECT_SOURCE_LABELS = {
     "mlb_stats_api_prospects": "Live MLB API",
@@ -1528,6 +1532,13 @@ window.addEventListener('load', syncStickyOffsets);
 
 def app_factory(db_path: str):
     def app(environ, start_response):
+        if environ.get("PATH_INFO") == "/favicon.ico":
+            start_response(
+                "200 OK",
+                [("Content-Type", "image/x-icon"), ("Cache-Control", "public, max-age=86400")],
+            )
+            return [FAVICON_BYTES]
+
         init_db(db_path)
         year = get_selected_year(environ, default_year=2026)
 
@@ -1627,6 +1638,7 @@ def app_factory(db_path: str):
           <meta charset="utf-8">
           <meta name="viewport" content="width=device-width, initial-scale=1">
           <title>MLB Draft Tracker</title>
+          <link rel="icon" href="/favicon.ico" type="image/x-icon">
           <script>
             (function () {{
               try {{
