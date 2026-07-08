@@ -85,6 +85,37 @@ def make_pick_message(conn, draft_year: int, pick_row: dict[str, Any]) -> str:
     )
 
 
+def format_prospect_changes_message(draft_year: int, diff: dict[str, Any], max_items: int = 10) -> str | None:
+    """Summarize a prospect-board diff (see mlb_stats_api.
+    sync_prospects_from_api) for the daily-ish change-monitoring alert.
+    Returns None when nothing changed, so the caller can skip sending
+    anything rather than a Telegram message that says "no changes"."""
+    new_entrants = diff.get("new_entrants") or []
+    dropped = diff.get("dropped") or []
+    rank_changes = diff.get("rank_changes") or []
+    if not new_entrants and not dropped and not rank_changes:
+        return None
+
+    def section(title: str, rows: list[dict[str, Any]], line: Any) -> list[str]:
+        lines = [f"\n{title} ({len(rows)}):"]
+        lines += [f"  {line(row)}" for row in rows[:max_items]]
+        if len(rows) > max_items:
+            lines.append(f"  ...and {len(rows) - max_items} more")
+        return lines
+
+    lines = [f"MLB Draft {draft_year} — prospect board updated"]
+    if new_entrants:
+        lines += section("New entrants", new_entrants, lambda r: f"#{r['rank']} {r['full_name']}")
+    if dropped:
+        lines += section("Dropped", dropped, lambda r: f"#{r['rank']} {r['full_name']}")
+    if rank_changes:
+        lines += section(
+            "Rank changes", rank_changes,
+            lambda r: f"{r['full_name']}: #{r['old_rank']} → #{r['new_rank']}",
+        )
+    return "\n".join(lines)
+
+
 def send_pick_if_new(conn, notifier: TelegramNotifier, draft_year: int, pick_row: dict[str, Any]) -> dict[str, Any]:
     event_key = f"draft_pick:{draft_year}:{pick_row['pick_number']}"
     message = make_pick_message(conn, draft_year, pick_row)

@@ -105,6 +105,24 @@ def team_logo_html(team_name):
 
 
 TEAM_LOGO_HEADERS = {"Team", "Mock Team", "Drafted By"}
+PLAYER_INFO_HEADERS = {"Player"}
+
+
+def prospect_info_button_html(row):
+    """A small info button opening the floating scouting-report card,
+    rendered only when there's actually a blurb/scouting_report to show -
+    tables that don't select those columns (Actual Picks, Predictions, etc)
+    naturally get nothing here since row.get() just returns None."""
+    blurb = row.get("blurb") or ""
+    scouting = row.get("scouting_report") or ""
+    if not blurb and not scouting:
+        return ""
+    name = esc(row.get("full_name") or "")
+    return (
+        f' <button type="button" class="prospect-info-btn" aria-label="Scouting info for {name}" '
+        f'data-name="{name}" data-blurb="{esc(blurb)}" data-scouting="{esc(scouting)}" '
+        f'onclick="showProspectCard(this)">&#9432;</button>'
+    )
 
 
 def get_selected_year(environ, default_year: int = 2026) -> int:
@@ -123,7 +141,7 @@ def fetch_dashboard_data(conn: sqlite3.Connection, year: int):
             conn,
             """
             SELECT rank, full_name, position_name, school_name, school_class,
-                   is_drafted, draft_team_name, pick_number
+                   is_drafted, draft_team_name, pick_number, blurb, scouting_report
             FROM prospects
             WHERE draft_year = ? AND rank IS NOT NULL
             ORDER BY rank
@@ -139,7 +157,7 @@ def fetch_dashboard_data(conn: sqlite3.Connection, year: int):
             conn,
             """
             SELECT pros.rank, pros.full_name, pros.position_name, pros.school_name, pros.school_class,
-                   pros.current_age, pros.bats, pros.throws,
+                   pros.current_age, pros.bats, pros.throws, pros.blurb, pros.scouting_report,
                    mock.team_name AS mock_team, ROUND(mock.predicted_probability, 4) AS mock_probability
             FROM prospects pros
             LEFT JOIN (
@@ -480,7 +498,11 @@ def filterable_table(table_id, title, headers, rows, cell_keys, *, count_label="
         model = row.get("model_version")
         attrs = row_attrs(status=status, position=position, school=school, team=team, model=model)
         cells = "".join(
-            f'<td data-label="{esc(h)}">{team_logo_html(row.get(k, "")) if h in TEAM_LOGO_HEADERS else ""}{esc(row.get(k, ""))}</td>'
+            f'<td data-label="{esc(h)}">'
+            f'{team_logo_html(row.get(k, "")) if h in TEAM_LOGO_HEADERS else ""}'
+            f'{esc(row.get(k, ""))}'
+            f'{prospect_info_button_html(row) if h in PLAYER_INFO_HEADERS else ""}'
+            f'</td>'
             for h, k in zip(headers, cell_keys)
         )
         body_rows.append(f"<tr class=\"frow\" {attrs}>{cells}</tr>")
@@ -992,6 +1014,70 @@ main { padding: 28px 32px 60px; max-width: 1440px; margin: 0 auto; }
   .toast-container { left: 16px; right: 16px; max-width: none; }
 }
 
+.prospect-info-btn {
+  background: none;
+  border: none;
+  color: var(--accent);
+  font-size: 15px;
+  cursor: pointer;
+  padding: 0 0 0 4px;
+  line-height: 1;
+  vertical-align: -2px;
+}
+.prospect-info-btn:hover { color: var(--text); }
+
+.prospect-card-overlay {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.55);
+  z-index: 300;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+}
+.prospect-card-overlay.visible { display: flex; }
+.prospect-card {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+  padding: 24px 26px;
+  max-width: 480px;
+  width: 100%;
+  max-height: 80vh;
+  overflow-y: auto;
+  position: relative;
+}
+.prospect-card h3 { margin: 0 0 16px; font-size: 19px; padding-right: 24px; }
+.prospect-card-section { margin-bottom: 16px; }
+.prospect-card-section:last-child { margin-bottom: 0; }
+.prospect-card-section h4 {
+  margin: 0 0 6px;
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  color: var(--text-muted);
+  font-weight: 600;
+}
+.prospect-card-section p { margin: 0; font-size: 14px; line-height: 1.5; color: var(--text); white-space: pre-wrap; }
+.prospect-card-section p a { color: var(--accent); text-decoration: none; font-weight: 600; }
+.prospect-card-section p a:hover { text-decoration: underline; }
+.prospect-card-section p:empty::before { content: "Not available."; color: var(--text-muted); font-style: italic; }
+.prospect-card-close {
+  position: absolute;
+  top: 14px;
+  right: 16px;
+  background: none;
+  border: none;
+  color: var(--text-muted);
+  font-size: 20px;
+  cursor: pointer;
+  line-height: 1;
+  padding: 4px;
+}
+.prospect-card-close:hover { color: var(--text); }
+
 .table-wrap { overflow-x: auto; }
 table { border-collapse: collapse; width: 100%; font-size: 13.5px; }
 th, td { padding: 10px 12px; text-align: left; white-space: nowrap; }
@@ -1154,6 +1240,45 @@ function toggleFilterBar() {
   const icon = document.getElementById('filter-toggle-icon');
   if (icon) icon.innerHTML = expanded ? '&#9652;' : '&#9662;';
 }
+
+// Floating scouting-report card: a single shared overlay/card pair, filled
+// in from whichever info button was clicked (data-name/data-blurb/
+// data-scouting attributes) rather than rendering one card per row - keeps
+// the summary tables from having to carry a modal's worth of markup per
+// player just to show text most rows won't ever open.
+function showProspectCard(btn) {
+  document.getElementById('prospect-card-name').textContent = btn.dataset.name;
+  document.getElementById('prospect-card-blurb').textContent = btn.dataset.blurb;
+
+  // MLB's "scoutingReport" field is consistently a link to a scouting video
+  // rather than free text - render it as a clickable link when it looks
+  // like a URL, built via DOM APIs (not innerHTML) so there's no injection
+  // risk even though this data comes from our own backend.
+  const scoutingEl = document.getElementById('prospect-card-scouting');
+  const scouting = btn.dataset.scouting || '';
+  scoutingEl.textContent = '';
+  if (/^https?:/.test(scouting)) {
+    const link = document.createElement('a');
+    link.href = scouting;
+    link.target = '_blank';
+    link.rel = 'noopener noreferrer';
+    link.textContent = 'Watch scouting video ↗';
+    scoutingEl.appendChild(link);
+  } else {
+    scoutingEl.textContent = scouting;
+  }
+
+  document.getElementById('prospect-card-overlay').classList.add('visible');
+}
+
+function hideProspectCard(event) {
+  if (event && event.target !== event.currentTarget) return;
+  document.getElementById('prospect-card-overlay').classList.remove('visible');
+}
+
+document.addEventListener('keydown', function (event) {
+  if (event.key === 'Escape') hideProspectCard();
+});
 
 function showRound(btn) {
   const target = btn.getAttribute('data-target');
@@ -1533,6 +1658,22 @@ def app_factory(db_path: str):
 
           <footer>MLB Draft Tracker &middot; local dashboard</footer>
           <div class="toast-container" id="toast-container"></div>
+
+          <div class="prospect-card-overlay" id="prospect-card-overlay" onclick="hideProspectCard(event)">
+            <div class="prospect-card" onclick="event.stopPropagation()">
+              <button type="button" class="prospect-card-close" aria-label="Close" onclick="hideProspectCard()">&times;</button>
+              <h3 id="prospect-card-name"></h3>
+              <div class="prospect-card-section">
+                <h4>Blurb</h4>
+                <p id="prospect-card-blurb"></p>
+              </div>
+              <div class="prospect-card-section">
+                <h4>Scouting Report</h4>
+                <p id="prospect-card-scouting"></p>
+              </div>
+            </div>
+          </div>
+
           <script>{SCRIPT}</script>
         </body>
         </html>

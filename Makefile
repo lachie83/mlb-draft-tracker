@@ -11,7 +11,7 @@ PICKS ?= 10
 BATCH_SIZE ?= 1
 DELAY ?= 5
 
-.PHONY: help init-db pre-draft-sync sync-prospects seed-no-r-prospects seed-prospects-csv seed-draft-order \
+.PHONY: help init-db pre-draft-sync sync-prospects sync-prospects-api seed-no-r-prospects seed-prospects-csv seed-draft-order \
 	sync-draft-order-api generate-predictions seed-mock-drafts seed-mock-consensus verify-baseballr \
 	live-monitor live-monitor-api on-the-clock-api rehearse-draft-day rehearse-draft-day-cleanup \
 	poll-draft-day live-monitor-status test-telegram dashboard
@@ -19,6 +19,7 @@ DELAY ?= 5
 help:
 	@echo "Common targets (override with YEAR=<year> DB=<path>):"
 	@echo "  make pre-draft-sync            init db + sync order (API) + sync prospects + predictions + mock consensus"
+	@echo "  make sync-prospects-api        replace the prospect board with a live pull from statsapi.mlb.com (rank + scouting text)"
 	@echo "  make rehearse-draft-day        replay a real past draft to test the whole pipeline + Telegram + dashboard"
 	@echo "  make rehearse-draft-day-cleanup  delete a rehearsal's rows (default draft_year=9999) so it can be rerun"
 	@echo "  make poll-draft-day            run the draft-day live-monitor polling loop (MLB Stats API, no R needed)"
@@ -49,6 +50,9 @@ seed-draft-order:
 
 sync-draft-order-api:
 	cd python_app && $(PYTHON) main.py $(DB_FLAG) sync-draft-order-api --year $(YEAR)
+
+sync-prospects-api:
+	cd python_app && $(PYTHON) main.py $(DB_FLAG) sync-prospects-api --year $(YEAR)
 
 generate-predictions:
 	cd python_app && $(PYTHON) main.py $(DB_FLAG) generate-predictions --year $(YEAR) --top-n 5 --max-pick 50

@@ -3,7 +3,10 @@ from __future__ import annotations
 import json
 from pathlib import Path
 
+import pytest
+
 from mlb_tracker.mlb_stats_api import (
+    STATS_API_PROSPECTS_SOURCE,
     get_on_the_clock,
     iter_picks,
     pick_to_actual_pick,
@@ -11,6 +14,7 @@ from mlb_tracker.mlb_stats_api import (
     pick_to_raw_prospect,
     reconcile_picks_from_api,
     sync_draft_order,
+    sync_prospects_from_api,
 )
 from mlb_tracker.sources import normalize_prospect_row
 
@@ -190,3 +194,105 @@ def test_reconcile_picks_from_api_is_idempotent_and_does_not_resend_alerts(conn,
     assert len(second_pass) == 0
     total = conn.execute("SELECT COUNT(*) c FROM actual_picks WHERE draft_year = 2025").fetchone()["c"]
     assert total == len(first_pass)
+
+
+def test_sync_prospects_from_api_loads_ranked_and_unranked_prospects(conn, monkeypatch):
+    payload = load_fixture("draft_prospects_2026.json")
+    monkeypatch.setattr("mlb_tracker.mlb_stats_api.fetch_draft_prospects", lambda year, client=None: payload)
+
+    result = sync_prospects_from_api(conn, draft_year=2026)
+
+    assert result["total_synced"] == 3
+    assert result["ranked_count"] == 2
+    row = conn.execute(
+        "SELECT source, blurb, scouting_report FROM prospects WHERE draft_year=2026 AND mlb_person_id=501"
+    ).fetchone()
+    assert row["source"] == STATS_API_PROSPECTS_SOURCE
+    assert row["blurb"] == "Test blurb for player one."
+    assert row["scouting_report"] == "Test scouting report for player one."
+
+
+def test_sync_prospects_from_api_first_sync_reports_no_diff(conn, monkeypatch):
+    # The very first API-sourced sync has nothing comparable to diff against
+    # (prior data, if any, came from the CSV/no-R fallback's synthetic IDs) -
+    # it should not report every ranked player as both new and dropped.
+    payload = load_fixture("draft_prospects_2026.json")
+    monkeypatch.setattr("mlb_tracker.mlb_stats_api.fetch_draft_prospects", lambda year, client=None: payload)
+
+    result = sync_prospects_from_api(conn, draft_year=2026)
+
+    assert result["new_entrants"] == []
+    assert result["dropped"] == []
+    assert result["rank_changes"] == []
+
+
+def test_sync_prospects_from_api_detects_changes_on_subsequent_sync(conn, monkeypatch):
+    payload = load_fixture("draft_prospects_2026.json")
+    monkeypatch.setattr("mlb_tracker.mlb_stats_api.fetch_draft_prospects", lambda year, client=None: payload)
+    sync_prospects_from_api(conn, draft_year=2026)
+
+    updated = json.loads(json.dumps(payload))  # deep copy
+    prospects = updated["prospects"]
+    # Player Two (rank 2) drops out of the board entirely.
+    prospects[:] = [p for p in prospects if p["person"]["id"] != 502]
+    # Player One moves from rank 1 to rank 2.
+    next(p for p in prospects if p["person"]["id"] == 501)["rank"] = 2
+    # A new player enters at rank 1.
+    new_player = json.loads(json.dumps(next(p for p in payload["prospects"] if p["person"]["id"] == 501)))
+    new_player["person"]["id"] = 504
+    new_player["person"]["fullName"] = "Player Four"
+    new_player["rank"] = 1
+    prospects.append(new_player)
+    monkeypatch.setattr("mlb_tracker.mlb_stats_api.fetch_draft_prospects", lambda year, client=None: updated)
+
+    result = sync_prospects_from_api(conn, draft_year=2026)
+
+    assert [r["mlb_person_id"] for r in result["new_entrants"]] == [504]
+    assert [r["mlb_person_id"] for r in result["dropped"]] == [502]
+    assert result["rank_changes"] == [
+        {"mlb_person_id": 501, "full_name": "Player One", "old_rank": 1, "new_rank": 2}
+    ]
+
+
+def test_sync_prospects_from_api_no_diff_when_nothing_changed(conn, monkeypatch):
+    payload = load_fixture("draft_prospects_2026.json")
+    monkeypatch.setattr("mlb_tracker.mlb_stats_api.fetch_draft_prospects", lambda year, client=None: payload)
+    sync_prospects_from_api(conn, draft_year=2026)
+
+    result = sync_prospects_from_api(conn, draft_year=2026)
+
+    assert result["new_entrants"] == []
+    assert result["dropped"] == []
+    assert result["rank_changes"] == []
+
+
+def test_sync_prospects_from_api_clears_stale_predictions_and_mock_picks(conn, monkeypatch):
+    payload = load_fixture("draft_prospects_2026.json")
+    monkeypatch.setattr("mlb_tracker.mlb_stats_api.fetch_draft_prospects", lambda year, client=None: payload)
+    sync_prospects_from_api(conn, draft_year=2026)
+    old_prospect_id = conn.execute(
+        "SELECT prospect_id FROM prospects WHERE draft_year=2026 AND mlb_person_id=501"
+    ).fetchone()["prospect_id"]
+    conn.execute(
+        "INSERT INTO predictions (draft_year, pick_number, team_name, prospect_id, player_name, "
+        "predicted_probability, model_version, prediction_source) VALUES (2026, 1, 'Some Team', ?, 'Player One', 0.5, 'v1', 'test')",
+        (old_prospect_id,),
+    )
+    conn.commit()
+
+    # Would raise sqlite3.IntegrityError (FOREIGN KEY constraint failed) if
+    # predictions referencing the old prospect_id weren't cleared first -
+    # this is the same bug class fixed in rehearse-draft-day-cleanup.
+    sync_prospects_from_api(conn, draft_year=2026)
+
+    assert conn.execute("SELECT COUNT(*) c FROM predictions WHERE draft_year=2026").fetchone()["c"] == 0
+
+
+def test_sync_prospects_from_api_raises_when_endpoint_is_empty(conn, monkeypatch):
+    monkeypatch.setattr(
+        "mlb_tracker.mlb_stats_api.fetch_draft_prospects",
+        lambda year, client=None: {"prospects": []},
+    )
+
+    with pytest.raises(RuntimeError, match="returned no prospects"):
+        sync_prospects_from_api(conn, draft_year=2026)

@@ -23,18 +23,22 @@ echo "==> Syncing official draft order from the MLB Stats API"
 python3 main.py "${DB_ARGS[@]}" sync-draft-order-api --year "$YEAR"
 
 echo "==> Syncing prospects"
-# The MLB Stats API's per-year prospects list isn't populated pre-draft (verified
-# empty for an upcoming draft), so the ranked pre-draft board still comes from
-# baseballr when available, or the CSV/no-R fallback otherwise. Draft order and
-# live picks (see live-monitor-api) don't have this gap.
+# /draft/prospects/{year} was empty pre-draft every time this was checked
+# through 2026-07-07, but MLB populated it as of 2026-07-08 - live rank plus
+# real scouting blurb/report text, richer than the CSV/no-R fallback. Try it
+# first; if MLB hasn't populated it for some other year, or the call fails
+# for any reason, fall through to baseballr, then the CSV/no-R chain that
+# used to be the only option (unchanged, still here as a safety net).
 PROSPECTS_CSV="${PROSPECTS_SEED_CSV:-../examples/prospects_top250_seed_${YEAR}.csv}"
-if python3 main.py verify-baseballr >/dev/null 2>&1 && python3 main.py "${DB_ARGS[@]}" sync-prospects --year "$YEAR"; then
-  echo "    synced prospects via baseballr"
+if python3 main.py "${DB_ARGS[@]}" sync-prospects-api --year "$YEAR"; then
+  echo "    synced prospects live from the MLB Stats API"
+elif python3 main.py verify-baseballr >/dev/null 2>&1 && python3 main.py "${DB_ARGS[@]}" sync-prospects --year "$YEAR"; then
+  echo "    MLB Stats API prospects unavailable, synced via baseballr instead"
 elif [ -f "$PROSPECTS_CSV" ]; then
-  echo "    baseballr unavailable or its live call failed, seeding the top-250 CSV snapshot ($PROSPECTS_CSV)"
+  echo "    MLB Stats API and baseballr both unavailable, seeding the top-250 CSV snapshot ($PROSPECTS_CSV)"
   python3 main.py "${DB_ARGS[@]}" seed-prospects-csv --year "$YEAR" --csv "$PROSPECTS_CSV"
 else
-  echo "    baseballr unavailable or its live call failed, and no CSV snapshot exists for $YEAR, using the no-R live-scrape fallback"
+  echo "    MLB Stats API and baseballr both unavailable, and no CSV snapshot exists for $YEAR, using the no-R live-scrape fallback"
   python3 main.py "${DB_ARGS[@]}" seed-no-r-prospects --year "$YEAR"
 fi
 
