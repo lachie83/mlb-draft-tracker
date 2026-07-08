@@ -123,7 +123,15 @@ def cleanup_rehearsal_data(conn, year: int = 9999) -> dict[str, int]:
             "rehearsal sentinel. This command only ever deletes rehearsal data."
         )
     deleted: dict[str, int] = {}
-    for table in ("draft_slots", "prospects", "actual_picks"):
+    # actual_picks/predictions/mock_draft_picks all have a FOREIGN KEY on
+    # prospects.prospect_id (see sql/schema.sql) - with foreign_keys=ON
+    # (get_connection always sets it), deleting prospects first raises
+    # "FOREIGN KEY constraint failed" if any of those still reference it.
+    # predictions/mock_draft_picks aren't normally written by a rehearsal,
+    # but are included defensively in case stray rows exist for this year.
+    # draft_slots and prospects have no incoming references, so they're
+    # safe to delete last, in either order.
+    for table in ("actual_picks", "predictions", "mock_draft_picks", "draft_slots", "prospects"):
         cur = conn.execute(f"DELETE FROM {table} WHERE draft_year = ?", (year,))
         deleted[table] = cur.rowcount
     cur = conn.execute(
