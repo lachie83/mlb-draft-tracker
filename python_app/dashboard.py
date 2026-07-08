@@ -838,6 +838,11 @@ body {
   flex-wrap: wrap;
   gap: 12px;
   padding: 18px 32px;
+  /* With viewport-fit=cover, the page now renders under the iOS notch/
+     status bar instead of leaving that strip as uncolored browser chrome -
+     this keeps the topbar's dark background filling it instead of the
+     header content sliding up underneath the clock/Dynamic Island. */
+  padding-top: max(18px, env(safe-area-inset-top));
   background: var(--chrome-bg);
   backdrop-filter: blur(10px);
   border-bottom: 1px solid var(--border);
@@ -1657,7 +1662,7 @@ def app_factory(db_path: str):
         <html lang="en">
         <head>
           <meta charset="utf-8">
-          <meta name="viewport" content="width=device-width, initial-scale=1">
+          <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
           <title>MLB Draft Tracker</title>
           <link rel="icon" href="/favicon.ico" type="image/x-icon">
           <meta name="theme-color" content="#0b1120">
