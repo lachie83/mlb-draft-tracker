@@ -130,7 +130,20 @@ def test_rehearse_draft_day_flips_a_players_prospect_row_when_drafted(conn, monk
 def seed_rehearsal_rows(conn, year: int) -> None:
     seed_draft_slot(conn, draft_year=year, pick_number=1, team_name="Team A")
     seed_prospect(conn, draft_year=year, person_id=1, person_full_name="Some Prospect")
-    seed_actual_pick(conn, draft_year=year, pick_number=1, team_name="Team A", player_name="Some Prospect")
+    # actual_picks.prospect_id is a real FOREIGN KEY on prospects.prospect_id
+    # (enforced - get_connection always sets PRAGMA foreign_keys = ON), so
+    # link it here for real rather than leaving it NULL - a NULL FK is
+    # trivially deletable in any order and would silently hide a real
+    # ordering bug in cleanup_rehearsal_data (as it did before this test
+    # was written this way).
+    prospect_id = conn.execute(
+        "SELECT prospect_id FROM prospects WHERE draft_year = ? AND full_name = ?",
+        (year, "Some Prospect"),
+    ).fetchone()["prospect_id"]
+    seed_actual_pick(
+        conn, draft_year=year, pick_number=1, team_name="Team A", player_name="Some Prospect",
+        prospect_id=prospect_id,
+    )
     mark_event_sent(conn, f"draft_pick:{year}:1", "hash", 1, "message text")
     conn.commit()
 
@@ -158,9 +171,11 @@ def test_cleanup_rehearsal_data_returns_rowcounts_per_table(conn):
     deleted = cleanup_rehearsal_data(conn, year=9999)
 
     assert deleted == {
+        "actual_picks": 1,
+        "predictions": 0,
+        "mock_draft_picks": 0,
         "draft_slots": 1,
         "prospects": 1,
-        "actual_picks": 1,
         "telegram_events_sent": 1,
     }
 
