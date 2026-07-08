@@ -33,6 +33,8 @@ data/
 dist/
 build/
 coverage/
+.coverage
+htmlcov/
 .pytest_cache/
 .mypy_cache/
 

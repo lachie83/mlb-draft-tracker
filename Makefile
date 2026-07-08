@@ -14,7 +14,7 @@ DELAY ?= 5
 .PHONY: help init-db pre-draft-sync sync-prospects sync-prospects-api seed-no-r-prospects seed-prospects-csv seed-draft-order \
 	sync-draft-order-api generate-predictions seed-mock-drafts seed-mock-consensus verify-baseballr \
 	live-monitor live-monitor-api on-the-clock-api rehearse-draft-day rehearse-draft-day-cleanup \
-	poll-draft-day live-monitor-status test-telegram dashboard
+	poll-draft-day live-monitor-status test-telegram dashboard coverage
 
 help:
 	@echo "Common targets (override with YEAR=<year> DB=<path>):"
@@ -27,6 +27,7 @@ help:
 	@echo "  make on-the-clock-api          print who's on the clock right now via the MLB Stats API"
 	@echo "  make test-telegram             send a one-off Telegram test message"
 	@echo "  make dashboard                 run the local dashboard on :8000"
+	@echo "  make coverage                  run the test suite with a line-coverage report"
 	@echo "  make init-db / sync-prospects / seed-no-r-prospects / seed-prospects-csv / seed-draft-order / sync-draft-order-api"
 	@echo "  make generate-predictions / seed-mock-drafts / seed-mock-consensus / verify-baseballr / live-monitor / live-monitor-api"
 
@@ -93,3 +94,6 @@ test-telegram:
 
 dashboard:
 	cd python_app && $(PYTHON) dashboard.py --host 0.0.0.0 --port 8000
+
+coverage:
+	cd python_app && $(PYTHON) -m pytest --cov=. --cov-report=term-missing
