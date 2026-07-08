@@ -54,7 +54,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - uses: azure/setup-kubectl@v4
+      - uses: azure/setup-kubectl@v5
 
       - name: Render kustomization (catches YAML/reference errors)
         run: kubectl kustomize k8s/ > /dev/null
