@@ -1453,7 +1453,13 @@ function showPickToast(pick) {
 function maybeNativeNotify(pick) {
   if (localStorage.getItem('mlb_pick_alerts') !== '1') return;
   if (typeof Notification === 'undefined' || Notification.permission !== 'granted') return;
-  if (!document.hidden) return; // tab is focused - the in-page toast already covers this
+  // document.hidden only tracks tab visibility (is this the active tab in a
+  // non-minimized window) - it stays false even when the user has switched
+  // OS focus away to another app (e.g. a terminal) while the dashboard tab
+  // sits open in the background. Checking hasFocus() too means the native
+  // notification only gets suppressed when the in-page toast is actually
+  // guaranteed to be seen.
+  if (!document.hidden && document.hasFocus()) return;
   // Native notifications can't render our two-variant light/dark <img> markup
   // in the body, but the Notification API does support a single icon image.
   new Notification(pick.title, { body: pick.summary, icon: pick.team_logo_url || undefined });
