@@ -160,6 +160,7 @@ app's built-in db path) overrides, e.g. `make pre-draft-sync YEAR=2025`.
 | `make rehearse-draft-day-cleanup` | Deletes one rehearsal's rows (`draft_slots`/`prospects`/`actual_picks`/`telegram_events_sent`) so it can be rerun, without needing to delete the whole database file — the only way to reset a rehearsal that was run against a shared/production db. Refuses to run against `--year 2025` or `2026`. Override with `REHEARSAL_DB=`, `REHEARSAL_YEAR=`. See §4a. |
 | `make init-db` / `sync-prospects` / `seed-no-r-prospects` / `seed-prospects-csv` / `seed-draft-order` / `generate-predictions` / `verify-baseballr` / `live-monitor` | Thin wrappers around the matching `main.py` subcommand. `seed-draft-order` (CSV) and `live-monitor` (baseballr) are the legacy paths, superseded by `sync-draft-order-api` / `live-monitor-api` above. `seed-prospects-csv` loads the full top-250 board from `examples/prospects_top250_seed_2026.csv` when baseballr is unavailable. |
 | `make dashboard` | Runs the local dashboard on `:8000`. |
+| `make coverage` | Runs the test suite with a per-module line-coverage report (`pytest-cov`, config in `python_app/.coveragerc`). Test files are excluded from the measured source so the percentage reflects application code, not the tests themselves. |
 
 Run `make help` for the full list.
 
