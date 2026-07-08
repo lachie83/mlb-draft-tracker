@@ -1,6 +1,12 @@
 from __future__ import annotations
 
-from dashboard import describe_prospect_source, fetch_dashboard_data, fetch_latest_picks, prospect_info_button_html
+from dashboard import (
+    describe_prospect_source,
+    fetch_dashboard_data,
+    fetch_latest_picks,
+    get_selected_theme,
+    prospect_info_button_html,
+)
 
 from .factories import seed_actual_pick, seed_draft_slot, seed_prediction, seed_prospect
 
@@ -242,3 +248,24 @@ def test_summary_includes_prospect_source(conn):
     data = fetch_dashboard_data(conn, 2026)
 
     assert data["summary"]["prospect_source"] == "Live MLB API"
+
+
+def test_get_selected_theme_none_when_no_cookie():
+    assert get_selected_theme({}) is None
+
+
+def test_get_selected_theme_reads_valid_cookie_values():
+    assert get_selected_theme({"HTTP_COOKIE": "mlb_theme=light"}) == "light"
+    assert get_selected_theme({"HTTP_COOKIE": "mlb_theme=dark"}) == "dark"
+
+
+def test_get_selected_theme_ignores_unknown_value():
+    assert get_selected_theme({"HTTP_COOKIE": "mlb_theme=purple"}) is None
+
+
+def test_get_selected_theme_reads_alongside_other_cookies():
+    assert get_selected_theme({"HTTP_COOKIE": "other=1; mlb_theme=light; another=2"}) == "light"
+
+
+def test_get_selected_theme_none_on_malformed_cookie_header():
+    assert get_selected_theme({"HTTP_COOKIE": "not a valid \x00 cookie header"}) is None
