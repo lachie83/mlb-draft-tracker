@@ -1377,7 +1377,12 @@ function toggleTheme() {
   const current = document.documentElement.getAttribute('data-theme') || 'dark';
   const next = current === 'light' ? 'dark' : 'light';
   localStorage.setItem('mlb_theme', next);
-  applyThemeUi(next);
+  // iOS Safari only re-reads <meta name="theme-color"> (the status-bar/
+  // toolbar chrome color) on a real navigation - mutating it in place after
+  // the click leaves the chrome stuck on the old theme even though the page
+  // content flips instantly. Reloading is what already makes the chrome
+  // come out correct on every auto-refresh cycle, so reuse that here too.
+  window.location.reload();
 }
 
 function applyThemeUi(theme) {
