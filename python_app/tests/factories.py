@@ -36,8 +36,15 @@ def make_raw_prospect(**overrides: Any) -> dict[str, Any]:
 
 
 def seed_prospect(conn, draft_year: int = 2026, **overrides: Any) -> dict[str, Any]:
+    # normalize_prospect_row() always hardcodes source to the baseballr
+    # value regardless of what's in the raw dict (every real sync path
+    # explicitly overrides it afterward - see mlb_stats_api.py/main.py) -
+    # do the same here so tests can actually control it.
+    source = overrides.pop("source", None)
     raw = make_raw_prospect(**overrides)
     normalized = normalize_prospect_row(raw, draft_year)
+    if source is not None:
+        normalized["source"] = source
     upsert_prospect(conn, normalized)
     conn.commit()
     return normalized

@@ -14,6 +14,14 @@ Endpoints used:
   live draft yet (none was in progress), so `get_on_the_clock` only relies
   on `nextUp`, not any assumed "just picked" field. Re-verify once a draft
   is actually live before depending on more of this response.
+- GET /draft/prospects/{year}  the full draft-eligible pool. Returned 0
+  results for 2026 every time this was checked pre-draft (through
+  2026-07-07); as of 2026-07-08 it's populated with 2000+ prospects, 250 of
+  them ranked with real `blurb`/`scoutingReport` text - the same board as
+  the CSV/no-R fallback, but live and richer. Each record has the same
+  shape as a "pick" object from /draft/{year} (person/school/home/rank/
+  blurb/scoutingReport at the same keys), just without team/pickRound/
+  pickNumber assigned yet, so pick_to_raw_prospect() below is reused as-is.
 
 Design note: this module only *reads* the live API and maps its objects
 into the same shapes the rest of the app already understands
@@ -27,13 +35,15 @@ import json
 from typing import Any, Iterable
 
 from .clients import HttpClient
-from .db import upsert_actual_pick, upsert_draft_slot, upsert_prospect
+from .db import clear_prospect_board, upsert_actual_pick, upsert_draft_slot, upsert_prospect
 from .sources import normalize_prospect_row
 from .telegram import TelegramNotifier, send_pick_if_new
 
 DRAFT_URL_TMPL = "https://statsapi.mlb.com/api/v1/draft/{year}"
 LATEST_URL_TMPL = "https://statsapi.mlb.com/api/v1/draft/{year}/latest"
+DRAFT_PROSPECTS_URL_TMPL = "https://statsapi.mlb.com/api/v1/draft/prospects/{year}"
 STATS_API_SOURCE = "mlb_stats_api"
+STATS_API_PROSPECTS_SOURCE = "mlb_stats_api_prospects"
 
 
 def fetch_draft(year: int, client: HttpClient | None = None) -> dict[str, Any]:
@@ -44,6 +54,15 @@ def fetch_draft(year: int, client: HttpClient | None = None) -> dict[str, Any]:
 def fetch_latest(year: int, client: HttpClient | None = None) -> dict[str, Any]:
     client = client or HttpClient()
     return client.get_json(LATEST_URL_TMPL.format(year=year))
+
+
+def fetch_draft_prospects(year: int, client: HttpClient | None = None) -> dict[str, Any]:
+    client = client or HttpClient()
+    return client.get_json(DRAFT_PROSPECTS_URL_TMPL.format(year=year))
+
+
+def iter_prospects(prospects_payload: dict[str, Any]) -> list[dict[str, Any]]:
+    return prospects_payload.get("prospects") or []
 
 
 def iter_picks(draft_payload: dict[str, Any]) -> Iterable[dict[str, Any]]:
@@ -191,6 +210,101 @@ def sync_draft_order(conn, draft_year: int, client: HttpClient | None = None) ->
     for row in rows:
         upsert_draft_slot(conn, row)
     return rows
+
+
+def _ranked_board(conn, draft_year: int) -> dict[int, dict[str, Any]]:
+    return {
+        row["mlb_person_id"]: {"rank": row["rank"], "full_name": row["full_name"]}
+        for row in conn.execute(
+            "SELECT mlb_person_id, rank, full_name FROM prospects "
+            "WHERE draft_year = ? AND rank IS NOT NULL AND mlb_person_id IS NOT NULL",
+            (draft_year,),
+        ).fetchall()
+    }
+
+
+def sync_prospects_from_api(conn, draft_year: int, client: HttpClient | None = None) -> dict[str, Any]:
+    """Replace draft_year's entire prospect board with a fresh pull from
+    /draft/prospects/{year} - rank plus real scouting blurb/report, when MLB
+    has populated it (empty pre-draft until MLB turns it on; raises if so,
+    letting the caller fall back to the CSV/no-R path).
+
+    Full replace rather than upsert - see db.clear_prospect_board() for why
+    (synthetic IDs from the CSV/no-R fallback would create duplicate rows
+    instead of updating them).
+
+    Returns a diff of the ranked board vs. what was stored before this
+    call - {"new_entrants", "dropped", "rank_changes"} - for change
+    monitoring/Telegram alerts, plus totals. The very first call for a year
+    (transitioning off the CSV/no-R fallback, which uses synthetic
+    mlb_person_id values that can't match the API's real ones) has no
+    comparable prior state, so the diff is intentionally left empty rather
+    than reporting every single player as both a new entrant and dropped.
+    """
+    payload = fetch_draft_prospects(draft_year, client=client)
+    prospects = iter_prospects(payload)
+    if not prospects:
+        raise RuntimeError(
+            f"/draft/prospects/{draft_year} returned no prospects - MLB may not have "
+            "populated it yet for this year. Not touching existing data."
+        )
+
+    is_first_api_sync = not conn.execute(
+        "SELECT 1 FROM prospects WHERE draft_year = ? AND source = ? LIMIT 1",
+        (draft_year, STATS_API_PROSPECTS_SOURCE),
+    ).fetchone()
+    before = {} if is_first_api_sync else _ranked_board(conn, draft_year)
+
+    clear_prospect_board(conn, draft_year)
+
+    ranked_count = 0
+    for record in prospects:
+        raw = pick_to_raw_prospect(record)
+        if raw is None:
+            continue
+        normalized = normalize_prospect_row(raw, draft_year)
+        normalized["source"] = STATS_API_PROSPECTS_SOURCE
+        upsert_prospect(conn, normalized)
+        if raw.get("rank") is not None:
+            ranked_count += 1
+
+    after = _ranked_board(conn, draft_year)
+    conn.commit()
+
+    if is_first_api_sync:
+        # Nothing comparable to diff against - not a "change" worth
+        # reporting, just a one-time source transition.
+        new_entrants, dropped, rank_changes = [], [], []
+    else:
+        new_entrants = sorted(
+            ({"mlb_person_id": pid, **after[pid]} for pid in after if pid not in before),
+            key=lambda r: r["rank"],
+        )
+        dropped = sorted(
+            ({"mlb_person_id": pid, **before[pid]} for pid in before if pid not in after),
+            key=lambda r: r["rank"],
+        )
+        rank_changes = sorted(
+            (
+                {
+                    "mlb_person_id": pid,
+                    "full_name": after[pid]["full_name"],
+                    "old_rank": before[pid]["rank"],
+                    "new_rank": after[pid]["rank"],
+                }
+                for pid in after
+                if pid in before and before[pid]["rank"] != after[pid]["rank"]
+            ),
+            key=lambda r: r["new_rank"],
+        )
+
+    return {
+        "total_synced": len(prospects),
+        "ranked_count": ranked_count,
+        "new_entrants": new_entrants,
+        "dropped": dropped,
+        "rank_changes": rank_changes,
+    }
 
 
 def reconcile_picks_from_api(

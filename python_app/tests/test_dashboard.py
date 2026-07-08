@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from dashboard import fetch_dashboard_data, fetch_latest_picks
+from dashboard import describe_prospect_source, fetch_dashboard_data, fetch_latest_picks, prospect_info_button_html
 
 from .factories import seed_actual_pick, seed_draft_slot, seed_prediction, seed_prospect
 
@@ -172,3 +172,73 @@ def test_fetch_latest_picks_scoped_to_draft_year(conn):
 
     assert len(picks) == 1
     assert picks[0]["team_name"] == "New Team"
+
+
+def test_best_available_and_top_250_carry_blurb_and_scouting_report(conn):
+    seed_draft_slot(conn, pick_number=1, team_name="Some Team")
+    seed_prospect(
+        conn, person_id=1, person_full_name="Scouted Player", rank=1,
+        blurb="A promising talent.", scouting_report="Plus hit tool, above-average arm.",
+    )
+
+    data = fetch_dashboard_data(conn, 2026)
+
+    best_row = data["best_available"][0]
+    assert best_row["blurb"] == "A promising talent."
+    assert best_row["scouting_report"] == "Plus hit tool, above-average arm."
+
+    board_row = data["top_250"][0]
+    assert board_row["blurb"] == "A promising talent."
+    assert board_row["scouting_report"] == "Plus hit tool, above-average arm."
+
+
+def test_prospect_info_button_renders_only_when_text_is_present():
+    with_blurb = prospect_info_button_html(
+        {"full_name": "Has Blurb", "blurb": "Some text.", "scouting_report": ""}
+    )
+    assert "prospect-info-btn" in with_blurb
+    assert 'data-name="Has Blurb"' in with_blurb
+    assert 'data-blurb="Some text."' in with_blurb
+
+    with_scouting_only = prospect_info_button_html(
+        {"full_name": "Has Scouting", "blurb": "", "scouting_report": "Some report."}
+    )
+    assert "prospect-info-btn" in with_scouting_only
+
+    without_either = prospect_info_button_html(
+        {"full_name": "No Text", "blurb": None, "scouting_report": None}
+    )
+    assert without_either == ""
+
+    missing_keys_entirely = prospect_info_button_html({"full_name": "No Keys At All"})
+    assert missing_keys_entirely == ""
+
+
+def test_describe_prospect_source_no_data():
+    assert describe_prospect_source([]) == "No data loaded"
+
+
+def test_describe_prospect_source_maps_known_values():
+    assert describe_prospect_source(["mlb_stats_api_prospects"]) == "Live MLB API"
+    assert describe_prospect_source(["baseballr_mlb_draft_prospects"]) == "baseballr"
+    assert describe_prospect_source(["mlb_pipeline_draft_prospects_manual_csv"]) == "CSV snapshot"
+    assert describe_prospect_source(["no_r_pipeline_scrape"]) == "No-R scrape"
+
+
+def test_describe_prospect_source_falls_back_to_raw_value_for_unknown_source():
+    assert describe_prospect_source(["some_future_source"]) == "some_future_source"
+
+
+def test_describe_prospect_source_flags_mixed_state():
+    result = describe_prospect_source(["mlb_stats_api_prospects", "mlb_pipeline_draft_prospects_manual_csv"])
+    assert result.startswith("Mixed sources")
+    assert "Live MLB API" in result
+    assert "CSV snapshot" in result
+
+
+def test_summary_includes_prospect_source(conn):
+    seed_prospect(conn, person_id=1, person_full_name="Some Prospect", rank=1, source="mlb_stats_api_prospects")
+
+    data = fetch_dashboard_data(conn, 2026)
+
+    assert data["summary"]["prospect_source"] == "Live MLB API"

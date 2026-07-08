@@ -8,6 +8,7 @@ from mlb_tracker.telegram import (
     TelegramNotifier,
     format_pick_summary,
     format_pick_title,
+    format_prospect_changes_message,
     make_pick_message,
     round_display_name,
     send_pick_if_new,
@@ -162,3 +163,39 @@ def test_send_raises_with_telegrams_error_description(monkeypatch):
 
     with pytest.raises(requests.exceptions.HTTPError, match="chat not found"):
         notifier.send("hello")
+
+
+def test_format_prospect_changes_message_returns_none_when_nothing_changed():
+    empty_diff = {"new_entrants": [], "dropped": [], "rank_changes": []}
+    assert format_prospect_changes_message(2026, empty_diff) is None
+
+
+def test_format_prospect_changes_message_renders_each_section():
+    diff = {
+        "new_entrants": [{"mlb_person_id": 1, "rank": 45, "full_name": "New Guy"}],
+        "dropped": [{"mlb_person_id": 2, "rank": 240, "full_name": "Old Guy"}],
+        "rank_changes": [
+            {"mlb_person_id": 3, "full_name": "Shifted Guy", "old_rank": 18, "new_rank": 12}
+        ],
+    }
+
+    message = format_prospect_changes_message(2026, diff)
+
+    assert "2026" in message
+    assert "New entrants (1):" in message
+    assert "#45 New Guy" in message
+    assert "Dropped (1):" in message
+    assert "#240 Old Guy" in message
+    assert "Rank changes (1):" in message
+    assert "Shifted Guy: #18 → #12" in message
+
+
+def test_format_prospect_changes_message_caps_long_sections():
+    new_entrants = [{"mlb_person_id": i, "rank": i, "full_name": f"Player {i}"} for i in range(1, 16)]
+    diff = {"new_entrants": new_entrants, "dropped": [], "rank_changes": []}
+
+    message = format_prospect_changes_message(2026, diff, max_items=10)
+
+    assert "New entrants (15):" in message
+    assert "...and 5 more" in message
+    assert "Player 11" not in message

@@ -3,12 +3,26 @@ from __future__ import annotations
 import argparse
 from pathlib import Path
 
-from mlb_tracker.db import DEFAULT_DB_PATH, get_connection, init_db, insert_or_replace_predictions, upsert_draft_slot, upsert_prospect
+from mlb_tracker.db import (
+    DEFAULT_DB_PATH,
+    clear_prospect_board,
+    get_connection,
+    init_db,
+    insert_or_replace_predictions,
+    upsert_draft_slot,
+    upsert_prospect,
+)
 from mlb_tracker.draft_rehearsal import cleanup_rehearsal_data, rehearse_draft_day
 from mlb_tracker.live_monitor import reconcile_live_picks
-from mlb_tracker.mlb_stats_api import fetch_latest, get_on_the_clock, reconcile_picks_from_api, sync_draft_order
+from mlb_tracker.mlb_stats_api import (
+    fetch_latest,
+    get_on_the_clock,
+    reconcile_picks_from_api,
+    sync_draft_order,
+    sync_prospects_from_api,
+)
 from mlb_tracker.mock_ingest import generate_mock_consensus_predictions, ingest_real_mock_draft_picks
-from mlb_tracker.no_r_ingest import build_no_r_seed
+from mlb_tracker.no_r_ingest import NO_R_SOURCE, build_no_r_seed
 from mlb_tracker.predictions import generate_predictions
 from mlb_tracker.sources import (
     fetch_baseballr_prospects_csv,
@@ -17,7 +31,7 @@ from mlb_tracker.sources import (
     seed_prospects_from_csv,
     verify_baseballr_setup,
 )
-from mlb_tracker.telegram import TelegramNotifier
+from mlb_tracker.telegram import TelegramNotifier, format_prospect_changes_message
 
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -34,6 +48,7 @@ def cmd_sync_prospects(args):
     init_db(args.db)
     conn = get_connection(args.db)
     rows = fetch_baseballr_prospects_csv(args.year)
+    clear_prospect_board(conn, args.year)
     for raw in rows:
         upsert_prospect(conn, normalize_prospect_row(raw, args.year))
     conn.commit()
@@ -45,8 +60,11 @@ def cmd_seed_no_r_prospects(args):
     init_db(args.db)
     conn = get_connection(args.db)
     rows = build_no_r_seed()
+    clear_prospect_board(conn, args.year)
     for raw in rows:
-        upsert_prospect(conn, normalize_prospect_row(raw, args.year))
+        normalized = normalize_prospect_row(raw, args.year)
+        normalized["source"] = NO_R_SOURCE
+        upsert_prospect(conn, normalized)
     conn.commit()
     conn.close()
     print(f"Seeded {len(rows)} no-R prospects for {args.year}")
@@ -56,6 +74,7 @@ def cmd_seed_prospects_csv(args):
     init_db(args.db)
     conn = get_connection(args.db)
     rows = seed_prospects_from_csv(Path(args.csv), args.year)
+    clear_prospect_board(conn, args.year)
     for row in rows:
         upsert_prospect(conn, row)
     conn.commit()
@@ -120,6 +139,28 @@ def cmd_sync_draft_order_api(args):
     conn.commit()
     conn.close()
     print(f"Synced {len(rows)} draft slots from the MLB Stats API for {args.year}")
+
+
+def cmd_sync_prospects_api(args):
+    init_db(args.db)
+    conn = get_connection(args.db)
+    result = sync_prospects_from_api(conn, draft_year=args.year)
+    conn.close()
+    print(
+        f"Synced {result['total_synced']} prospects ({result['ranked_count']} ranked) "
+        f"from the MLB Stats API for {args.year}"
+    )
+
+    message = format_prospect_changes_message(args.year, result)
+    if message is None:
+        print("No change to the ranked board since the last sync.")
+        return
+    print(message)
+    if args.notify:
+        notifier = TelegramNotifier()
+        print(f"Telegram: {notifier.send(message)}")
+    else:
+        print("(--no-notify passed, not sending to Telegram)")
 
 
 def cmd_live_monitor_api(args):
@@ -255,6 +296,14 @@ def build_parser() -> argparse.ArgumentParser:
     p = sub.add_parser("sync-draft-order-api")
     p.add_argument("--year", type=int, default=2026)
     p.set_defaults(func=cmd_sync_draft_order_api)
+
+    p = sub.add_parser("sync-prospects-api")
+    p.add_argument("--year", type=int, default=2026)
+    p.add_argument(
+        "--notify", action=argparse.BooleanOptionalAction, default=True,
+        help="send a Telegram alert if the ranked board changed since the last sync (default: yes)",
+    )
+    p.set_defaults(func=cmd_sync_prospects_api)
 
     p = sub.add_parser("live-monitor-api")
     p.add_argument("--year", type=int, default=2026)
