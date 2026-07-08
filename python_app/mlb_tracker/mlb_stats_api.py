@@ -35,7 +35,7 @@ import json
 from typing import Any, Iterable
 
 from .clients import HttpClient
-from .db import upsert_actual_pick, upsert_draft_slot, upsert_prospect
+from .db import clear_prospect_board, upsert_actual_pick, upsert_draft_slot, upsert_prospect
 from .sources import normalize_prospect_row
 from .telegram import TelegramNotifier, send_pick_if_new
 
@@ -229,19 +229,9 @@ def sync_prospects_from_api(conn, draft_year: int, client: HttpClient | None = N
     has populated it (empty pre-draft until MLB turns it on; raises if so,
     letting the caller fall back to the CSV/no-R path).
 
-    Full replace rather than upsert: the CSV/no-R fallback seeds synthetic
-    mlb_person_id values that would never match the API's real person IDs,
-    so upserting on top would create duplicate rows instead of updating
-    them. predictions/mock_draft_picks for this year are cleared first
-    (FOREIGN KEY on prospects.prospect_id - see the rehearse-draft-day-
-    cleanup FK-ordering fix) since pre_draft_sync.sh always regenerates
-    both immediately after this step anyway. actual_picks has the same FK
-    but holds real, irreplaceable draft results once the draft is live -
-    its prospect_id is set to NULL rather than deleting those rows; the
-    live-monitor poller re-links it to the fresh prospect rows on its very
-    next cycle (it re-upserts every pick's prospect_id unconditionally,
-    not just on newly-seen picks), so this is a momentary, self-healing gap
-    rather than a permanent loss of the link.
+    Full replace rather than upsert - see db.clear_prospect_board() for why
+    (synthetic IDs from the CSV/no-R fallback would create duplicate rows
+    instead of updating them).
 
     Returns a diff of the ranked board vs. what was stored before this
     call - {"new_entrants", "dropped", "rank_changes"} - for change
@@ -265,10 +255,7 @@ def sync_prospects_from_api(conn, draft_year: int, client: HttpClient | None = N
     ).fetchone()
     before = {} if is_first_api_sync else _ranked_board(conn, draft_year)
 
-    conn.execute("UPDATE actual_picks SET prospect_id = NULL WHERE draft_year = ?", (draft_year,))
-    conn.execute("DELETE FROM predictions WHERE draft_year = ?", (draft_year,))
-    conn.execute("DELETE FROM mock_draft_picks WHERE draft_year = ?", (draft_year,))
-    conn.execute("DELETE FROM prospects WHERE draft_year = ?", (draft_year,))
+    clear_prospect_board(conn, draft_year)
 
     ranked_count = 0
     for record in prospects:

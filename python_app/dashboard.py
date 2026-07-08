@@ -9,8 +9,28 @@ from collections import defaultdict
 from urllib.parse import parse_qs
 from wsgiref.simple_server import make_server
 
-from mlb_tracker.db import DEFAULT_DB_PATH, get_connection, init_db
+from mlb_tracker.db import DEFAULT_DB_PATH, get_connection, get_prospect_sources, init_db
 from mlb_tracker.telegram import format_pick_summary, format_pick_title, round_display_name
+
+PROSPECT_SOURCE_LABELS = {
+    "mlb_stats_api_prospects": "Live MLB API",
+    "baseballr_mlb_draft_prospects": "baseballr",
+    "mlb_pipeline_draft_prospects_manual_csv": "CSV snapshot",
+    "no_r_pipeline_scrape": "No-R scrape",
+}
+
+
+def describe_prospect_source(sources: list[str]) -> str:
+    if not sources:
+        return "No data loaded"
+    if len(sources) > 1:
+        # Shouldn't happen once every sync path clears the board first
+        # (db.clear_prospect_board) - surfaced rather than silently
+        # picking one, since it means something wrote prospects without
+        # going through the normal sync commands.
+        labels = ", ".join(PROSPECT_SOURCE_LABELS.get(s, s) for s in sources)
+        return f"Mixed sources ({labels})"
+    return PROSPECT_SOURCE_LABELS.get(sources[0], sources[0])
 
 
 def q(conn: sqlite3.Connection, sql: str, params=()):
@@ -411,6 +431,7 @@ def fetch_dashboard_data(conn: sqlite3.Connection, year: int):
     summary = {
         "year": year,
         "prospects_loaded": prospects_loaded,
+        "prospect_source": describe_prospect_source(get_prospect_sources(conn, year)),
         "picks_loaded": picks_loaded,
         "predictions_loaded": predictions_loaded,
         "top_ranked_available": top_available_rows[0]["full_name"] if top_available_rows else "N/A",
@@ -963,6 +984,9 @@ main { padding: 28px 32px 60px; max-width: 1440px; margin: 0 auto; }
   border-radius: 999px;
 }
 .badge-accent { color: white; background: var(--accent); border-color: var(--accent); }
+.badge-warning { color: var(--warning); background: var(--warning-soft); border-color: var(--warning); }
+
+.card .badge { display: inline-block; margin-top: 8px; }
 
 .on-the-clock-team { font-size: 20px; font-weight: 700; margin: 0 0 14px; }
 
@@ -1526,7 +1550,11 @@ def app_factory(db_path: str):
 
         cards = f"""
         <div class="cards">
-          <div class="card"><h3>Prospects Loaded</h3><div class="value">{summary['prospects_loaded']}</div></div>
+          <div class="card">
+            <h3>Prospects Loaded</h3>
+            <div class="value">{summary['prospects_loaded']}</div>
+            <span class="badge{' badge-warning' if 'Mixed sources' in summary['prospect_source'] else ''}" title="Where the current prospect board data came from">{esc(summary['prospect_source'])}</span>
+          </div>
           <div class="card"><h3>Actual Picks Loaded</h3><div class="value">{summary['picks_loaded']}</div></div>
           <div class="card"><h3>Predictions Loaded</h3><div class="value">{summary['predictions_loaded']}</div></div>
           <div class="card"><h3>Top Available</h3><div class="value">{esc(summary['top_ranked_available'])}</div></div>

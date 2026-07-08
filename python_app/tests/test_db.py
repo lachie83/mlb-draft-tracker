@@ -1,8 +1,8 @@
 from __future__ import annotations
 
-from mlb_tracker.db import get_best_available, get_top_prospects, row_to_dict, rows_to_dicts
+from mlb_tracker.db import clear_prospect_board, get_best_available, get_prospect_sources, get_top_prospects, row_to_dict, rows_to_dicts
 
-from .factories import seed_draft_slot, seed_mock_draft_pick, seed_prospect
+from .factories import seed_actual_pick, seed_draft_slot, seed_mock_draft_pick, seed_prediction, seed_prospect
 
 
 EXPECTED_TABLES = {
@@ -161,3 +161,59 @@ def test_upsert_mock_draft_pick_allows_multiple_players_for_same_source_and_pick
 
     rows = conn.execute("SELECT player_name FROM mock_draft_picks WHERE draft_year = 2026 AND pick_number = 1").fetchall()
     assert {r["player_name"] for r in rows} == {"Roch Cholowsky", "Grady Emerson"}
+
+
+def test_get_prospect_sources_empty_when_none_loaded(conn):
+    assert get_prospect_sources(conn, 2026) == []
+
+
+def test_get_prospect_sources_returns_distinct_values_sorted(conn):
+    seed_prospect(conn, person_id=1, person_full_name="Player A", source="mlb_stats_api_prospects")
+    seed_prospect(conn, person_id=2, person_full_name="Player B", source="mlb_stats_api_prospects")
+    seed_prospect(conn, person_id=3, person_full_name="Player C", source="mlb_pipeline_draft_prospects_manual_csv")
+
+    assert get_prospect_sources(conn, 2026) == [
+        "mlb_pipeline_draft_prospects_manual_csv",
+        "mlb_stats_api_prospects",
+    ]
+
+
+def test_clear_prospect_board_deletes_prospects_predictions_and_mock_picks(conn):
+    seed_prospect(conn, person_id=1, person_full_name="Some Prospect")
+    prospect_id = conn.execute(
+        "SELECT prospect_id FROM prospects WHERE draft_year=2026 AND full_name='Some Prospect'"
+    ).fetchone()["prospect_id"]
+    # Linked for real (not left NULL) so this also proves clearing predictions
+    # before prospects avoids the FOREIGN KEY constraint failure that would
+    # otherwise block deleting the referenced prospect row.
+    seed_prediction(conn, pick_number=1, mlb_person_id=1, prospect_id=prospect_id)
+    seed_mock_draft_pick(conn, pick_number=1, player_name="Some Prospect", prospect_id=prospect_id)
+
+    clear_prospect_board(conn, 2026)
+
+    assert conn.execute("SELECT COUNT(*) c FROM prospects WHERE draft_year=2026").fetchone()["c"] == 0
+    assert conn.execute("SELECT COUNT(*) c FROM predictions WHERE draft_year=2026").fetchone()["c"] == 0
+    assert conn.execute("SELECT COUNT(*) c FROM mock_draft_picks WHERE draft_year=2026").fetchone()["c"] == 0
+
+
+def test_clear_prospect_board_nulls_actual_picks_link_without_deleting_the_pick(conn):
+    seed_prospect(conn, person_id=1, person_full_name="Some Prospect")
+    prospect_id = conn.execute(
+        "SELECT prospect_id FROM prospects WHERE draft_year=2026 AND full_name='Some Prospect'"
+    ).fetchone()["prospect_id"]
+    seed_actual_pick(conn, pick_number=1, player_name="Some Prospect", prospect_id=prospect_id)
+
+    clear_prospect_board(conn, 2026)
+
+    pick = conn.execute("SELECT player_name, prospect_id FROM actual_picks WHERE draft_year=2026 AND pick_number=1").fetchone()
+    assert pick is not None
+    assert pick["player_name"] == "Some Prospect"
+    assert pick["prospect_id"] is None
+
+
+def test_clear_prospect_board_does_not_touch_other_years(conn):
+    seed_prospect(conn, draft_year=2025, person_id=1, person_full_name="Old Year Prospect")
+
+    clear_prospect_board(conn, 2026)
+
+    assert conn.execute("SELECT COUNT(*) c FROM prospects WHERE draft_year=2025").fetchone()["c"] == 1

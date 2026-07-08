@@ -120,6 +120,48 @@ def upsert_prospect(conn: sqlite3.Connection, row: dict[str, Any]) -> None:
     conn.execute(sql, row)
 
 
+def clear_prospect_board(conn: sqlite3.Connection, draft_year: int) -> None:
+    """Clear a draft year's entire prospect board before a full resync from
+    a single source. Every prospect-sync path (live API, baseballr, CSV,
+    no-R scrape) should call this first rather than just upserting its own
+    rows on top of whatever's already there: the fallback sources use
+    synthetic mlb_person_id values that never match a different source's
+    real IDs (or each other's), and school-name formatting can differ
+    enough that the (full_name, school_name, draft_year) unique constraint
+    doesn't catch it either - so switching sources between sync runs
+    without clearing first leaves duplicate rows for the same real player
+    instead of replacing them.
+
+    predictions/mock_draft_picks are cleared too (FOREIGN KEY on
+    prospects.prospect_id) since every sync path is immediately followed
+    by regenerating both. actual_picks holds real, irreplaceable draft
+    results, so its prospect_id is set to NULL instead of deleting the
+    row - the live-monitor poller re-links it on its next cycle (it
+    unconditionally re-upserts every pick's prospect_id, not just
+    newly-seen ones).
+    """
+    conn.execute("UPDATE actual_picks SET prospect_id = NULL WHERE draft_year = ?", (draft_year,))
+    conn.execute("DELETE FROM predictions WHERE draft_year = ?", (draft_year,))
+    conn.execute("DELETE FROM mock_draft_picks WHERE draft_year = ?", (draft_year,))
+    conn.execute("DELETE FROM prospects WHERE draft_year = ?", (draft_year,))
+
+
+def get_prospect_sources(conn: sqlite3.Connection, draft_year: int) -> list[str]:
+    """Distinct prospects.source values currently stored for a draft year.
+    Should always be a single value (or empty, if nothing's loaded yet) as
+    long as every sync path uses clear_prospect_board() first - more than
+    one means something wrote prospects without clearing the prior
+    source's rows, e.g. a one-off manual upsert bypassing the normal
+    sync commands."""
+    return [
+        row["source"]
+        for row in conn.execute(
+            "SELECT DISTINCT source FROM prospects WHERE draft_year = ? AND source IS NOT NULL ORDER BY source",
+            (draft_year,),
+        ).fetchall()
+    ]
+
+
 def insert_or_replace_predictions(conn: sqlite3.Connection, rows: Iterable[dict[str, Any]], draft_year: int, model_version: str) -> None:
     conn.execute(
         "DELETE FROM predictions WHERE draft_year = ? AND model_version = ?",

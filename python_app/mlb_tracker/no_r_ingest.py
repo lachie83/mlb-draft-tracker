@@ -9,6 +9,7 @@ from typing import Any
 import requests
 
 PIPELINE_URL = 'https://www.mlb.com/milb/prospects/draft/'
+NO_R_SOURCE = 'no_r_pipeline_scrape'
 
 TOP_FALLBACK = [
     (1, 'Grady Emerson', 'SS', 'Fort Worth Christian (TX)'),

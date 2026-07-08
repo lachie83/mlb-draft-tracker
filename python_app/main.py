@@ -3,7 +3,15 @@ from __future__ import annotations
 import argparse
 from pathlib import Path
 
-from mlb_tracker.db import DEFAULT_DB_PATH, get_connection, init_db, insert_or_replace_predictions, upsert_draft_slot, upsert_prospect
+from mlb_tracker.db import (
+    DEFAULT_DB_PATH,
+    clear_prospect_board,
+    get_connection,
+    init_db,
+    insert_or_replace_predictions,
+    upsert_draft_slot,
+    upsert_prospect,
+)
 from mlb_tracker.draft_rehearsal import cleanup_rehearsal_data, rehearse_draft_day
 from mlb_tracker.live_monitor import reconcile_live_picks
 from mlb_tracker.mlb_stats_api import (
@@ -14,7 +22,7 @@ from mlb_tracker.mlb_stats_api import (
     sync_prospects_from_api,
 )
 from mlb_tracker.mock_ingest import generate_mock_consensus_predictions, ingest_real_mock_draft_picks
-from mlb_tracker.no_r_ingest import build_no_r_seed
+from mlb_tracker.no_r_ingest import NO_R_SOURCE, build_no_r_seed
 from mlb_tracker.predictions import generate_predictions
 from mlb_tracker.sources import (
     fetch_baseballr_prospects_csv,
@@ -40,6 +48,7 @@ def cmd_sync_prospects(args):
     init_db(args.db)
     conn = get_connection(args.db)
     rows = fetch_baseballr_prospects_csv(args.year)
+    clear_prospect_board(conn, args.year)
     for raw in rows:
         upsert_prospect(conn, normalize_prospect_row(raw, args.year))
     conn.commit()
@@ -51,8 +60,11 @@ def cmd_seed_no_r_prospects(args):
     init_db(args.db)
     conn = get_connection(args.db)
     rows = build_no_r_seed()
+    clear_prospect_board(conn, args.year)
     for raw in rows:
-        upsert_prospect(conn, normalize_prospect_row(raw, args.year))
+        normalized = normalize_prospect_row(raw, args.year)
+        normalized["source"] = NO_R_SOURCE
+        upsert_prospect(conn, normalized)
     conn.commit()
     conn.close()
     print(f"Seeded {len(rows)} no-R prospects for {args.year}")
@@ -62,6 +74,7 @@ def cmd_seed_prospects_csv(args):
     init_db(args.db)
     conn = get_connection(args.db)
     rows = seed_prospects_from_csv(Path(args.csv), args.year)
+    clear_prospect_board(conn, args.year)
     for row in rows:
         upsert_prospect(conn, row)
     conn.commit()
