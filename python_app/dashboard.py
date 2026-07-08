@@ -6,6 +6,7 @@ import json
 import re
 import sqlite3
 from collections import defaultdict
+from http.cookies import SimpleCookie
 from pathlib import Path
 from urllib.parse import parse_qs
 from wsgiref.simple_server import make_server
@@ -156,6 +157,27 @@ def get_selected_year(environ, default_year: int = 2026) -> int:
         return int(year_str)
     except Exception:
         return default_year
+
+
+THEME_BG = {"dark": "#0b1120", "light": "#eef1f8"}
+
+
+def get_selected_theme(environ):
+    """The theme cookie set by toggleTheme(), or None on a first-ever visit
+    with no cookie yet - callers fall back to a client-side prefers-color-
+    scheme check in that case. Reading this server-side (rather than relying
+    on client JS to mutate <meta name="theme-color"> after the fact) is what
+    actually fixes iOS Safari's status-bar/notch overlay: that overlay is
+    colored from the tag's value as parsed from the initial HTML response,
+    not from later DOM mutations, so the value has to be correct from the
+    first byte."""
+    cookies = SimpleCookie()
+    try:
+        cookies.load(environ.get("HTTP_COOKIE", ""))
+    except Exception:
+        return None
+    theme = cookies["mlb_theme"].value if "mlb_theme" in cookies else None
+    return theme if theme in THEME_BG else None
 
 
 def fetch_dashboard_data(conn: sqlite3.Connection, year: int):
@@ -1381,12 +1403,12 @@ function scheduleRefresh() {
 function toggleTheme() {
   const current = document.documentElement.getAttribute('data-theme') || 'dark';
   const next = current === 'light' ? 'dark' : 'light';
-  localStorage.setItem('mlb_theme', next);
-  // iOS Safari only re-reads <meta name="theme-color"> (the status-bar/
-  // toolbar chrome color) on a real navigation - mutating it in place after
-  // the click leaves the chrome stuck on the old theme even though the page
-  // content flips instantly. Reloading is what already makes the chrome
-  // come out correct on every auto-refresh cycle, so reuse that here too.
+  // A cookie (not localStorage) so the server can render data-theme and
+  // theme-color directly into the next response - iOS Safari's status-bar/
+  // notch overlay only reflects theme-color's value from the initial HTML,
+  // not later DOM mutations, so this has to be correct from the first byte
+  // rather than patched in after the fact.
+  document.cookie = 'mlb_theme=' + next + '; path=/; max-age=31536000; SameSite=Lax';
   window.location.reload();
 }
 
@@ -1567,6 +1589,7 @@ def app_factory(db_path: str):
 
         init_db(db_path)
         year = get_selected_year(environ, default_year=2026)
+        theme = get_selected_theme(environ)
 
         if environ.get("PATH_INFO") == "/api/latest-picks":
             conn = get_connection(db_path)
@@ -1658,30 +1681,37 @@ def app_factory(db_path: str):
             active = "active" if summary["year"] == y else ""
             return f'<a class="{active}" href="/?year={y}">{y}</a>'
 
+        theme_attr = f' data-theme="{theme}"' if theme else ""
+        theme_color = THEME_BG.get(theme, THEME_BG["dark"])
         body = f"""<!DOCTYPE html>
-        <html lang="en">
+        <html lang="en"{theme_attr}>
         <head>
           <meta charset="utf-8">
           <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
           <title>MLB Draft Tracker</title>
           <link rel="icon" href="/favicon.ico" type="image/x-icon">
-          <meta name="theme-color" content="#0b1120">
+          <meta name="theme-color" content="{theme_color}">
           <style>{STYLE}</style>
           <script>
             (function () {{
               try {{
-                var stored = localStorage.getItem('mlb_theme');
-                var theme = (stored === 'light' || stored === 'dark')
-                  ? stored
-                  : (window.matchMedia('(prefers-color-scheme: light)').matches ? 'light' : 'dark');
-                document.documentElement.setAttribute('data-theme', theme);
-                // Style tag above is already parsed at this point, so the
-                // computed --bg reflects the theme we just set - keeps
-                // Safari's own toolbar chrome color in sync without
-                // duplicating the hex values from STYLE here.
-                var meta = document.querySelector('meta[name="theme-color"]');
-                var bg = getComputedStyle(document.documentElement).getPropertyValue('--bg').trim();
-                if (meta && bg) meta.setAttribute('content', bg);
+                // Server already rendered data-theme/theme-color correctly
+                // from the mlb_theme cookie - nothing to do here except on
+                // a first-ever visit (no cookie yet), where we still need a
+                // client-side prefers-color-scheme fallback. iOS Safari's
+                // notch/status-bar overlay is colored from theme-color's
+                // value in the *initial* HTML response, not from later DOM
+                // mutations, so getting this right server-side (rather than
+                // patching the tag after the fact with JS) is what actually
+                // keeps that overlay in sync with the chosen theme.
+                if (!document.documentElement.hasAttribute('data-theme')) {{
+                  var theme = window.matchMedia('(prefers-color-scheme: light)').matches ? 'light' : 'dark';
+                  document.documentElement.setAttribute('data-theme', theme);
+                  document.cookie = 'mlb_theme=' + theme + '; path=/; max-age=31536000; SameSite=Lax';
+                  var meta = document.querySelector('meta[name="theme-color"]');
+                  var bg = getComputedStyle(document.documentElement).getPropertyValue('--bg').trim();
+                  if (meta && bg) meta.setAttribute('content', bg);
+                }}
               }} catch (e) {{}}
             }})();
           </script>
