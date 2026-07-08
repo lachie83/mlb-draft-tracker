@@ -813,6 +813,13 @@ STYLE = """
 
 * { box-sizing: border-box; }
 
+html {
+  /* iOS Safari reveals this color during scroll-bounce and behind its own
+     collapsing toolbar chrome - without it those areas stay white regardless
+     of the active theme, even though body itself is styled correctly. */
+  background: var(--bg);
+}
+
 body {
   font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
   margin: 0;
@@ -1377,6 +1384,9 @@ function applyThemeUi(theme) {
   document.documentElement.setAttribute('data-theme', theme);
   const btn = document.getElementById('theme-toggle');
   if (btn) btn.textContent = theme === 'light' ? '🌙' : '☀️';
+  const meta = document.querySelector('meta[name="theme-color"]');
+  const bg = getComputedStyle(document.documentElement).getPropertyValue('--bg').trim();
+  if (meta && bg) meta.setAttribute('content', bg);
 }
 
 // The topbar/subnav/filter-bar stack on top of each other via
@@ -1645,6 +1655,8 @@ def app_factory(db_path: str):
           <meta name="viewport" content="width=device-width, initial-scale=1">
           <title>MLB Draft Tracker</title>
           <link rel="icon" href="/favicon.ico" type="image/x-icon">
+          <meta name="theme-color" content="#0b1120">
+          <style>{STYLE}</style>
           <script>
             (function () {{
               try {{
@@ -1653,10 +1665,16 @@ def app_factory(db_path: str):
                   ? stored
                   : (window.matchMedia('(prefers-color-scheme: light)').matches ? 'light' : 'dark');
                 document.documentElement.setAttribute('data-theme', theme);
+                // Style tag above is already parsed at this point, so the
+                // computed --bg reflects the theme we just set - keeps
+                // Safari's own toolbar chrome color in sync without
+                // duplicating the hex values from STYLE here.
+                var meta = document.querySelector('meta[name="theme-color"]');
+                var bg = getComputedStyle(document.documentElement).getPropertyValue('--bg').trim();
+                if (meta && bg) meta.setAttribute('content', bg);
               }} catch (e) {{}}
             }})();
           </script>
-          <style>{STYLE}</style>
         </head>
         <body>
           <header class="topbar">
