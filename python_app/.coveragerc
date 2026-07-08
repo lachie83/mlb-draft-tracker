@@ -1,0 +1,8 @@
+[run]
+source = .
+omit =
+    tests/*
+    */__pycache__/*
+
+[report]
+skip_empty = True
