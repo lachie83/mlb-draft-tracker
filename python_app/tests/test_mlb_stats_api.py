@@ -18,6 +18,8 @@ from mlb_tracker.mlb_stats_api import (
 )
 from mlb_tracker.sources import normalize_prospect_row
 
+from .factories import seed_actual_pick
+
 FIXTURES = Path(__file__).parent / "fixtures"
 
 
@@ -286,6 +288,37 @@ def test_sync_prospects_from_api_clears_stale_predictions_and_mock_picks(conn, m
     sync_prospects_from_api(conn, draft_year=2026)
 
     assert conn.execute("SELECT COUNT(*) c FROM predictions WHERE draft_year=2026").fetchone()["c"] == 0
+
+
+def test_sync_prospects_from_api_preserves_actual_picks_when_draft_is_live(conn, monkeypatch):
+    # If the draft has already started when this runs (a real scenario -
+    # this syncs on every 6h pre_draft_sync.sh cycle regardless of draft
+    # progress), actual_picks may already reference a prospect row that's
+    # about to be replaced. Unlike predictions/mock_draft_picks, those rows
+    # are real, irreplaceable draft results and must never be deleted -
+    # only prospect_id should be cleared (see the docstring: the live
+    # poller re-links it on its next cycle).
+    payload = load_fixture("draft_prospects_2026.json")
+    monkeypatch.setattr("mlb_tracker.mlb_stats_api.fetch_draft_prospects", lambda year, client=None: payload)
+    sync_prospects_from_api(conn, draft_year=2026)
+    old_prospect_id = conn.execute(
+        "SELECT prospect_id FROM prospects WHERE draft_year=2026 AND mlb_person_id=501"
+    ).fetchone()["prospect_id"]
+    seed_actual_pick(
+        conn, draft_year=2026, pick_number=1, team_name="Some Team", player_name="Player One",
+        prospect_id=old_prospect_id,
+    )
+
+    # Would raise sqlite3.IntegrityError (FOREIGN KEY constraint failed) if
+    # actual_picks referencing the old prospect_id weren't handled first.
+    sync_prospects_from_api(conn, draft_year=2026)
+
+    pick = conn.execute(
+        "SELECT player_name, prospect_id FROM actual_picks WHERE draft_year=2026 AND pick_number=1"
+    ).fetchone()
+    assert pick is not None, "the real pick itself must survive, not just avoid crashing"
+    assert pick["player_name"] == "Player One"
+    assert pick["prospect_id"] is None
 
 
 def test_sync_prospects_from_api_raises_when_endpoint_is_empty(conn, monkeypatch):
