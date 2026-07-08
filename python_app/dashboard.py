@@ -6,11 +6,15 @@ import json
 import re
 import sqlite3
 from collections import defaultdict
+from pathlib import Path
 from urllib.parse import parse_qs
 from wsgiref.simple_server import make_server
 
 from mlb_tracker.db import DEFAULT_DB_PATH, get_connection, get_prospect_sources, init_db
 from mlb_tracker.telegram import format_pick_summary, format_pick_title, round_display_name
+
+FAVICON_PATH = Path(__file__).resolve().parent / "static" / "favicon.ico"
+FAVICON_BYTES = FAVICON_PATH.read_bytes()
 
 PROSPECT_SOURCE_LABELS = {
     "mlb_stats_api_prospects": "Live MLB API",
@@ -1449,7 +1453,13 @@ function showPickToast(pick) {
 function maybeNativeNotify(pick) {
   if (localStorage.getItem('mlb_pick_alerts') !== '1') return;
   if (typeof Notification === 'undefined' || Notification.permission !== 'granted') return;
-  if (!document.hidden) return; // tab is focused - the in-page toast already covers this
+  // document.hidden only tracks tab visibility (is this the active tab in a
+  // non-minimized window) - it stays false even when the user has switched
+  // OS focus away to another app (e.g. a terminal) while the dashboard tab
+  // sits open in the background. Checking hasFocus() too means the native
+  // notification only gets suppressed when the in-page toast is actually
+  // guaranteed to be seen.
+  if (!document.hidden && document.hasFocus()) return;
   // Native notifications can't render our two-variant light/dark <img> markup
   // in the body, but the Notification API does support a single icon image.
   new Notification(pick.title, { body: pick.summary, icon: pick.team_logo_url || undefined });
@@ -1528,6 +1538,13 @@ window.addEventListener('load', syncStickyOffsets);
 
 def app_factory(db_path: str):
     def app(environ, start_response):
+        if environ.get("PATH_INFO") == "/favicon.ico":
+            start_response(
+                "200 OK",
+                [("Content-Type", "image/x-icon"), ("Cache-Control", "public, max-age=86400")],
+            )
+            return [FAVICON_BYTES]
+
         init_db(db_path)
         year = get_selected_year(environ, default_year=2026)
 
@@ -1627,6 +1644,7 @@ def app_factory(db_path: str):
           <meta charset="utf-8">
           <meta name="viewport" content="width=device-width, initial-scale=1">
           <title>MLB Draft Tracker</title>
+          <link rel="icon" href="/favicon.ico" type="image/x-icon">
           <script>
             (function () {{
               try {{
