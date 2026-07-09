@@ -11,9 +11,6 @@ Please report security vulnerabilities using
 for this repository (Security tab → "Report a vulnerability"). This lets you
 share details privately with the maintainer before anything is public.
 
-If that's not available, you can instead email lachlan.evenson@gmail.com
-with details.
-
 Please do not open a public GitHub issue for security vulnerabilities.
 
 ## What to expect
