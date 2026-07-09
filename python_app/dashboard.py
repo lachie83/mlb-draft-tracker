@@ -1742,9 +1742,9 @@ def app_factory(db_path: str):
             <a href="#best-available">Best Available</a>
             <a href="#fallers">Fallers</a>
             <a href="#actual-picks">Actual Picks</a>
+            <a href="#board">Full Board</a>
             <a href="#predictions">Predictions</a>
             <a href="#model-comparison">Model Comparison</a>
-            <a href="#board">Full Board</a>
           </nav>
 
           <main>
@@ -1755,9 +1755,9 @@ def app_factory(db_path: str):
             {best_available_panel}
             {fallers_panel}
             {picks_panel}
+            {board_panel}
             {predictions_panel}
             {model_comparison_panel}
-            {board_panel}
           </main>
 
           <footer>MLB Draft Tracker &middot; local dashboard</footer>
