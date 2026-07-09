@@ -1,5 +1,7 @@
 # MLB Draft 2026 Tracker
 
+[![OpenSSF Scorecard](https://api.scorecard.dev/projects/github.com/lachie83/mlb-draft-tracker/badge)](https://scorecard.dev/viewer/?uri=github.com/lachie83/mlb-draft-tracker)
+
 A local SQLite-backed tracker for the 2026 MLB Draft that stores prospects, draft order, live picks, prediction outputs, and Telegram delivery state.
 
 ## What this project does
