@@ -1,11 +1,16 @@
 from __future__ import annotations
 
 from dashboard import (
+    class_label,
     describe_prospect_source,
     fetch_dashboard_data,
     fetch_latest_picks,
+    fetch_team_pool_data,
+    format_usd,
     get_selected_theme,
     prospect_info_button_html,
+    signability_tag,
+    signability_tag_html,
 )
 
 from .factories import seed_actual_pick, seed_draft_slot, seed_prediction, seed_prospect
@@ -269,3 +274,178 @@ def test_get_selected_theme_reads_alongside_other_cookies():
 
 def test_get_selected_theme_none_on_malformed_cookie_header():
     assert get_selected_theme({"HTTP_COOKIE": "not a valid \x00 cookie header"}) is None
+
+
+def test_class_label_maps_known_school_class_values():
+    assert class_label("HS SR") == "High School"
+    assert class_label("JC J1") == "JUCO"
+    assert class_label("JC J2") == "JUCO"
+    assert class_label("4YR FR") == "College Fr"
+    assert class_label("4YR SO") == "College So"
+    assert class_label("4YR JR") == "College Jr"
+    assert class_label("4YR SR") == "College Sr"
+    assert class_label("4YR 5S") == "College 5th Yr"
+    assert class_label("4YR GR") == "Grad Student"
+
+
+def test_class_label_handles_missing_or_unknown():
+    assert class_label(None) == "Unknown"
+    assert class_label("") == "Unknown"
+    assert class_label("NS") == "Unknown"
+    assert class_label("something odd") == "College"
+
+
+def test_signability_tag_steal_when_pick_well_after_rank():
+    # Ranked #5, drafted at pick #40 - fell 35 spots past consensus, a steal.
+    tag, delta = signability_tag(rank=5, pick_number=40)
+    assert tag == "Steal"
+    assert delta == 35
+
+
+def test_signability_tag_reach_when_pick_well_before_rank():
+    # Ranked #40, drafted at pick #5 - team reached 35 spots ahead of consensus.
+    tag, delta = signability_tag(rank=40, pick_number=5)
+    assert tag == "Reach"
+    assert delta == -35
+
+
+def test_signability_tag_none_within_threshold():
+    tag, delta = signability_tag(rank=10, pick_number=15)
+    assert tag is None
+    assert delta == 5
+
+
+def test_signability_tag_none_at_exact_threshold_boundary():
+    # threshold=20 is exclusive (> / <), not inclusive
+    tag, delta = signability_tag(rank=10, pick_number=30)
+    assert tag is None
+    assert delta == 20
+
+
+def test_signability_tag_none_when_rank_unknown():
+    assert signability_tag(rank=None, pick_number=10) == (None, None)
+
+
+def test_signability_tag_respects_custom_threshold():
+    tag, delta = signability_tag(rank=10, pick_number=15, threshold=3)
+    assert tag == "Steal"
+    assert delta == 5
+
+
+def test_signability_tag_html_renders_steal_and_reach_badges():
+    steal_html = signability_tag_html({"signability_tag": "Steal", "signability_delta": 35})
+    assert "Steal (+35)" in steal_html
+    assert "badge-accent" in steal_html
+
+    reach_html = signability_tag_html({"signability_tag": "Reach", "signability_delta": -35})
+    assert "Reach (-35)" in reach_html
+    assert "badge-warning" in reach_html
+
+
+def test_signability_tag_html_empty_when_no_tag():
+    assert signability_tag_html({"signability_tag": None, "signability_delta": -5}) == ""
+    assert signability_tag_html({}) == ""
+
+
+def test_format_usd():
+    assert format_usd(None) == ""
+    assert format_usd(1350600) == "$1,350,600"
+    assert format_usd(0) == "$0"
+
+
+def test_fetch_team_pool_data_computes_totals_used_and_remaining(conn):
+    seed_draft_slot(conn, pick_number=1, team_name="Team A", pick_value=10_000_000)
+    seed_draft_slot(conn, pick_number=31, team_name="Team A", pick_value=2_000_000)
+    seed_draft_slot(conn, pick_number=2, team_name="Team B", pick_value=9_000_000)
+    # Round 11+ picks report pick_value=0 in the real API and don't count
+    # toward the bonus pool - excluded by the WHERE pick_value > 0 clause.
+    seed_draft_slot(conn, pick_number=400, team_name="Team A", pick_value=0)
+
+    seed_actual_pick(conn, pick_number=1, team_name="Team A", bonus_amount=8_500_000)
+
+    rows = fetch_team_pool_data(conn, 2026)
+    by_team = {r["team_name"]: r for r in rows}
+
+    assert by_team["Team A"]["pool_total"] == 12_000_000
+    assert by_team["Team A"]["pool_used"] == 8_500_000
+    assert by_team["Team A"]["pool_remaining"] == 3_500_000
+    assert abs(by_team["Team A"]["pct_used"] - (8_500_000 / 12_000_000)) < 1e-9
+
+    assert by_team["Team B"]["pool_total"] == 9_000_000
+    assert by_team["Team B"]["pool_used"] == 0
+    assert by_team["Team B"]["pool_remaining"] == 9_000_000
+
+
+def test_fetch_team_pool_data_sorted_by_remaining_ascending(conn):
+    seed_draft_slot(conn, pick_number=1, team_name="Committed Team", pick_value=10_000_000)
+    seed_actual_pick(conn, pick_number=1, team_name="Committed Team", bonus_amount=9_500_000)
+    seed_draft_slot(conn, pick_number=2, team_name="Fresh Team", pick_value=10_000_000)
+
+    rows = fetch_team_pool_data(conn, 2026)
+
+    assert [r["team_name"] for r in rows] == ["Committed Team", "Fresh Team"]
+
+
+def test_fetch_team_pool_data_empty_when_no_draft_slots(conn):
+    assert fetch_team_pool_data(conn, 2026) == []
+
+
+def test_picks_query_carries_rank_signed_status_and_signability_tag(conn):
+    prospect = seed_prospect(conn, person_id=777, person_full_name="Fallen Star", rank=5)
+    seed_actual_pick(
+        conn, pick_number=40, team_name="Some Team", player_name="Fallen Star",
+        mlb_person_id=prospect["mlb_person_id"], bonus_amount=3_000_000, slot_value=2_500_000,
+    )
+
+    data = fetch_dashboard_data(conn, 2026)
+    pick = next(p for p in data["picks"] if p["pick_number"] == 40)
+
+    assert pick["rank"] == 5
+    assert pick["signed_status"] == "Signed"
+    assert pick["signability_tag"] == "Steal"
+    assert pick["signability_delta"] == 35
+
+
+def test_picks_query_unsigned_status_when_no_bonus_reported(conn):
+    seed_actual_pick(conn, pick_number=1, team_name="Some Team", player_name="Someone")
+
+    data = fetch_dashboard_data(conn, 2026)
+    pick = next(p for p in data["picks"] if p["pick_number"] == 1)
+
+    assert pick["signed_status"] == "Unsigned"
+    assert pick["signability_tag"] is None  # no matching prospect -> rank unknown
+
+
+def test_prospect_info_button_renders_for_position_and_school_without_blurb():
+    # Actual Picks rows often won't have a written blurb, but position/
+    # school alone should still be enough to show the info button.
+    html = prospect_info_button_html(
+        {"full_name": "Some Player", "position_name": "Shortstop", "school_name": "Test U"}
+    )
+    assert "prospect-info-btn" in html
+    assert 'data-position="Shortstop"' in html
+    assert 'data-school="Test U"' in html
+
+
+def test_prospect_info_button_carries_enrichment_attributes():
+    html = prospect_info_button_html(
+        {
+            "full_name": "Some Player",
+            "blurb": "text",
+            "bats": "L",
+            "throws": "R",
+            "home_city": "Austin",
+            "home_state": "TX",
+            "school_class": "4YR JR",
+            "headshot_link": "https://example.com/photo.png",
+            "bonus_amount": 3_000_000,
+            "slot_value": 2_500_000,
+        }
+    )
+    assert 'data-bt="L/R"' in html
+    assert 'data-hometown="Austin, TX"' in html
+    assert 'data-class="College Jr"' in html
+    assert 'data-headshot="https://example.com/photo.png"' in html
+    assert 'data-bonus="$3,000,000"' in html
+    assert 'data-slot="$2,500,000"' in html
+    assert 'data-over-under="+$500,000"' in html

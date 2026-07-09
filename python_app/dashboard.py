@@ -68,6 +68,56 @@ def school_type(school_class):
     return "College"
 
 
+# More granular than school_type() above: signability leverage differs a lot
+# by class year even within "College" - a college senior has the least
+# leverage and typically signs under slot, while a HS player or college
+# sophomore has the most. Real school.schoolClass values observed from the
+# live API: "HS SR", "4YR FR/SO/JR/SR", "4YR 5S" (fifth-year senior),
+# "4YR GR" (grad student), "JC J1/J2/J3", "NS".
+_CLASS_YEAR_LABELS = {"FR": "Fr", "SO": "So", "JR": "Jr", "SR": "Sr"}
+
+
+def class_label(school_class):
+    if not school_class:
+        return "Unknown"
+    sc = str(school_class).upper()
+    if "HS" in sc:
+        return "High School"
+    if "JC" in sc:
+        return "JUCO"
+    if sc == "NS":
+        return "Unknown"
+    if sc == "4YR GR":
+        return "Grad Student"
+    if sc == "4YR 5S":
+        return "College 5th Yr"
+    year = sc.replace("4YR", "").strip()
+    if year in _CLASS_YEAR_LABELS:
+        return f"College {_CLASS_YEAR_LABELS[year]}"
+    return "College"
+
+
+SIGNABILITY_THRESHOLD = 20
+
+
+def signability_tag(rank, pick_number, threshold=SIGNABILITY_THRESHOLD):
+    """delta = pick_number - rank: positive means the player was still on
+    the board well past their consensus rank ("Steal" - fell due to
+    signability concerns, over-slot bonus demands, or a crowded position),
+    negative means the team picked them well ahead of consensus ("Reach" -
+    often signals a pre-arranged under-slot deal freeing bonus-pool money
+    elsewhere). Returns (None, None) when rank isn't known (unranked
+    player) since there's nothing to compare the pick number against."""
+    if rank is None:
+        return None, None
+    delta = pick_number - rank
+    if delta > threshold:
+        return "Steal", delta
+    if delta < -threshold:
+        return "Reach", delta
+    return None, delta
+
+
 # MLB's official team IDs (matches what the MLB Stats API returns in
 # draft_slots.team_id / actual_picks.team_id) - kept as a static lookup
 # here too since several dashboard rows only carry team_name text (e.g.
@@ -131,21 +181,49 @@ def team_logo_html(team_name):
 
 TEAM_LOGO_HEADERS = {"Team", "Mock Team", "Drafted By"}
 PLAYER_INFO_HEADERS = {"Player"}
+TAG_HEADERS = {"Tag"}
+
+
+def signability_tag_html(row) -> str:
+    tag = row.get("signability_tag")
+    delta = row.get("signability_delta")
+    if not tag:
+        return ""
+    badge_class = "badge-accent" if tag == "Steal" else "badge-warning"
+    sign = "+" if delta >= 0 else ""
+    return f'<span class="badge {badge_class}">{esc(tag)} ({sign}{delta})</span>'
 
 
 def prospect_info_button_html(row):
     """A small info button opening the floating scouting-report card,
-    rendered only when there's actually a blurb/scouting_report to show -
-    tables that don't select those columns (Actual Picks, Predictions, etc)
-    naturally get nothing here since row.get() just returns None."""
+    rendered only when there's actually something to show - tables that
+    don't select these columns (Predictions, etc) naturally get nothing
+    here since row.get() just returns None."""
     blurb = row.get("blurb") or ""
     scouting = row.get("scouting_report") or ""
-    if not blurb and not scouting:
+    position = row.get("position_name") or ""
+    school = row.get("school_name") or ""
+    if not blurb and not scouting and not position and not school:
         return ""
     name = esc(row.get("full_name") or "")
+    bats, throws = row.get("bats"), row.get("throws")
+    bt = f"{bats}/{throws}" if bats and throws else ""
+    home_city, home_state = row.get("home_city"), row.get("home_state")
+    hometown = ", ".join(p for p in (home_city, home_state) if p)
+    bonus, slot = row.get("bonus_amount"), row.get("slot_value")
+    over_under_str = ""
+    if bonus is not None and slot is not None:
+        delta = bonus - slot
+        sign = "+" if delta >= 0 else "-"
+        over_under_str = sign + format_usd(abs(delta))
     return (
         f' <button type="button" class="prospect-info-btn" aria-label="Scouting info for {name}" '
         f'data-name="{name}" data-blurb="{esc(blurb)}" data-scouting="{esc(scouting)}" '
+        f'data-headshot="{esc(row.get("headshot_link") or "")}" '
+        f'data-position="{esc(position)}" data-school="{esc(school)}" data-bt="{esc(bt)}" '
+        f'data-hometown="{esc(hometown)}" data-class="{esc(class_label(row.get("school_class")))}" '
+        f'data-bonus="{esc(format_usd(bonus))}" data-slot="{esc(format_usd(slot))}" '
+        f'data-over-under="{esc(over_under_str)}" '
         f'onclick="showProspectCard(this)">&#9432;</button>'
     )
 
@@ -187,7 +265,8 @@ def fetch_dashboard_data(conn: sqlite3.Connection, year: int):
             conn,
             """
             SELECT rank, full_name, position_name, school_name, school_class,
-                   is_drafted, draft_team_name, pick_number, blurb, scouting_report
+                   is_drafted, draft_team_name, pick_number, blurb, scouting_report,
+                   bats, throws, home_city, home_state, headshot_link
             FROM prospects
             WHERE draft_year = ? AND rank IS NOT NULL
             ORDER BY rank
@@ -204,6 +283,7 @@ def fetch_dashboard_data(conn: sqlite3.Connection, year: int):
             """
             SELECT pros.rank, pros.full_name, pros.position_name, pros.school_name, pros.school_class,
                    pros.current_age, pros.bats, pros.throws, pros.blurb, pros.scouting_report,
+                   pros.home_city, pros.home_state, pros.headshot_link,
                    mock.team_name AS mock_team, ROUND(mock.predicted_probability, 4) AS mock_probability
             FROM prospects pros
             LEFT JOIN (
@@ -231,15 +311,25 @@ def fetch_dashboard_data(conn: sqlite3.Connection, year: int):
         for r in q(
             conn,
             """
-            SELECT pick_number, team_name, player_name, player_position, school_name
-            FROM actual_picks
-            WHERE draft_year = ?
-            ORDER BY pick_number
+            SELECT a.pick_number, a.team_name, a.player_name, a.player_position,
+                   COALESCE(p.school_name, a.school_name) AS school_name,
+                   a.bonus_amount, a.slot_value,
+                   COALESCE(p.full_name, a.player_name) AS full_name,
+                   COALESCE(p.position_name, a.player_position) AS position_name,
+                   p.rank, p.blurb, p.scouting_report, p.bats, p.throws,
+                   p.home_city, p.home_state, p.school_class, p.headshot_link
+            FROM actual_picks a
+            LEFT JOIN prospects p ON a.mlb_person_id = p.mlb_person_id AND a.draft_year = p.draft_year
+            WHERE a.draft_year = ?
+            ORDER BY a.pick_number
             LIMIT 100
             """,
             (year,),
         )
     ]
+    for row in picks:
+        row["signed_status"] = "Signed" if row.get("bonus_amount") is not None else "Unsigned"
+        row["signability_tag"], row["signability_delta"] = signability_tag(row.get("rank"), row["pick_number"])
 
     predictions = [
         dict(r)
@@ -505,6 +595,39 @@ def fetch_latest_picks(conn: sqlite3.Connection, year: int, limit: int = 20) -> 
     return picks
 
 
+def fetch_team_pool_data(conn: sqlite3.Connection, year: int) -> list[dict]:
+    """Each team's bonus-pool total (summed from draft_slots.pick_value,
+    which the MLB Stats API already reports as a real dollar slot value for
+    every round-1-10 pick and exactly 0 for round 11+ - confirmed against
+    the live API, matches the real bonus-pool rules exactly) versus what's
+    been used so far (summed actual_picks.bonus_amount for that team's
+    signed picks). No separate static bonus-pool file needed."""
+    rows = conn.execute(
+        """
+        SELECT s.team_name,
+               SUM(s.pick_value) AS pool_total,
+               COALESCE((
+                   SELECT SUM(a.bonus_amount) FROM actual_picks a
+                   WHERE a.team_name = s.team_name AND a.draft_year = s.draft_year
+               ), 0) AS pool_used
+        FROM draft_slots s
+        WHERE s.draft_year = ? AND s.pick_value > 0
+        GROUP BY s.team_name
+        ORDER BY (pool_total - pool_used) ASC
+        """,
+        (year,),
+    ).fetchall()
+    result = []
+    for r in rows:
+        row = dict(r)
+        total = row["pool_total"] or 0
+        used = row["pool_used"] or 0
+        row["pool_remaining"] = total - used
+        row["pct_used"] = (used / total) if total else 0
+        result.append(row)
+    return result
+
+
 def row_attrs(*, status=None, position=None, school=None, team=None, model=None) -> str:
     attrs = []
     if status:
@@ -547,7 +670,7 @@ def filterable_table(table_id, title, headers, rows, cell_keys, *, count_label="
         cells = "".join(
             f'<td data-label="{esc(h)}">'
             f'{team_logo_html(row.get(k, "")) if h in TEAM_LOGO_HEADERS else ""}'
-            f'{esc(row.get(k, ""))}'
+            f'{signability_tag_html(row) if h in TAG_HEADERS else esc(row.get(k, ""))}'
             f'{prospect_info_button_html(row) if h in PLAYER_INFO_HEADERS else ""}'
             f'</td>'
             for h, k in zip(headers, cell_keys)
@@ -676,6 +799,55 @@ def render_draft_order(groups, on_the_clock_pick_number, teams):
       </div>
       <div class="round-tabs" id="round-tabs">{''.join(tab_buttons)}</div>
       {''.join(round_panels)}
+    </section>
+    """
+
+
+POOL_WARNING_THRESHOLD = 0.95
+
+
+def format_usd(value) -> str:
+    if value is None:
+        return ""
+    return f"${value:,.0f}"
+
+
+def render_pool_tracker(rows):
+    if not rows:
+        return """
+        <section class="panel" id="pool-tracker">
+          <div class="panel-header"><h2>Bonus Pool Tracker</h2></div>
+          <p class="muted">No draft order loaded yet — run sync-draft-order-api.</p>
+        </section>
+        """
+
+    team_rows = []
+    for row in rows:
+        pct = min(row["pct_used"], 1.0)
+        warning = row["pct_used"] >= POOL_WARNING_THRESHOLD
+        team_rows.append(
+            f"""
+            <div class="pool-row" data-team="{esc(slugify(row['team_name']))}">
+              <div class="pool-row-header">
+                {team_logo_html(row['team_name'])}
+                <span class="pool-team-name">{esc(row['team_name'])}</span>
+                <span class="pool-amounts">{format_usd(row['pool_used'])} / {format_usd(row['pool_total'])}
+                  <span class="muted">({row['pct_used']:.0%} used)</span></span>
+              </div>
+              <div class="pool-bar-track">
+                <div class="pool-bar-fill{' pool-bar-warning' if warning else ''}" style="width:{pct * 100:.1f}%"></div>
+              </div>
+            </div>
+            """
+        )
+
+    return f"""
+    <section class="panel" id="pool-tracker">
+      <div class="panel-header">
+        <h2>Bonus Pool Tracker</h2>
+        <span class="badge">{len(rows)} teams</span>
+      </div>
+      <div class="pool-tracker-list">{''.join(team_rows)}</div>
     </section>
     """
 
@@ -1112,6 +1284,16 @@ main { padding: 28px 32px 60px; max-width: 1440px; margin: 0 auto; }
   position: relative;
 }
 .prospect-card h3 { margin: 0 0 16px; font-size: 19px; padding-right: 24px; }
+.prospect-card-meta { display: flex; align-items: center; gap: 12px; margin-bottom: 16px; }
+.prospect-card-headshot {
+  width: 56px;
+  height: 56px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 1px solid var(--border);
+  flex-shrink: 0;
+}
+.prospect-card-meta-line { margin: 0; font-size: 13px; color: var(--text-muted); line-height: 1.4; }
 .prospect-card-section { margin-bottom: 16px; }
 .prospect-card-section:last-child { margin-bottom: 0; }
 .prospect-card-section h4 {
@@ -1191,6 +1373,26 @@ tbody tr:nth-child(even) { background: var(--row-stripe); }
 }
 tr.otc-row { background: var(--accent-soft); }
 tr.otc-row:hover { background: var(--accent-soft); }
+
+.pool-tracker-list { display: flex; flex-direction: column; gap: 14px; }
+.pool-row-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 6px;
+  font-size: 13.5px;
+}
+.pool-team-name { font-weight: 600; }
+.pool-amounts { margin-left: auto; color: var(--text); font-variant-numeric: tabular-nums; }
+.pool-bar-track {
+  height: 10px;
+  border-radius: 999px;
+  background: var(--bg-elevated);
+  border: 1px solid var(--border);
+  overflow: hidden;
+}
+.pool-bar-fill { height: 100%; background: var(--accent); border-radius: 999px; }
+.pool-bar-fill.pool-bar-warning { background: var(--warning); }
 
 .muted { color: var(--text-muted); }
 
@@ -1311,6 +1513,30 @@ function toggleFilterBar() {
 function showProspectCard(btn) {
   document.getElementById('prospect-card-name').textContent = btn.dataset.name;
   document.getElementById('prospect-card-blurb').textContent = btn.dataset.blurb;
+
+  const headshotEl = document.getElementById('prospect-card-headshot');
+  if (btn.dataset.headshot) {
+    headshotEl.src = btn.dataset.headshot;
+    headshotEl.alt = btn.dataset.name;
+    headshotEl.style.display = '';
+  } else {
+    headshotEl.style.display = 'none';
+    headshotEl.removeAttribute('src');
+  }
+  const metaParts = [btn.dataset.position, btn.dataset.school, btn.dataset.bt, btn.dataset.hometown, btn.dataset.class]
+    .filter(function (p) { return p; });
+  document.getElementById('prospect-card-meta-line').textContent = metaParts.join(' · ');
+
+  const bonusSection = document.getElementById('prospect-card-bonus-section');
+  if (btn.dataset.bonus) {
+    let text = 'Signed for ' + btn.dataset.bonus;
+    if (btn.dataset.slot) text += ' (slot value ' + btn.dataset.slot + ')';
+    if (btn.dataset.overUnder) text += ' — ' + btn.dataset.overUnder + ' slot';
+    document.getElementById('prospect-card-bonus').textContent = text;
+    bonusSection.style.display = '';
+  } else {
+    bonusSection.style.display = 'none';
+  }
 
   // MLB's "scoutingReport" field is consistently a link to a scouting video
   // rather than free text - render it as a clickable link when it looks
@@ -1565,6 +1791,24 @@ function initPickAlertsToggle() {
   });
 }
 
+// 2026 signing deadline: 5:00 PM ET on July 27 - ET is UTC-4 (EDT) in July.
+const SIGNING_DEADLINE = new Date('2026-07-27T17:00:00-04:00');
+
+function updateSigningDeadlineCountdown() {
+  const el = document.getElementById('signing-deadline-countdown');
+  if (!el) return;
+  const remainingMs = SIGNING_DEADLINE - new Date();
+  if (remainingMs <= 0) {
+    el.textContent = 'Passed';
+    return;
+  }
+  const totalMinutes = Math.floor(remainingMs / 60000);
+  const days = Math.floor(totalMinutes / 1440);
+  const hours = Math.floor((totalMinutes % 1440) / 60);
+  const minutes = totalMinutes % 60;
+  el.textContent = days + 'd ' + hours + 'h ' + minutes + 'm';
+}
+
 document.addEventListener('DOMContentLoaded', function () {
   initAutoRefresh();
   updateEmptyStates();
@@ -1572,6 +1816,8 @@ document.addEventListener('DOMContentLoaded', function () {
   syncStickyOffsets();
   initPickPolling();
   initPickAlertsToggle();
+  updateSigningDeadlineCountdown();
+  setInterval(updateSigningDeadlineCountdown, 60000);
 });
 window.addEventListener('resize', syncStickyOffsets);
 window.addEventListener('load', syncStickyOffsets);
@@ -1604,6 +1850,7 @@ def app_factory(db_path: str):
 
         conn = get_connection(db_path)
         data = fetch_dashboard_data(conn, year)
+        pool_data = fetch_team_pool_data(conn, year)
         conn.close()
 
         summary = data["summary"]
@@ -1618,6 +1865,10 @@ def app_factory(db_path: str):
           <div class="card"><h3>Actual Picks Loaded</h3><div class="value">{summary['picks_loaded']}</div></div>
           <div class="card"><h3>Predictions Loaded</h3><div class="value">{summary['predictions_loaded']}</div></div>
           <div class="card"><h3>Top Available</h3><div class="value">{esc(summary['top_ranked_available'])}</div></div>
+          <div class="card">
+            <h3>Signing Deadline</h3>
+            <div class="value" id="signing-deadline-countdown">&mdash;</div>
+          </div>
         </div>
         """
 
@@ -1625,6 +1876,7 @@ def app_factory(db_path: str):
         on_the_clock = render_on_the_clock(data["on_the_clock"])
         otc_pick_number = data["on_the_clock"]["pick_number"] if data["on_the_clock"] else None
         draft_order_panel = render_draft_order(data["draft_order"], otc_pick_number, data["teams"])
+        pool_tracker_panel = render_pool_tracker(pool_data)
         model_comparison_panel = render_model_comparison(data["model_comparison"], data["models"])
 
         best_available_panel = filterable_table(
@@ -1651,9 +1903,9 @@ def app_factory(db_path: str):
         picks_panel = filterable_table(
             "actual-picks",
             "Actual Picks",
-            ["Pick", "Team", "Player", "Position", "School"],
+            ["Pick", "Team", "Player", "Position", "School", "Status", "Tag"],
             data["picks"],
-            ["pick_number", "team_name", "player_name", "player_position", "school_name"],
+            ["pick_number", "team_name", "player_name", "player_position", "school_name", "signed_status", "signability_tag"],
             count_label="picks",
             empty_text="No picks recorded yet for this draft year.",
             default_status="Drafted",
@@ -1739,6 +1991,7 @@ def app_factory(db_path: str):
           <nav class="subnav">
             <a href="#on-the-clock">On the Clock</a>
             <a href="#draft-order">Draft Order</a>
+            <a href="#pool-tracker">Bonus Pool</a>
             <a href="#best-available">Best Available</a>
             <a href="#fallers">Fallers</a>
             <a href="#actual-picks">Actual Picks</a>
@@ -1751,6 +2004,7 @@ def app_factory(db_path: str):
             {cards}
             {on_the_clock}
             {draft_order_panel}
+            {pool_tracker_panel}
             {filter_bar}
             {best_available_panel}
             {fallers_panel}
@@ -1767,6 +2021,10 @@ def app_factory(db_path: str):
             <div class="prospect-card" onclick="event.stopPropagation()">
               <button type="button" class="prospect-card-close" aria-label="Close" onclick="hideProspectCard()">&times;</button>
               <h3 id="prospect-card-name"></h3>
+              <div class="prospect-card-meta">
+                <img id="prospect-card-headshot" class="prospect-card-headshot" alt="" style="display:none">
+                <p id="prospect-card-meta-line" class="prospect-card-meta-line"></p>
+              </div>
               <div class="prospect-card-section">
                 <h4>Blurb</h4>
                 <p id="prospect-card-blurb"></p>
@@ -1774,6 +2032,10 @@ def app_factory(db_path: str):
               <div class="prospect-card-section">
                 <h4>Scouting Report</h4>
                 <p id="prospect-card-scouting"></p>
+              </div>
+              <div class="prospect-card-section" id="prospect-card-bonus-section" style="display:none">
+                <h4>Signing Bonus</h4>
+                <p id="prospect-card-bonus"></p>
               </div>
             </div>
           </div>
