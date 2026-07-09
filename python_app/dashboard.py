@@ -1991,20 +1991,19 @@ def app_factory(db_path: str):
           <nav class="subnav">
             <a href="#on-the-clock">On the Clock</a>
             <a href="#draft-order">Draft Order</a>
-            <a href="#pool-tracker">Bonus Pool</a>
             <a href="#best-available">Best Available</a>
             <a href="#fallers">Fallers</a>
             <a href="#actual-picks">Actual Picks</a>
             <a href="#board">Full Board</a>
             <a href="#predictions">Predictions</a>
             <a href="#model-comparison">Model Comparison</a>
+            <a href="#pool-tracker">Bonus Pool</a>
           </nav>
 
           <main>
             {cards}
             {on_the_clock}
             {draft_order_panel}
-            {pool_tracker_panel}
             {filter_bar}
             {best_available_panel}
             {fallers_panel}
@@ -2012,6 +2011,7 @@ def app_factory(db_path: str):
             {board_panel}
             {predictions_panel}
             {model_comparison_panel}
+            {pool_tracker_panel}
           </main>
 
           <footer>MLB Draft Tracker &middot; local dashboard</footer>
