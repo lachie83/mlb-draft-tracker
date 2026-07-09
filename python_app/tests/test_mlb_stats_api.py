@@ -198,6 +198,27 @@ def test_reconcile_picks_from_api_is_idempotent_and_does_not_resend_alerts(conn,
     assert total == len(first_pass)
 
 
+def test_reconcile_picks_from_api_persists_all_picks_even_when_telegram_fails_for_all(conn, monkeypatch):
+    # conn.commit() only happens after reconcile_picks_from_api() returns (see
+    # cmd_live_monitor_api in main.py) - a notifier that raises on every send
+    # is the worst case, and proves a Telegram outage can't abort the loop
+    # and drop picks that were already upserted this cycle.
+    payload = load_fixture("draft_complete_2025.json")
+    monkeypatch.setattr("mlb_tracker.mlb_stats_api.fetch_draft", lambda year, client=None: payload)
+
+    class FailingNotifier:
+        def send(self, text):
+            raise RuntimeError("simulated Telegram outage")
+
+    new_picks = reconcile_picks_from_api(conn, draft_year=2025, notifier=FailingNotifier())
+
+    drafted_count = sum(1 for p in iter_picks(payload) if p.get("isDrafted") and not p.get("isPass"))
+    assert drafted_count > 1  # otherwise this test can't distinguish "aborted after pick 1" from "worked"
+    assert len(new_picks) == drafted_count
+    total = conn.execute("SELECT COUNT(*) c FROM actual_picks WHERE draft_year = 2025").fetchone()["c"]
+    assert total == drafted_count
+
+
 def test_sync_prospects_from_api_loads_ranked_and_unranked_prospects(conn, monkeypatch):
     payload = load_fixture("draft_prospects_2026.json")
     monkeypatch.setattr("mlb_tracker.mlb_stats_api.fetch_draft_prospects", lambda year, client=None: payload)
