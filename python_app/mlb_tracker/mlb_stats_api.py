@@ -346,6 +346,16 @@ def reconcile_picks_from_api(
         upsert_actual_pick(conn, pick_row)
         if existing is None:
             new_picks.append(pick_row)
-            send_pick_if_new(conn, notifier, draft_year, pick_row)
+            try:
+                send_pick_if_new(conn, notifier, draft_year, pick_row)
+            except Exception as exc:
+                # conn.commit() only happens after this function returns (see
+                # cmd_live_monitor_api in main.py), so letting a Telegram
+                # failure (rate limit, outage, bad token) propagate here would
+                # abort the loop and drop every pick already upserted this
+                # cycle - not just fail to notify for this one. Log and move
+                # on; mark_event_sent() never ran, so the alert is retried
+                # on the next successful poll.
+                print(f"Warning: failed to send Telegram alert for pick #{pick_row['pick_number']}: {exc}")
 
     return new_picks
