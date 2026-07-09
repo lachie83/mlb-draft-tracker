@@ -2,13 +2,18 @@
 
 Each entry below is a faithful transcription of a specific published mock
 draft — not a synthetic/curated approximation. They were retrieved by
-browsing MLB Pipeline's coverage directly:
+browsing each outlet's coverage directly:
 
 - "MLB Pipeline 2026 mock draft July 2" by Jonathan Mayo, published
   2026-07-02: https://www.mlb.com/milb/news/mlb-pipeline-2026-mock-draft-july-2
 - "Our experts tag-team the latest mock draft from the Combine" by
   Jonathan Mayo, Jim Callis, and Brendan Samson, published 2026-06-25:
   https://www.mlb.com/milb/news/mlb-pipeline-2026-mock-draft-june-25
+- "2026 Mock Draft 1.0" by Eric Longenhagen (FanGraphs), published
+  2026-07-08: https://blogs.fangraphs.com/2026-mock-draft-1-0/
+- "2026 MLB Mock Draft Predictions and Breaking Down Top Prospects" by
+  Zach Buckley (Bleacher Report), published 2026-07-08:
+  https://bleacherreport.com/articles/25452409-2026-mlb-mock-draft-predictions-and-breaking-down-top-prospects
 
 These are point-in-time snapshots, like examples/prospects_top250_seed_2026.csv
 - they will not reflect mock drafts published after the date this module was
@@ -17,6 +22,11 @@ mocks are published.
 
 `board_rank` is the prospect's rank as cited in that specific mock article
 ("(No. X)"), which can differ between mocks/dates as the board is re-ranked.
+It's `None` for the FanGraphs/Bleacher Report entries below - neither article
+cites an explicit numeric rank alongside its picks (checked directly, not an
+extraction gap), so mock_ingest's name-matching is the only match path for
+those rows rather than the board_rank fallback.
+
 `weight` is a per-source confidence multiplier (more recent mocks are closer
 to the draft and weighted higher); for MLB Pipeline's July 2 mock, pick 1 was
 given as an explicit three-way percentage split by the author, which is
@@ -82,6 +92,22 @@ _JUNE_25_SOURCE = {
     "source_date": "2026-06-25",
     "source_url": "https://www.mlb.com/milb/news/mlb-pipeline-2026-mock-draft-june-25",
     "weight": 1.0,
+}
+
+_FANGRAPHS_1_0_SOURCE = {
+    "source_name": "FanGraphs Mock Draft 1.0",
+    "source_authors": "Eric Longenhagen",
+    "source_date": "2026-07-08",
+    "source_url": "https://blogs.fangraphs.com/2026-mock-draft-1-0/",
+    "weight": 2.0,
+}
+
+_BLEACHER_REPORT_SOURCE = {
+    "source_name": "Bleacher Report Mock Draft",
+    "source_authors": "Zach Buckley",
+    "source_date": "2026-07-08",
+    "source_url": "https://bleacherreport.com/articles/25452409-2026-mlb-mock-draft-predictions-and-breaking-down-top-prospects",
+    "weight": 2.0,
 }
 
 # (pick_number, team_nickname, player_name, board_rank)
@@ -170,6 +196,74 @@ _JUNE_25_PICKS: list[tuple[int, str, str, int]] = [
     (40, "Dodgers", "Will Brick", 51),
 ]
 
+# No board_rank citations in this article - see module docstring.
+_FANGRAPHS_1_0_PICKS: list[tuple[int, str, str, int | None]] = [
+    (1, "White Sox", "Grady Emerson", None),
+    (2, "Rays", "Vahn Lackey", None),
+    (3, "Twins", "Roch Cholowsky", None),
+    (4, "Giants", "Jackson Flora", None),
+    (5, "Pirates", "Eric Booth Jr.", None),
+    (6, "Royals", "Jacob Lombard", None),
+    (7, "Orioles", "Tyler Bell", None),
+    (8, "Athletics", "Chris Hacopian", None),
+    (9, "Braves", "Derek Curiel", None),
+    (10, "Rockies", "Zion Rose", None),
+    (11, "Nationals", "Drew Burress", None),
+    (12, "Angels", "Mason Edwards", None),
+    (13, "Cardinals", "Jared Grindlinger", None),
+    (14, "Marlins", "Gio Rojas", None),
+    (15, "Diamondbacks", "Trevor Condon", None),
+    (16, "Rangers", "Hunter Dietz", None),
+    (17, "Astros", "Justin Lebron", None),
+    (18, "Reds", "Liam Peterson", None),
+    (19, "Guardians", "Tyler Spangler", None),
+    (20, "Red Sox", "Cameron Flukey", None),
+    (21, "Padres", "Bo Lowrance", None),
+    (22, "Tigers", "Cole Carlon", None),
+    (23, "Cubs", "Aiden Robbins", None),
+    (24, "Mariners", "Ryder Helfrick", None),
+    (25, "Brewers", "Ace Reese", None),
+    # Supplemental first round
+    (26, "Braves", "Carson Bolemon", None),
+    (27, "Mets", "Tegan Kuhns", None),
+    (28, "Astros", "Daniel Jackson", None),
+]
+
+# No board_rank citations in this article either - see module docstring.
+_BLEACHER_REPORT_PICKS: list[tuple[int, str, str, int | None]] = [
+    (1, "White Sox", "Roch Cholowsky", None),
+    (2, "Rays", "Grady Emerson", None),
+    (3, "Twins", "Vahn Lackey", None),
+    (4, "Giants", "Jacob Lombard", None),
+    (5, "Pirates", "Eric Booth Jr.", None),
+    (6, "Royals", "Jackson Flora", None),
+    (7, "Orioles", "Drew Burress", None),
+    (8, "Athletics", "Ryder Helfrick", None),
+    (9, "Braves", "Gio Rojas", None),
+    (10, "Rockies", "AJ Gracia", None),
+    (11, "Nationals", "Tyler Bell", None),
+    (12, "Angels", "Derek Curiel", None),
+    (13, "Cardinals", "Liam Peterson", None),
+    (14, "Marlins", "Chris Hacopian", None),
+    (15, "Diamondbacks", "Justin Lebron", None),
+    (16, "Rangers", "Jared Grindlinger", None),
+    (17, "Astros", "Daniel Jackson", None),
+    (18, "Reds", "Trevor Condon", None),
+    (19, "Guardians", "Sawyer Strosnider", None),
+    (20, "Red Sox", "Brody Bumila", None),
+    (21, "Padres", "Carson Bolemon", None),
+    (22, "Tigers", "Cameron Flukey", None),
+    (23, "Cubs", "Hunter Dietz", None),
+    (24, "Mariners", "Aiden Robbins", None),
+    (25, "Brewers", "Zion Rose", None),
+    # Supplemental first round
+    (26, "Braves", "Bo Lowrance", None),
+    (27, "Mets", "Cole Prosek", None),
+    (28, "Astros", "Cole Carlon", None),
+    (29, "Giants", "Logan Schmidt", None),
+    (30, "Royals", "Taylor Rabe", None),
+]
+
 
 def _build_picks() -> list[dict[str, Any]]:
     rows: list[dict[str, Any]] = []
@@ -201,6 +295,28 @@ def _build_picks() -> list[dict[str, Any]]:
         rows.append(
             {
                 **_JUNE_25_SOURCE,
+                "pick_number": pick_number,
+                "team_name": full_team_name(nickname),
+                "player_name": player_name,
+                "board_rank": board_rank,
+            }
+        )
+
+    for pick_number, nickname, player_name, board_rank in _FANGRAPHS_1_0_PICKS:
+        rows.append(
+            {
+                **_FANGRAPHS_1_0_SOURCE,
+                "pick_number": pick_number,
+                "team_name": full_team_name(nickname),
+                "player_name": player_name,
+                "board_rank": board_rank,
+            }
+        )
+
+    for pick_number, nickname, player_name, board_rank in _BLEACHER_REPORT_PICKS:
+        rows.append(
+            {
+                **_BLEACHER_REPORT_SOURCE,
                 "pick_number": pick_number,
                 "team_name": full_team_name(nickname),
                 "player_name": player_name,
