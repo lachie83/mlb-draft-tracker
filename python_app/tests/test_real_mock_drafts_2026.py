@@ -56,3 +56,21 @@ def test_load_real_mock_draft_picks_no_exact_duplicate_source_pick_player():
     rows = load_real_mock_draft_picks(draft_year=2026)
     keys = [(r["source_name"], r["source_date"], r["pick_number"], r["player_name"]) for r in rows]
     assert len(keys) == len(set(keys))
+
+
+def test_load_real_mock_draft_picks_includes_fangraphs_and_bleacher_report():
+    rows = load_real_mock_draft_picks(draft_year=2026)
+    source_names = {r["source_name"] for r in rows}
+    assert "FanGraphs Mock Draft 1.0" in source_names
+    assert "Bleacher Report Mock Draft" in source_names
+
+    fangraphs_pick_1 = next(
+        r for r in rows if r["source_name"] == "FanGraphs Mock Draft 1.0" and r["pick_number"] == 1
+    )
+    assert fangraphs_pick_1["player_name"] == "Grady Emerson"
+    assert fangraphs_pick_1["board_rank"] is None  # no rank citations in that article - see module docstring
+
+    br_pick_1 = next(
+        r for r in rows if r["source_name"] == "Bleacher Report Mock Draft" and r["pick_number"] == 1
+    )
+    assert br_pick_1["player_name"] == "Roch Cholowsky"
