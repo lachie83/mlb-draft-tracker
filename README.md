@@ -244,7 +244,16 @@ See `.env.example`.
 - The SQLite DB is intentionally excluded from git; recreate it from schema + seed data.
 
 ## Roadmap
-- automate periodic refresh of the top-250 prospect CSV snapshot, or drop it once/if `/draft/prospects/{year}` becomes populated pre-draft
-- fully retire the R/baseballr path once the Stats API (or another source) covers the pre-draft prospect board too
-- improve dashboard filtering and draft-day views
-- add mock drafts from additional outlets beyond MLB Pipeline, and automate periodic re-transcription as new mocks are published
+**Recently shipped:**
+- Live prospect board sync straight from `/draft/prospects/{year}` (populated as of 2026-07-08), with automated 6h change monitoring and Telegram alerts — see `sync-prospects-api`. This replaced the CSV snapshot as the primary source.
+- Team logos wherever a team name appears in the dashboard.
+- A floating in-browser pick notification mirroring the Telegram alerts, for anyone watching the dashboard tab.
+- A per-team filter on Draft Order to see all of a team's picks across every round.
+- Fixed the mobile filter bar not staying sticky (a desktop-only regression).
+- OpenSSF Scorecard workflow/badge, CodeQL SAST scanning, Dependabot, pinned CI/Docker dependencies, `SECURITY.md`.
+
+**Still open:**
+- Fully retire the R/baseballr path — no longer the primary prospect-board source (superseded by `sync-prospects-api`), but still kept in the fallback chain rather than removed outright.
+- Refresh or retire the legacy `examples/prospects_top250_seed_2026.csv` snapshot — still used as a last-resort fallback if both the live API and baseballr fail, and it will drift over time.
+- Add mock drafts from additional outlets beyond MLB Pipeline, and automate periodic re-transcription as new mocks are published.
+- OpenSSF Best Practices badge — needs a self-assessment submitted directly on bestpractices.dev (not a code change).
