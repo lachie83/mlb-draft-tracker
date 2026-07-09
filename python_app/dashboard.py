@@ -410,7 +410,7 @@ def fetch_dashboard_data(conn: sqlite3.Connection, year: int):
     next_pick_row = q(
         conn,
         """
-        SELECT s.pick_number, s.team_name, s.round_label
+        SELECT s.pick_number, s.team_name, s.round_label, s.pick_value
         FROM draft_slots s
         WHERE s.draft_year = ?
           AND s.pick_number NOT IN (
@@ -447,6 +447,7 @@ def fetch_dashboard_data(conn: sqlite3.Connection, year: int):
             "pick_number": slot["pick_number"],
             "team_name": slot["team_name"],
             "round_label": slot["round_label"],
+            "pick_value": slot["pick_value"],
             "candidates": candidates,
         }
 
@@ -455,7 +456,7 @@ def fetch_dashboard_data(conn: sqlite3.Connection, year: int):
         for r in q(
             conn,
             """
-            SELECT s.pick_number, s.round_label, s.team_name, ap.player_name
+            SELECT s.pick_number, s.round_label, s.team_name, s.pick_value, ap.player_name
             FROM draft_slots s
             LEFT JOIN actual_picks ap
                 ON ap.draft_year = s.draft_year AND ap.pick_number = s.pick_number
@@ -721,7 +722,7 @@ def render_on_the_clock(otc):
         <h2>On the Clock</h2>
         <span class="badge badge-accent">Pick #{esc(otc['pick_number'])}</span>
       </div>
-      <p class="on-the-clock-team">{team_logo_html(otc['team_name'])}{esc(otc['team_name'])} <span class="muted">&middot; {esc(otc.get('round_label') or '')}</span></p>
+      <p class="on-the-clock-team">{team_logo_html(otc['team_name'])}{esc(otc['team_name'])} <span class="muted">&middot; {esc(otc.get('round_label') or '')}{f" &middot; Slot value: {esc(format_usd(otc['pick_value']))}" if otc.get('pick_value') else ""}</span></p>
       <div class="table-wrap">
         <table>
           <thead><tr><th>Player</th><th>Position</th><th>School</th><th title="{esc(HEADER_TOOLTIPS['Win Prob.'])}">Win Prob.</th><th>Models</th></tr></thead>
@@ -763,6 +764,7 @@ def render_draft_order(groups, on_the_clock_pick_number, teams):
                   <td data-label="Pick">{esc(p['pick_number'])}</td>
                   <td data-label="Team">{team_logo_html(p['team_name'])}{esc(p['team_name'])}</td>
                   <td data-label="Player">{esc(p.get('player_name')) or ('<span class="badge badge-accent">On the Clock</span>' if p['pick_number'] == on_the_clock_pick_number else '<span class="muted">&mdash;</span>')}</td>
+                  <td data-label="Slot Value">{esc(format_usd(p.get('pick_value')))}</td>
                 </tr>"""
             for p in group["picks"]
         )
@@ -772,7 +774,7 @@ def render_draft_order(groups, on_the_clock_pick_number, teams):
               <h3 class="round-heading">{esc(group['round_name'])}</h3>
               <div class="table-wrap">
                 <table>
-                  <thead><tr><th>Pick</th><th>Team</th><th>Player</th></tr></thead>
+                  <thead><tr><th>Pick</th><th>Team</th><th>Player</th><th>Slot Value</th></tr></thead>
                   <tbody>{pick_rows}</tbody>
                 </table>
               </div>
