@@ -127,6 +127,23 @@ def test_draft_order_shows_player_name_once_drafted(conn):
     assert by_pick[2]["player_name"] is None
 
 
+def test_draft_order_carries_pick_value(conn):
+    seed_draft_slot(conn, pick_number=1, team_name="Team A", round_label="1", pick_value=11_350_600)
+
+    data = fetch_dashboard_data(conn, 2026)
+    pick = data["draft_order"][0]["picks"][0]
+
+    assert pick["pick_value"] == 11_350_600
+
+
+def test_on_the_clock_carries_pick_value(conn):
+    seed_draft_slot(conn, pick_number=1, team_name="Team A", round_label="1", pick_value=11_350_600)
+
+    data = fetch_dashboard_data(conn, 2026)
+
+    assert data["on_the_clock"]["pick_value"] == 11_350_600
+
+
 def test_draft_order_empty_when_no_slots_loaded(conn):
     data = fetch_dashboard_data(conn, 2026)
 
