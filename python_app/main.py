@@ -13,6 +13,7 @@ from mlb_tracker.db import (
     upsert_prospect,
 )
 from mlb_tracker.draft_rehearsal import cleanup_rehearsal_data, rehearse_draft_day
+from mlb_tracker.draft_schedule import DEFAULT_POLL_INTERVAL_SECONDS, current_milestone, recommended_poll_interval_seconds
 from mlb_tracker.live_monitor import reconcile_live_picks
 from mlb_tracker.mlb_stats_api import (
     fetch_latest,
@@ -31,7 +32,7 @@ from mlb_tracker.sources import (
     seed_prospects_from_csv,
     verify_baseballr_setup,
 )
-from mlb_tracker.telegram import TelegramNotifier, format_prospect_changes_message
+from mlb_tracker.telegram import TelegramNotifier, format_prospect_changes_message, send_milestone_notification_if_new
 
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -168,9 +169,26 @@ def cmd_live_monitor_api(args):
     conn = get_connection(args.db)
     notifier = TelegramNotifier()
     new_picks = reconcile_picks_from_api(conn, draft_year=args.year, notifier=notifier)
+    # The milestone schedule is tied to the 2026 draft's real wall-clock
+    # dates (see draft_schedule.py) - only meaningful when actually
+    # monitoring that draft, not e.g. a rehearsal or a different year.
+    if args.year == 2026:
+        milestone = current_milestone()
+        if milestone is not None:
+            send_milestone_notification_if_new(conn, notifier, draft_year=args.year, milestone=milestone)
     conn.commit()
     conn.close()
     print(f"Observed {len(new_picks)} new picks via the MLB Stats API")
+
+
+def cmd_draft_poll_interval(args):
+    """Prints just the recommended poll interval (seconds) to stdout - no DB
+    access, so poll_draft_day.sh can call this cheaply on every tick without
+    opening a connection. Only the 2026 draft has a real schedule to size
+    against (see draft_schedule.py); any other year gets the long-standing
+    static default."""
+    interval = recommended_poll_interval_seconds() if args.year == 2026 else DEFAULT_POLL_INTERVAL_SECONDS
+    print(interval)
 
 
 def cmd_on_the_clock_api(args):
@@ -312,6 +330,10 @@ def build_parser() -> argparse.ArgumentParser:
     p = sub.add_parser("on-the-clock-api")
     p.add_argument("--year", type=int, default=2026)
     p.set_defaults(func=cmd_on_the_clock_api)
+
+    p = sub.add_parser("draft-poll-interval", help="print the recommended live-monitor poll interval (seconds) for --year right now")
+    p.add_argument("--year", type=int, default=2026)
+    p.set_defaults(func=cmd_draft_poll_interval)
 
     p = sub.add_parser("rehearse-draft-day")
     p.add_argument("--year", type=int, default=9999, help="draft_year tag for simulated picks (default 9999 - a sentinel that can't collide with a real draft)")

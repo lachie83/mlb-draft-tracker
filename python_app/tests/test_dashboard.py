@@ -1,10 +1,13 @@
 from __future__ import annotations
 
+from datetime import datetime
+
 from dashboard import (
     class_label,
     commitment_tier_for_school,
     compute_signability,
     describe_prospect_source,
+    draft_milestone_payload,
     extract_commitment_school,
     fetch_dashboard_data,
     fetch_latest_picks,
@@ -13,10 +16,12 @@ from dashboard import (
     get_selected_theme,
     prior_draft_return,
     prospect_info_button_html,
+    render_draft_schedule_banner,
     signability_badge_html,
     signability_tag,
     signability_tag_html,
 )
+from mlb_tracker.draft_schedule import ET
 
 from .factories import seed_actual_pick, seed_draft_slot, seed_prediction, seed_prospect
 
@@ -740,3 +745,56 @@ def test_picks_query_ignores_commitment_mentions_for_non_hs_players(conn):
     pick = next(p for p in data["picks"] if p["pick_number"] == 3)
 
     assert "college commitment" not in " ".join(pick["signability"]["factors"])
+
+
+def test_draft_milestone_payload_empty_for_non_2026_years():
+    payload = draft_milestone_payload(2025)
+
+    assert payload == {
+        "year": 2025, "location": None, "current": None, "next": None,
+        "poll_interval_seconds": None, "milestones": [],
+    }
+
+
+def test_draft_milestone_payload_reports_current_milestone():
+    now = datetime(2026, 7, 11, 18, 0, tzinfo=ET)
+
+    payload = draft_milestone_payload(2026, now=now)
+
+    assert payload["current"]["key"] == "day1_late"
+    assert payload["current"]["picks_label"] == "Picks 41-135"
+    assert payload["poll_interval_seconds"] == 15
+    assert len(payload["milestones"]) == 4
+    assert payload["location"] is not None
+
+
+def test_draft_milestone_payload_reports_next_milestone_when_none_active():
+    now = datetime(2026, 7, 11, 20, 0, tzinfo=ET)
+
+    payload = draft_milestone_payload(2026, now=now)
+
+    assert payload["current"] is None
+    assert payload["next"]["key"] == "day2"
+
+
+def test_draft_milestone_payload_both_none_after_last_window(conn):
+    now = datetime(2026, 7, 13, 12, 0, tzinfo=ET)
+
+    payload = draft_milestone_payload(2026, now=now)
+
+    assert payload["current"] is None
+    assert payload["next"] is None
+
+
+def test_render_draft_schedule_banner_empty_for_non_2026_years():
+    assert render_draft_schedule_banner(2025) == ""
+
+
+def test_render_draft_schedule_banner_shows_current_milestone():
+    now = datetime(2026, 7, 11, 18, 0, tzinfo=ET)
+
+    html = render_draft_schedule_banner(2026, now=now)
+
+    assert "draft-schedule-banner" in html
+    assert "Live now" in html
+    assert "Picks 41-135" in html

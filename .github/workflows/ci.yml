@@ -48,6 +48,7 @@ jobs:
           file: ${{ matrix.dockerfile }}
           tags: mlb-draft-tracker:ci
           push: false
+          build-args: GIT_COMMIT=${{ github.sha }}
           cache-from: type=gha,scope=${{ matrix.dockerfile }}
           cache-to: type=gha,mode=max,scope=${{ matrix.dockerfile }}
 
