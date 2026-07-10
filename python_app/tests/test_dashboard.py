@@ -2,13 +2,18 @@ from __future__ import annotations
 
 from dashboard import (
     class_label,
+    commitment_tier_for_school,
+    compute_signability,
     describe_prospect_source,
+    extract_commitment_school,
     fetch_dashboard_data,
     fetch_latest_picks,
     fetch_team_pool_data,
     format_usd,
     get_selected_theme,
+    prior_draft_return,
     prospect_info_button_html,
+    signability_badge_html,
     signability_tag,
     signability_tag_html,
 )
@@ -466,3 +471,193 @@ def test_prospect_info_button_carries_enrichment_attributes():
     assert 'data-bonus="$3,000,000"' in html
     assert 'data-slot="$2,500,000"' in html
     assert 'data-over-under="+$500,000"' in html
+
+
+def test_extract_commitment_school_high_confidence_phrasing():
+    assert extract_commitment_school("Both he and Spangler are committed to Stanford for college ball") == "Stanford"
+    assert extract_commitment_school("If he follows through on his commitment to Alabama") == "Alabama"
+    assert extract_commitment_school("committed to Louisiana State this fall") == "Louisiana State"
+
+
+def test_extract_commitment_school_none_when_no_high_confidence_phrasing():
+    assert extract_commitment_school(None) is None
+    assert extract_commitment_school("") is None
+    assert extract_commitment_school("The Texas recruit is a fine prospect") is None
+    assert extract_commitment_school("All of the LSU recruit's tools stand out") is None
+
+
+def test_extract_commitment_school_rejects_garbage_sentence_bleed():
+    # This is a real example from testing against the live board - a looser
+    # pattern matched across a sentence boundary onto an unrelated phrase.
+    # The strict "committed to X" / "commitment to X" patterns should not.
+    blurb = "Comeau has limited defensive options. The Texas A&M recruit projects best in a corner."
+    assert extract_commitment_school(blurb) is None
+
+
+def test_commitment_tier_for_school_known_and_unknown():
+    assert commitment_tier_for_school("Vanderbilt") == "hard"
+    assert commitment_tier_for_school("Kentucky") == "medium"
+    assert commitment_tier_for_school("Some Small College") == "medium"
+    assert commitment_tier_for_school("Pearl River Community College") == "easy"
+    assert commitment_tier_for_school(None) is None
+
+
+def test_prior_draft_return_true_when_earlier_year_pick_exists(conn):
+    seed_actual_pick(conn, draft_year=2025, pick_number=425, player_name="Returned Player", mlb_person_id=999)
+
+    assert prior_draft_return(conn, 999, 2026) is True
+
+
+def test_prior_draft_return_false_when_no_earlier_pick(conn):
+    assert prior_draft_return(conn, 999, 2026) is False
+
+
+def test_prior_draft_return_false_when_person_id_none(conn):
+    assert prior_draft_return(conn, None, 2026) is False
+
+
+def test_prior_draft_return_ignores_same_or_later_year(conn):
+    seed_actual_pick(conn, draft_year=2026, pick_number=1, player_name="This Year", mlb_person_id=888)
+
+    assert prior_draft_return(conn, 888, 2026) is False
+
+
+def test_compute_signability_college_senior_signed_at_slot_is_likely_sign():
+    result = compute_signability(
+        rank=50, pick_number=52, class_label_value="College Sr",
+        commitment_tier=None, pool_pct_used=0.5,
+    )
+    assert result["tier"] == "Likely Sign"
+    assert result["score"] > 70
+
+
+def test_compute_signability_hs_steal_with_hard_commitment_is_tougher():
+    likely = compute_signability(
+        rank=50, pick_number=52, class_label_value="College Sr",
+        commitment_tier=None, pool_pct_used=0.5,
+    )
+    tough = compute_signability(
+        rank=5, pick_number=40, class_label_value="High School",
+        commitment_tier="hard", pool_pct_used=0.5,
+    )
+    assert tough["score"] < likely["score"]
+    assert tough["tier"] in ("Moderate Risk", "Tough Sign")
+
+
+def test_compute_signability_juco_scores_like_high_school_not_like_senior():
+    # Regression: the source plan scored JUCO like a college senior
+    # (near-auto-sign) - backwards, since a draft-eligible JUCO player can
+    # return to school easily and has real leverage.
+    juco = compute_signability(
+        rank=None, pick_number=10, class_label_value="JUCO",
+        commitment_tier=None, pool_pct_used=None,
+    )
+    senior = compute_signability(
+        rank=None, pick_number=10, class_label_value="College Sr",
+        commitment_tier=None, pool_pct_used=None,
+    )
+    hs = compute_signability(
+        rank=None, pick_number=10, class_label_value="High School",
+        commitment_tier=None, pool_pct_used=None,
+    )
+    assert juco["score"] == hs["score"]
+    assert juco["score"] < senior["score"]
+
+
+def test_compute_signability_prior_return_lowers_score():
+    without = compute_signability(
+        rank=None, pick_number=10, class_label_value="College Jr",
+        commitment_tier=None, pool_pct_used=None, prior_return=False,
+    )
+    with_return = compute_signability(
+        rank=None, pick_number=10, class_label_value="College Jr",
+        commitment_tier=None, pool_pct_used=None, prior_return=True,
+    )
+    assert with_return["score"] < without["score"]
+    assert "previously drafted and didn't sign" in with_return["factors"]
+
+
+def test_compute_signability_reported_bonus_tier_adjusts_score():
+    over_slot = compute_signability(
+        rank=None, pick_number=10, class_label_value="College Jr",
+        commitment_tier=None, pool_pct_used=None, reported_bonus_tier="over_slot",
+    )
+    under_slot = compute_signability(
+        rank=None, pick_number=10, class_label_value="College Jr",
+        commitment_tier=None, pool_pct_used=None, reported_bonus_tier="under_slot",
+    )
+    assert under_slot["score"] > over_slot["score"]
+
+
+def test_compute_signability_pool_room_factors():
+    tight_pool = compute_signability(
+        rank=None, pick_number=10, class_label_value="College Jr",
+        commitment_tier=None, pool_pct_used=0.99,
+    )
+    ample_pool = compute_signability(
+        rank=None, pick_number=10, class_label_value="College Jr",
+        commitment_tier=None, pool_pct_used=0.2,
+    )
+    assert ample_pool["score"] > tight_pool["score"]
+
+
+def test_compute_signability_score_clamped_to_0_100():
+    worst = compute_signability(
+        rank=5, pick_number=100, class_label_value="High School",
+        commitment_tier="hard", pool_pct_used=0.99, prior_return=True, reported_bonus_tier="over_slot",
+    )
+    best = compute_signability(
+        rank=100, pick_number=5, class_label_value="College Sr",
+        commitment_tier="easy", pool_pct_used=0.1, reported_bonus_tier="under_slot",
+    )
+    assert 0 <= worst["score"] <= 100
+    assert 0 <= best["score"] <= 100
+
+
+def test_signability_badge_html_maps_tiers_to_badge_classes():
+    likely = signability_badge_html({"signability": {"tier": "Likely Sign", "score": 85, "factors": []}})
+    assert "badge-accent" in likely
+    assert "Likely Sign (85)" in likely
+
+    tough = signability_badge_html({"signability": {"tier": "Tough Sign", "score": 20, "factors": ["fell 30 spots"]}})
+    assert "badge-warning" in tough
+
+
+def test_signability_badge_html_empty_when_no_signability():
+    assert signability_badge_html({}) == ""
+
+
+def test_picks_query_includes_signability_end_to_end(conn):
+    prospect = seed_prospect(conn, person_id=555, person_full_name="Test Signer", rank=5, school_class="4YR SR")
+    seed_actual_pick(
+        conn, pick_number=6, team_name="Some Team", player_name="Test Signer",
+        mlb_person_id=prospect["mlb_person_id"], bonus_amount=100_000, slot_value=200_000,
+    )
+
+    data = fetch_dashboard_data(conn, 2026)
+    pick = next(p for p in data["picks"] if p["pick_number"] == 6)
+
+    assert pick["signability"] is not None
+    assert pick["signability"]["tier"] in ("Likely Sign", "Moderate Risk", "Tough Sign")
+    assert isinstance(pick["signability"]["score"], int)
+
+
+def test_picks_query_ignores_commitment_mentions_for_non_hs_players(conn):
+    # Regression: found via real-data testing that a college player's blurb
+    # can mention their *original* HS commitment as backstory (e.g. "His
+    # commitment to UCLA priced him out" for a player who's since actually
+    # enrolled there and become a junior) - that's history, not a live
+    # decision, and must not be treated as current signability leverage.
+    prospect = seed_prospect(
+        conn, person_id=555, person_full_name="College Junior", rank=2, school_class="4YR JR",
+        blurb="His commitment to Vanderbilt priced him out of the prior draft.",
+    )
+    seed_actual_pick(
+        conn, pick_number=3, team_name="Some Team", player_name="College Junior",
+        mlb_person_id=prospect["mlb_person_id"],
+    )
+
+    data = fetch_dashboard_data(conn, 2026)
+    pick = next(p for p in data["picks"] if p["pick_number"] == 3)
+
+    assert "college commitment" not in " ".join(pick["signability"]["factors"])

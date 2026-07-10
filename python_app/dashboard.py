@@ -118,6 +118,171 @@ def signability_tag(rank, pick_number, threshold=SIGNABILITY_THRESHOLD):
     return None, delta
 
 
+# High-confidence only: requires the explicit "committed to X" / "commitment
+# to X" phrasing MLB's blurb text sometimes uses for HS prospects. Tested
+# against all 107 ranked HS prospects in the live 2026 board - a looser
+# pattern (matching "...recruit" phrasing too) hit ~60% but produced real
+# garbage (e.g. "The Texas A&M" bleeding across an unrelated sentence).
+# This stricter version dropped coverage to ~23% (25/107) but produced zero
+# garbage on manual inspection - returns None (not a guess) for anything not
+# clearly matched, since most blurbs (77% in testing) either don't mention a
+# commitment at all or phrase it too loosely to trust.
+_COMMITMENT_PATTERNS = [
+    re.compile(r"committed to ([A-Z][a-zA-Z&]+(?: [A-Z][a-zA-Z&]+){0,2})\b"),
+    re.compile(r"commitment to ([A-Z][a-zA-Z&]+(?: [A-Z][a-zA-Z&]+){0,2})\b"),
+]
+
+
+def extract_commitment_school(blurb):
+    if not blurb:
+        return None
+    for pattern in _COMMITMENT_PATTERNS:
+        match = pattern.search(blurb)
+        if match:
+            return match.group(1).strip()
+    return None
+
+
+# Hand-tagged "blue blood" programs (top-25ish by recent recruiting/signing
+# track record) - not exhaustive, tunable. Unlisted schools default to
+# "medium" in commitment_tier_for_school() below; this is about a HS
+# player's *committed destination*, separate from the eligibility-leverage
+# handling in compute_signability() (a player's *current* enrollment).
+COMMITMENT_TIERS = {
+    "Vanderbilt": "hard", "LSU": "hard", "Louisiana State": "hard",
+    "Florida": "hard", "Texas": "hard", "Texas A&M": "hard",
+    "Arkansas": "hard", "Tennessee": "hard", "Wake Forest": "hard",
+    "Oregon State": "hard", "Clemson": "hard", "Florida State": "hard",
+    "Miami": "hard", "Virginia": "hard", "North Carolina": "hard",
+    "Duke": "hard", "Mississippi State": "hard", "Auburn": "hard",
+    "Stanford": "hard", "UCLA": "hard", "Oklahoma": "hard",
+    "South Carolina": "hard", "Texas Christian": "hard", "Louisville": "hard",
+    "Kentucky": "medium", "Georgia": "medium", "Alabama": "medium",
+    "Georgia Tech": "medium", "Oklahoma State": "medium", "Penn State": "medium",
+    "Coastal Carolina": "medium", "Oregon": "medium",
+}
+
+
+def commitment_tier_for_school(school_name):
+    if not school_name:
+        return None
+    if re.search(r"\b(JC|Junior College|Community College)\b", school_name, re.I):
+        return "easy"
+    return COMMITMENT_TIERS.get(school_name, "medium")
+
+
+def prior_draft_return(conn: sqlite3.Connection, mlb_person_id, draft_year: int) -> bool:
+    """True if this player was already drafted in an earlier year and didn't
+    sign (returned to school) - a genuine signability signal, not a guess.
+    Verified against real synced data: 11 real 2026 prospects were 2025
+    draftees (e.g. Brendan Brock, a 2025 pick at #425, now ranked #112 in
+    2026) - uses mlb_person_id, stable across years, and data this app
+    already syncs. No new source needed."""
+    if mlb_person_id is None:
+        return False
+    row = conn.execute(
+        "SELECT 1 FROM actual_picks WHERE mlb_person_id = ? AND draft_year < ? LIMIT 1",
+        (mlb_person_id, draft_year),
+    ).fetchone()
+    return row is not None
+
+
+# Hand-compiled from specific published reports, same pattern as
+# real_mock_drafts_2026.py - not a live/scraped feed. Keyed by mlb_person_id
+# since names can collide. Empty for now: researched specifically for this
+# feature (searched for named-player over/under-slot bonus-demand reporting
+# on the 2026 class) and found only soft, non-attributable team-strategy
+# speculation - e.g. a Chicago Sun-Times piece on the White Sox's #1 pick
+# decision (2026-07-08) explicitly states "no specific bonus figures or
+# asking prices" for any of the three candidates discussed. Add entries here
+# as concrete, citable reporting actually emerges (typically closer to/
+# during the draft itself) - each entry should cite its source, matching
+# the mock-draft module's convention.
+REPORTED_BONUS_DEMANDS: dict[int, dict] = {
+    # mlb_person_id: {"tier": "over_slot" | "at_slot" | "under_slot", "source": "...", "source_url": "...", "source_date": "..."}
+}
+
+
+ELIGIBILITY_SIGNABILITY_ADJ = {
+    # No leverage left - near-auto-sign, teams routinely sign these well
+    # under slot.
+    "College Sr": 25, "College 5th Yr": 25, "Grad Student": 25,
+    # Some leverage (one more season of eligibility possible), but real cost
+    # to walking away increases each year.
+    "College Jr": -10,
+    # Real leverage: JUCO transfer rules make returning painless, and
+    # current reporting specifically calls out draft-eligible sophomores as
+    # having "the most negotiating power ... can return to school for
+    # another season and lose minimal value." NOTE this fixes a sign error
+    # in the source plan, which scored JUCO at +15 (near-auto-sign, like a
+    # college senior) - backwards. This is about a player *currently
+    # enrolled* at a JUCO/as an underclassman deciding whether to return,
+    # not a HS player's *committed destination* (that's commitment_tier,
+    # unchanged and separate).
+    "College So": -15, "College Fr": -15, "JUCO": -15,
+    # Highest variance - can go anywhere, real wildcard.
+    "High School": -15,
+}
+
+SIGNABILITY_POOL_WARNING_PCT = 0.95
+SIGNABILITY_POOL_COMFORTABLE_PCT = 0.60
+
+
+def compute_signability(
+    *, rank, pick_number, class_label_value, commitment_tier,
+    pool_pct_used, prior_return=False, reported_bonus_tier=None,
+):
+    """0-100 signability score, higher = easier sign; tiered into Likely
+    Sign / Moderate Risk / Tough Sign. Deliberately simple, linear point
+    adjustments (not a trained model) so it's easy to explain in a tooltip
+    and easy to retune once real 2026 signings start landing."""
+    score = 70
+    factors = []
+
+    adj = ELIGIBILITY_SIGNABILITY_ADJ.get(class_label_value, 0)
+    if adj:
+        score += adj
+        factors.append(f"{class_label_value} eligibility")
+
+    if rank is not None:
+        delta = pick_number - rank
+        if delta > 15:
+            score -= 15
+            factors.append(f"fell {delta} spots past consensus rank")
+        elif delta > 5:
+            score -= 7
+            factors.append(f"fell {delta} spots past consensus rank")
+        elif delta < -10:
+            score += 5
+            factors.append("popped early relative to rank")
+
+    if commitment_tier:
+        commitment_adj = {"hard": -20, "medium": -8, "easy": 5}
+        score += commitment_adj.get(commitment_tier, 0)
+        factors.append(f"{commitment_tier} college commitment")
+
+    if pool_pct_used is not None:
+        if pool_pct_used > SIGNABILITY_POOL_WARNING_PCT:
+            score -= 10
+            factors.append("drafting team has little pool room left")
+        elif pool_pct_used < SIGNABILITY_POOL_COMFORTABLE_PCT:
+            score += 5
+            factors.append("drafting team has ample pool room")
+
+    if prior_return:
+        score -= 15
+        factors.append("previously drafted and didn't sign")
+
+    if reported_bonus_tier:
+        reported_adj = {"over_slot": -20, "at_slot": 0, "under_slot": 10}
+        score += reported_adj.get(reported_bonus_tier, 0)
+        factors.append(f"reported bonus demand: {reported_bonus_tier.replace('_', ' ')}")
+
+    score = max(0, min(100, score))
+    tier = "Likely Sign" if score >= 70 else "Moderate Risk" if score >= 40 else "Tough Sign"
+    return {"score": score, "tier": tier, "factors": factors}
+
+
 # MLB's official team IDs (matches what the MLB Stats API returns in
 # draft_slots.team_id / actual_picks.team_id) - kept as a static lookup
 # here too since several dashboard rows only carry team_name text (e.g.
@@ -194,6 +359,22 @@ def signability_tag_html(row) -> str:
     return f'<span class="badge {badge_class}">{esc(tag)} ({sign}{delta})</span>'
 
 
+SIGNABILITY_HEADERS = {"Signability"}
+
+
+def signability_badge_html(row) -> str:
+    signability = row.get("signability")
+    if not signability:
+        return ""
+    tier = signability["tier"]
+    badge_class = {
+        "Likely Sign": "badge-accent",
+        "Moderate Risk": "badge-warning",
+        "Tough Sign": "badge-warning",
+    }.get(tier, "badge")
+    return f'<span class="badge {badge_class}" title="{esc("; ".join(signability["factors"]) or "No notable factors")}">{esc(tier)} ({signability["score"]})</span>'
+
+
 def prospect_info_button_html(row):
     """A small info button opening the floating scouting-report card,
     rendered only when there's actually something to show - tables that
@@ -216,6 +397,10 @@ def prospect_info_button_html(row):
         delta = bonus - slot
         sign = "+" if delta >= 0 else "-"
         over_under_str = sign + format_usd(abs(delta))
+    signability = row.get("signability")
+    signability_tier = signability["tier"] if signability else ""
+    signability_score = signability["score"] if signability else ""
+    signability_factors = "|".join(signability["factors"]) if signability else ""
     return (
         f' <button type="button" class="prospect-info-btn" aria-label="Scouting info for {name}" '
         f'data-name="{name}" data-blurb="{esc(blurb)}" data-scouting="{esc(scouting)}" '
@@ -224,6 +409,8 @@ def prospect_info_button_html(row):
         f'data-hometown="{esc(hometown)}" data-class="{esc(class_label(row.get("school_class")))}" '
         f'data-bonus="{esc(format_usd(bonus))}" data-slot="{esc(format_usd(slot))}" '
         f'data-over-under="{esc(over_under_str)}" '
+        f'data-signability-tier="{esc(signability_tier)}" data-signability-score="{esc(signability_score)}" '
+        f'data-signability-factors="{esc(signability_factors)}" '
         f'onclick="showProspectCard(this)">&#9432;</button>'
     )
 
@@ -313,7 +500,7 @@ def fetch_dashboard_data(conn: sqlite3.Connection, year: int):
             """
             SELECT a.pick_number, a.team_name, a.player_name, a.player_position,
                    COALESCE(p.school_name, a.school_name) AS school_name,
-                   a.bonus_amount, a.slot_value,
+                   a.bonus_amount, a.slot_value, a.mlb_person_id,
                    COALESCE(p.full_name, a.player_name) AS full_name,
                    COALESCE(p.position_name, a.player_position) AS position_name,
                    p.rank, p.blurb, p.scouting_report, p.bats, p.throws,
@@ -327,9 +514,27 @@ def fetch_dashboard_data(conn: sqlite3.Connection, year: int):
             (year,),
         )
     ]
+    pool_pct_used_by_team = {r["team_name"]: r["pct_used"] for r in fetch_team_pool_data(conn, year)}
     for row in picks:
         row["signed_status"] = "Signed" if row.get("bonus_amount") is not None else "Unsigned"
         row["signability_tag"], row["signability_delta"] = signability_tag(row.get("rank"), row["pick_number"])
+        eligibility = class_label(row.get("school_class"))
+        # Commitment tier only means anything for a current HS player -
+        # college prospects' blurbs often reminisce about their *original*
+        # HS commitment (e.g. Roch Cholowsky's blurb mentions his HS-era
+        # commitment to UCLA, where he's since actually enrolled and become
+        # a junior) - that's history, not a live decision, so applying it
+        # here would misread a backward-looking fact as current leverage.
+        commitment_tier = commitment_tier_for_school(extract_commitment_school(row.get("blurb"))) if eligibility == "High School" else None
+        reported = REPORTED_BONUS_DEMANDS.get(row.get("mlb_person_id"))
+        row["signability"] = compute_signability(
+            rank=row.get("rank"), pick_number=row["pick_number"],
+            class_label_value=eligibility,
+            commitment_tier=commitment_tier,
+            pool_pct_used=pool_pct_used_by_team.get(row["team_name"]),
+            prior_return=prior_draft_return(conn, row.get("mlb_person_id"), year),
+            reported_bonus_tier=reported["tier"] if reported else None,
+        )
 
     predictions = [
         dict(r)
@@ -671,7 +876,7 @@ def filterable_table(table_id, title, headers, rows, cell_keys, *, count_label="
         cells = "".join(
             f'<td data-label="{esc(h)}">'
             f'{team_logo_html(row.get(k, "")) if h in TEAM_LOGO_HEADERS else ""}'
-            f'{signability_tag_html(row) if h in TAG_HEADERS else esc(row.get(k, ""))}'
+            f'{signability_tag_html(row) if h in TAG_HEADERS else signability_badge_html(row) if h in SIGNABILITY_HEADERS else esc(row.get(k, ""))}'
             f'{prospect_info_button_html(row) if h in PLAYER_INFO_HEADERS else ""}'
             f'</td>'
             for h, k in zip(headers, cell_keys)
@@ -1310,6 +1515,8 @@ main { padding: 28px 32px 60px; max-width: 1440px; margin: 0 auto; }
 .prospect-card-section p a { color: var(--accent); text-decoration: none; font-weight: 600; }
 .prospect-card-section p a:hover { text-decoration: underline; }
 .prospect-card-section p:empty::before { content: "Not available."; color: var(--text-muted); font-style: italic; }
+.prospect-card-factors { margin: 8px 0 0; padding-left: 18px; font-size: 13px; color: var(--text-muted); }
+.prospect-card-factors li { margin-bottom: 2px; }
 .prospect-card-close {
   position: absolute;
   top: 14px;
@@ -1538,6 +1745,22 @@ function showProspectCard(btn) {
     bonusSection.style.display = '';
   } else {
     bonusSection.style.display = 'none';
+  }
+
+  const signabilitySection = document.getElementById('prospect-card-signability-section');
+  const factorsList = document.getElementById('prospect-card-signability-factors');
+  factorsList.textContent = '';
+  if (btn.dataset.signabilityTier) {
+    document.getElementById('prospect-card-signability-summary').textContent =
+      btn.dataset.signabilityTier + ' (' + btn.dataset.signabilityScore + '/100)';
+    (btn.dataset.signabilityFactors || '').split('|').filter(function (f) { return f; }).forEach(function (factor) {
+      const li = document.createElement('li');
+      li.textContent = factor;
+      factorsList.appendChild(li);
+    });
+    signabilitySection.style.display = '';
+  } else {
+    signabilitySection.style.display = 'none';
   }
 
   // MLB's "scoutingReport" field is consistently a link to a scouting video
@@ -1905,9 +2128,9 @@ def app_factory(db_path: str):
         picks_panel = filterable_table(
             "actual-picks",
             "Actual Picks",
-            ["Pick", "Team", "Player", "Position", "School", "Status", "Tag"],
+            ["Pick", "Team", "Player", "Position", "School", "Status", "Tag", "Signability"],
             data["picks"],
-            ["pick_number", "team_name", "player_name", "player_position", "school_name", "signed_status", "signability_tag"],
+            ["pick_number", "team_name", "player_name", "player_position", "school_name", "signed_status", "signability_tag", "signability"],
             count_label="picks",
             empty_text="No picks recorded yet for this draft year.",
             default_status="Drafted",
@@ -2038,6 +2261,11 @@ def app_factory(db_path: str):
               <div class="prospect-card-section" id="prospect-card-bonus-section" style="display:none">
                 <h4>Signing Bonus</h4>
                 <p id="prospect-card-bonus"></p>
+              </div>
+              <div class="prospect-card-section" id="prospect-card-signability-section" style="display:none">
+                <h4>Signability</h4>
+                <p id="prospect-card-signability-summary"></p>
+                <ul id="prospect-card-signability-factors" class="prospect-card-factors"></ul>
               </div>
             </div>
           </div>
