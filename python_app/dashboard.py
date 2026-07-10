@@ -3,6 +3,7 @@ from __future__ import annotations
 import argparse
 import html
 import json
+import os
 import re
 import sqlite3
 from collections import defaultdict
@@ -12,10 +13,23 @@ from urllib.parse import parse_qs
 from wsgiref.simple_server import make_server
 
 from mlb_tracker.db import DEFAULT_DB_PATH, get_connection, get_prospect_sources, init_db
+from mlb_tracker.draft_schedule import (
+    DRAFT_2026_LOCATION,
+    DRAFT_2026_MILESTONES,
+    current_milestone,
+    next_milestone,
+    recommended_poll_interval_seconds,
+)
 from mlb_tracker.telegram import format_pick_summary, format_pick_title, round_display_name
 
 FAVICON_PATH = Path(__file__).resolve().parent / "static" / "favicon.ico"
 FAVICON_BYTES = FAVICON_PATH.read_bytes()
+
+# Baked in at Docker build time (see Dockerfile/Dockerfile.k8s's GIT_COMMIT
+# build-arg) so the running page can show which commit is actually deployed.
+# Read once at import time, not per-request - it never changes without a
+# restart anyway.
+GIT_COMMIT = os.environ.get("GIT_COMMIT", "unknown")
 
 PROSPECT_SOURCE_LABELS = {
     "mlb_stats_api_prospects": "Live MLB API",
@@ -425,6 +439,87 @@ def prospect_info_button_html(row):
         f'data-signability-factors="{esc(signability_factors)}" '
         f'onclick="showProspectCard(this)">&#9432;</button>'
     )
+
+
+def format_milestone_time(dt) -> str:
+    return dt.strftime("%a %-I:%M %p ET")
+
+
+def milestone_to_dict(m) -> dict:
+    return {
+        "key": m.key,
+        "label": m.label,
+        "picks_label": m.picks_label,
+        "channels": m.channels,
+        "start": m.start.isoformat(),
+        "end": m.end.isoformat(),
+        "poll_interval_seconds": m.poll_interval_seconds,
+    }
+
+
+def draft_milestone_payload(year: int, now=None) -> dict:
+    """JSON payload for /api/draft-milestone - the schedule is specific to
+    the real 2026 draft's wall-clock dates (draft_schedule.py), so any other
+    year gets an empty payload rather than a schedule that doesn't apply.
+    `now` is only ever overridden by tests; real requests let it default to
+    the actual current time."""
+    if year != 2026:
+        return {"year": year, "location": None, "current": None, "next": None, "poll_interval_seconds": None, "milestones": []}
+    current = current_milestone(now)
+    nxt = next_milestone(now)
+    return {
+        "year": year,
+        "location": DRAFT_2026_LOCATION,
+        "current": milestone_to_dict(current) if current else None,
+        "next": milestone_to_dict(nxt) if nxt else None,
+        "poll_interval_seconds": recommended_poll_interval_seconds(now),
+        "milestones": [milestone_to_dict(m) for m in DRAFT_2026_MILESTONES],
+    }
+
+
+def render_draft_schedule_banner(year: int, now=None) -> str:
+    """Info box shown at the top of the 2026 dashboard with the real draft-day
+    schedule - which window is live right now, when the next one starts, and
+    the full timeline. Kept updated live by the client (pollDraftMilestone in
+    SCRIPT) without a page reload, since a milestone can start while the tab
+    sits open. `now` is only ever overridden by tests."""
+    if year != 2026:
+        return ""
+    current = current_milestone(now)
+    nxt = next_milestone(now)
+    if current:
+        status_html = (
+            f'<span class="badge badge-accent">Live now</span> '
+            f"{esc(current.label)} &middot; {esc(current.picks_label)} on {esc(current.channels)}"
+        )
+    elif nxt:
+        status_html = (
+            f'<span class="badge">Next up</span> '
+            f"{esc(nxt.label)} starts {esc(format_milestone_time(nxt.start))} &middot; "
+            f"{esc(nxt.picks_label)} on {esc(nxt.channels)}"
+        )
+    else:
+        status_html = '<span class="badge">Complete</span> All scheduled draft windows have concluded.'
+
+    milestone_chips = "".join(
+        f'<div class="schedule-milestone{" active" if current and m.key == current.key else ""}" '
+        f'data-milestone-key="{esc(m.key)}">'
+        f'<span class="schedule-milestone-time">{esc(format_milestone_time(m.start))}&ndash;{esc(format_milestone_time(m.end))}</span>'
+        f"{esc(m.label)} &middot; {esc(m.picks_label)}<br><span class=\"muted\">{esc(m.channels)}</span>"
+        f"</div>"
+        for m in DRAFT_2026_MILESTONES
+    )
+
+    return f"""
+    <section class="schedule-banner" id="draft-schedule-banner">
+      <div class="schedule-banner-header">
+        <span class="schedule-banner-title">2026 Draft Schedule</span>
+        <span class="schedule-banner-location">{esc(DRAFT_2026_LOCATION)}</span>
+      </div>
+      <div class="schedule-banner-status" id="schedule-banner-status">{status_html}</div>
+      <div class="schedule-milestones">{milestone_chips}</div>
+    </section>
+    """
 
 
 def get_selected_year(environ, default_year: int = 2026) -> int:
@@ -1272,6 +1367,13 @@ body {
 
 .brand { display: flex; align-items: baseline; gap: 10px; }
 .brand h1 { font-size: 19px; margin: 0; letter-spacing: 0.2px; }
+.brand .build-version {
+  font-size: 11px;
+  font-weight: 400;
+  font-family: monospace;
+  color: var(--text-muted);
+  vertical-align: middle;
+}
 .brand .year-pill {
   font-size: 12px;
   color: var(--text-muted);
@@ -1344,6 +1446,32 @@ main { padding: 28px 32px 60px; max-width: 1440px; margin: 0 auto; }
   font-weight: 600;
 }
 .card .value { font-size: 26px; font-weight: 700; color: var(--text); }
+
+.schedule-banner {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-left: 4px solid var(--accent);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+  padding: 16px 20px;
+  margin-bottom: 20px;
+}
+.schedule-banner-header { display: flex; align-items: baseline; justify-content: space-between; gap: 12px; flex-wrap: wrap; }
+.schedule-banner-title { font-weight: 700; font-size: 15px; }
+.schedule-banner-location { color: var(--text-muted); font-size: 13px; }
+.schedule-banner-status { margin-top: 8px; font-size: 14px; }
+.schedule-milestones { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 14px; }
+.schedule-milestone {
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 8px 12px;
+  font-size: 12px;
+  color: var(--text-muted);
+  min-width: 190px;
+  flex: 1 1 190px;
+}
+.schedule-milestone.active { border-color: var(--accent); background: var(--accent-soft); color: var(--text); }
+.schedule-milestone-time { font-weight: 600; color: var(--text); display: block; margin-bottom: 2px; }
 
 .filter-bar {
   display: flex;
@@ -1921,7 +2049,16 @@ function syncStickyOffsets() {
 // rather than a websocket/SSE push: picks happen minutes apart at
 // fastest, so a 12s interval is plenty responsive without needing a
 // persistent connection.
-const PICK_POLL_INTERVAL_MS = 12000;
+const DEFAULT_PICK_POLL_INTERVAL_MS = 12000;
+// Mutable (not const): pollDraftMilestone() rescales this to match the real
+// draft-day pick pace from draft_schedule.py once /api/draft-milestone loads.
+let pickPollIntervalMs = DEFAULT_PICK_POLL_INTERVAL_MS;
+let pickPollTimer = null;
+
+function schedulePickPolling() {
+  if (pickPollTimer) clearInterval(pickPollTimer);
+  pickPollTimer = setInterval(pollLatestPicks, pickPollIntervalMs);
+}
 
 function currentDraftYear() {
   return new URLSearchParams(window.location.search).get('year') || '2026';
@@ -2011,7 +2148,97 @@ function initPickPolling() {
       }
     })
     .finally(function () {
-      setInterval(pollLatestPicks, PICK_POLL_INTERVAL_MS);
+      schedulePickPolling();
+    });
+}
+
+function lastSeenMilestoneKey(year) {
+  return 'mlb_last_seen_milestone_' + year;
+}
+
+function getLastSeenMilestone(year) {
+  return localStorage.getItem(lastSeenMilestoneKey(year)) || '';
+}
+
+function setLastSeenMilestone(year, key) {
+  localStorage.setItem(lastSeenMilestoneKey(year), key);
+}
+
+function renderScheduleStatus(data) {
+  const el = document.getElementById('schedule-banner-status');
+  if (!el) return;
+  el.textContent = '';
+  const badge = document.createElement('span');
+  badge.className = 'badge' + (data.current ? ' badge-accent' : '');
+  badge.textContent = data.current ? 'Live now' : (data.next ? 'Next up' : 'Complete');
+  el.appendChild(badge);
+  let text;
+  if (data.current) {
+    text = ' ' + data.current.label + ' · ' + data.current.picks_label + ' on ' + data.current.channels;
+  } else if (data.next) {
+    const start = new Date(data.next.start).toLocaleString('en-US', {
+      weekday: 'short', hour: 'numeric', minute: '2-digit', timeZone: 'America/New_York',
+    });
+    text = ' ' + data.next.label + ' starts ' + start + ' ET · ' + data.next.picks_label + ' on ' + data.next.channels;
+  } else {
+    text = ' All scheduled draft windows have concluded.';
+  }
+  el.appendChild(document.createTextNode(text));
+}
+
+function pollDraftMilestone() {
+  const banner = document.getElementById('draft-schedule-banner');
+  if (!banner) return;
+  const year = currentDraftYear();
+  fetch('/api/draft-milestone?year=' + encodeURIComponent(year), { cache: 'no-store' })
+    .then(function (resp) { return resp.ok ? resp.json() : null; })
+    .then(function (data) {
+      if (!data) return;
+      renderScheduleStatus(data);
+      document.querySelectorAll('.schedule-milestone').forEach(function (el) {
+        el.classList.toggle('active', !!data.current && el.dataset.milestoneKey === data.current.key);
+      });
+      if (data.poll_interval_seconds) {
+        const ms = data.poll_interval_seconds * 1000;
+        if (ms !== pickPollIntervalMs) {
+          pickPollIntervalMs = ms;
+          schedulePickPolling();
+        }
+      }
+      const currentKey = data.current ? data.current.key : '';
+      if (currentKey && currentKey !== getLastSeenMilestone(year)) {
+        // Reuses the same "Pick alerts" opt-in/permission flow as per-pick
+        // toasts (initPickAlertsToggle) rather than a second toggle - both
+        // are "live draft alert" categories from the user's point of view.
+        showPickToast({ title: 'Draft milestone starting', team_logo: '', summary: data.current.label + ' — ' + data.current.picks_label + ' on ' + data.current.channels });
+        maybeNativeNotify({ title: data.current.label, summary: data.current.picks_label + ' on ' + data.current.channels, team_logo_url: undefined });
+      }
+      if (currentKey) setLastSeenMilestone(year, currentKey);
+    })
+    .catch(function () { /* transient network hiccup - next interval retries */ });
+}
+
+function initDraftScheduleBanner() {
+  const banner = document.getElementById('draft-schedule-banner');
+  if (!banner) return;
+  const year = currentDraftYear();
+  // Seed last-seen to whatever's active right now on first-ever visit, same
+  // reasoning as initPickPolling: opening the dashboard mid-window shouldn't
+  // immediately fire a "starting" alert for something already underway.
+  fetch('/api/draft-milestone?year=' + encodeURIComponent(year), { cache: 'no-store' })
+    .then(function (resp) { return resp.ok ? resp.json() : null; })
+    .then(function (data) {
+      if (!data) return;
+      renderScheduleStatus(data);
+      if (data.current && !getLastSeenMilestone(year)) {
+        setLastSeenMilestone(year, data.current.key);
+      }
+      if (data.poll_interval_seconds) {
+        pickPollIntervalMs = data.poll_interval_seconds * 1000;
+      }
+    })
+    .finally(function () {
+      setInterval(pollDraftMilestone, 20000);
     });
 }
 
@@ -2060,6 +2287,7 @@ document.addEventListener('DOMContentLoaded', function () {
   updateEmptyStates();
   applyThemeUi(document.documentElement.getAttribute('data-theme') || 'dark');
   syncStickyOffsets();
+  initDraftScheduleBanner();
   initPickPolling();
   initPickAlertsToggle();
   updateSigningDeadlineCountdown();
@@ -2094,12 +2322,21 @@ def app_factory(db_path: str):
             )
             return [body]
 
+        if environ.get("PATH_INFO") == "/api/draft-milestone":
+            body = json.dumps(draft_milestone_payload(year)).encode("utf-8")
+            start_response(
+                "200 OK",
+                [("Content-Type", "application/json; charset=utf-8"), ("Cache-Control", "no-store")],
+            )
+            return [body]
+
         conn = get_connection(db_path)
         data = fetch_dashboard_data(conn, year)
         pool_data = fetch_team_pool_data(conn, year)
         conn.close()
 
         summary = data["summary"]
+        schedule_banner = render_draft_schedule_banner(year)
 
         cards = f"""
         <div class="cards">
@@ -2217,7 +2454,7 @@ def app_factory(db_path: str):
         <body>
           <header class="topbar">
             <div class="brand">
-              <h1>MLB Draft Tracker</h1>
+              <h1>MLB Draft Tracker <span class="build-version" title="Deployed commit">#{esc(GIT_COMMIT)}</span></h1>
               <span class="year-pill">Draft year {summary['year']} &middot; {summary['picks_made']} picks made</span>
             </div>
             <div class="topbar-controls">
@@ -2247,6 +2484,7 @@ def app_factory(db_path: str):
           </nav>
 
           <main>
+            {schedule_banner}
             {cards}
             {on_the_clock}
             {draft_order_panel}

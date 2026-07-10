@@ -171,16 +171,20 @@ image.
 
 **Important**: build for `linux/amd64` even if you're on Apple Silicon —
 `Standard_B2s` nodes are x86_64. The simplest way to avoid any
-cross-architecture mistakes is to let ACR build it remotely:
+cross-architecture mistakes is to let ACR build it remotely. Pass
+`GIT_COMMIT` as a build-arg so the running dashboard's header shows which
+commit is actually deployed (`.git` is excluded from the build context, so
+it can't be recovered any other way once inside the image):
 ```bash
 az acr build \
   --registry <ACR_NAME> \
   --image mlb-draft-tracker:<TAG> \
   --file Dockerfile.k8s \
+  --build-arg GIT_COMMIT=$(git rev-parse --short HEAD) \
   .
 ```
 (If your registry isn't ACR, build locally with an explicit platform and
-push yourself: `docker buildx build --platform linux/amd64 -f Dockerfile.k8s -t <ACR_LOGIN_SERVER>/mlb-draft-tracker:<TAG> --push .`)
+push yourself: `docker buildx build --platform linux/amd64 -f Dockerfile.k8s -t <ACR_LOGIN_SERVER>/mlb-draft-tracker:<TAG> --build-arg GIT_COMMIT=$(git rev-parse --short HEAD) --push .`)
 
 Then update the two `image:` placeholders in `k8s/05-deployment.yaml` to
 `<ACR_LOGIN_SERVER>/mlb-draft-tracker:<TAG>`.

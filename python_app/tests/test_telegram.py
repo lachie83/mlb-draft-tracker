@@ -4,13 +4,16 @@ import pytest
 import requests
 
 from mlb_tracker.db import get_sent_event
+from mlb_tracker.draft_schedule import DRAFT_2026_MILESTONES
 from mlb_tracker.telegram import (
     TelegramNotifier,
     format_pick_summary,
     format_pick_title,
     format_prospect_changes_message,
+    make_milestone_message,
     make_pick_message,
     round_display_name,
+    send_milestone_notification_if_new,
     send_pick_if_new,
 )
 
@@ -141,6 +144,51 @@ def test_send_pick_if_new_resends_when_pick_details_change(conn, monkeypatch):
     send_pick_if_new(conn, notifier, draft_year=2026, pick_row=corrected_pick_row)
 
     assert len(calls) == 1
+
+
+def test_make_milestone_message_includes_label_picks_and_channels():
+    milestone = next(m for m in DRAFT_2026_MILESTONES if m.key == "day1_late")
+
+    message = make_milestone_message(2026, milestone)
+
+    assert milestone.label in message
+    assert milestone.picks_label in message
+    assert milestone.channels in message
+
+
+def test_send_milestone_notification_if_new_marks_event_sent(conn, monkeypatch):
+    notifier = disabled_notifier(monkeypatch)
+    milestone = next(m for m in DRAFT_2026_MILESTONES if m.key == "day1_early")
+
+    result = send_milestone_notification_if_new(conn, notifier, draft_year=2026, milestone=milestone)
+
+    assert result["reason"] == "telegram not configured"
+    assert get_sent_event(conn, "draft_milestone:2026:day1_early") is not None
+
+
+def test_send_milestone_notification_if_new_does_not_resend(conn, monkeypatch):
+    notifier = disabled_notifier(monkeypatch)
+    milestone = next(m for m in DRAFT_2026_MILESTONES if m.key == "day1_early")
+    send_milestone_notification_if_new(conn, notifier, draft_year=2026, milestone=milestone)
+
+    calls = []
+    notifier.send = lambda text: calls.append(text) or {"ok": True}
+    second = send_milestone_notification_if_new(conn, notifier, draft_year=2026, milestone=milestone)
+
+    assert second == {"ok": True, "status": "already_sent", "event_key": "draft_milestone:2026:day1_early"}
+    assert calls == []
+
+
+def test_send_milestone_notification_if_new_is_independent_per_milestone(conn, monkeypatch):
+    notifier = disabled_notifier(monkeypatch)
+    preview = next(m for m in DRAFT_2026_MILESTONES if m.key == "day1_preview")
+    early = next(m for m in DRAFT_2026_MILESTONES if m.key == "day1_early")
+
+    send_milestone_notification_if_new(conn, notifier, draft_year=2026, milestone=preview)
+    send_milestone_notification_if_new(conn, notifier, draft_year=2026, milestone=early)
+
+    assert get_sent_event(conn, "draft_milestone:2026:day1_preview") is not None
+    assert get_sent_event(conn, "draft_milestone:2026:day1_early") is not None
 
 
 def test_send_raises_with_telegrams_error_description(monkeypatch):

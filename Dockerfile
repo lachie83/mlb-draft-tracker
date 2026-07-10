@@ -1,6 +1,13 @@
 FROM python:3.14-slim@sha256:b877e50bd90de10af8d82c57a022fc2e0dc731c5320d762a27986facfc3355c1
 
-ENV DEBIAN_FRONTEND=noninteractive
+# Passed at build time (e.g. --build-arg GIT_COMMIT=$(git rev-parse --short HEAD))
+# so the running dashboard can show which commit is actually deployed - .git
+# is excluded from the build context (.dockerignore), so this can't be
+# recovered at runtime any other way.
+ARG GIT_COMMIT=unknown
+
+ENV DEBIAN_FRONTEND=noninteractive \
+    GIT_COMMIT=${GIT_COMMIT}
 WORKDIR /app
 
 RUN apt-get update && apt-get install -y --no-install-recommends \

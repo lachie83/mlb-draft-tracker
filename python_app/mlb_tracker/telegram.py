@@ -8,6 +8,7 @@ from typing import Any
 import requests
 
 from .db import get_best_available, get_sent_event, mark_event_sent
+from .draft_schedule import DRAFT_2026_LOCATION, DraftMilestone
 
 
 class TelegramNotifier:
@@ -114,6 +115,33 @@ def format_prospect_changes_message(draft_year: int, diff: dict[str, Any], max_i
             lambda r: f"{r['full_name']}: #{r['old_rank']} → #{r['new_rank']}",
         )
     return "\n".join(lines)
+
+
+def make_milestone_message(draft_year: int, milestone: DraftMilestone) -> str:
+    return (
+        f"MLB Draft {draft_year} — {milestone.label} is starting\n"
+        f"{milestone.picks_label} · {milestone.channels}\n"
+        f"{DRAFT_2026_LOCATION}"
+    )
+
+
+def send_milestone_notification_if_new(
+    conn, notifier: TelegramNotifier, draft_year: int, milestone: DraftMilestone
+) -> dict[str, Any]:
+    """Same dedup shape as send_pick_if_new (telegram_events_sent, keyed by
+    event_key + payload_hash) so calling this on every poll tick only ever
+    actually sends once per milestone, however many ticks land inside its
+    window."""
+    event_key = f"draft_milestone:{draft_year}:{milestone.key}"
+    message = make_milestone_message(draft_year, milestone)
+    payload_hash = hashlib.sha256(message.encode("utf-8")).hexdigest()
+    existing = get_sent_event(conn, event_key)
+    if existing and existing["payload_hash"] == payload_hash:
+        return {"ok": True, "status": "already_sent", "event_key": event_key}
+    result = notifier.send(message)
+    if result.get("ok", True) or result.get("reason") == "telegram not configured":
+        mark_event_sent(conn, event_key, payload_hash, None, message)
+    return result
 
 
 def send_pick_if_new(conn, notifier: TelegramNotifier, draft_year: int, pick_row: dict[str, Any]) -> dict[str, Any]:
