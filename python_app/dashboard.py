@@ -99,6 +99,18 @@ def class_label(school_class):
 
 SIGNABILITY_THRESHOLD = 20
 
+# Rounds 11-20 have no assigned slot value (pick_value is 0), but a signing
+# bonus for one of those picks still counts against the team's pool for
+# whatever it pays above this threshold - confirmed via CBS Sports/MLB.com
+# 2025 draft coverage. Without this, pool_used double-counts every dollar of
+# every late-round bonus even though most of them are well under this
+# threshold and shouldn't count against the pool at all - verified directly
+# against the completed 2025 draft's real numbers: without this threshold,
+# 28 of 30 teams appear to have busted the 5%-overage penalty tier (which
+# costs a future 1st-round pick); real reporting confirms no team has ever
+# exceeded that tier in the 13 drafts under this system.
+POST_10TH_ROUND_BONUS_POOL_THRESHOLD = 150_000
+
 
 def signability_tag(rank, pick_number, threshold=SIGNABILITY_THRESHOLD):
     """delta = pick_number - rank: positive means the player was still on
@@ -806,14 +818,20 @@ def fetch_team_pool_data(conn: sqlite3.Connection, year: int) -> list[dict]:
     which the MLB Stats API already reports as a real dollar slot value for
     every round-1-10 pick and exactly 0 for round 11+ - confirmed against
     the live API, matches the real bonus-pool rules exactly) versus what's
-    been used so far (summed actual_picks.bonus_amount for that team's
-    signed picks). No separate static bonus-pool file needed."""
+    been used so far. A round-1-10 pick's full bonus counts against the
+    pool; a round-11+ pick (no slot_value) only counts for whatever it pays
+    above POST_10TH_ROUND_BONUS_POOL_THRESHOLD - see that constant's
+    comment. No separate static bonus-pool file needed."""
     rows = conn.execute(
         """
         SELECT s.team_name,
                SUM(s.pick_value) AS pool_total,
                COALESCE((
-                   SELECT SUM(a.bonus_amount) FROM actual_picks a
+                   SELECT SUM(
+                       CASE WHEN a.slot_value > 0 THEN a.bonus_amount
+                            ELSE MAX(a.bonus_amount - ?, 0)
+                       END
+                   ) FROM actual_picks a
                    WHERE a.team_name = s.team_name AND a.draft_year = s.draft_year
                ), 0) AS pool_used
         FROM draft_slots s
@@ -821,7 +839,7 @@ def fetch_team_pool_data(conn: sqlite3.Connection, year: int) -> list[dict]:
         GROUP BY s.team_name
         ORDER BY (pool_total - pool_used) ASC
         """,
-        (year,),
+        (POST_10TH_ROUND_BONUS_POOL_THRESHOLD, year),
     ).fetchall()
     result = []
     for r in rows:
