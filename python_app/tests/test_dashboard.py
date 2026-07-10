@@ -103,6 +103,44 @@ def test_best_available_bats_throws_blank_when_missing(conn):
     assert row["mock_team"] is None
 
 
+def test_predictions_carry_full_prospect_enrichment_for_the_info_card(conn):
+    # the Predictions query used to only select position_name/school_class
+    # from the prospects join, so its info button appeared (position_name
+    # was enough to pass prospect_info_button_html's guard) but blurb/
+    # scouting report/school always showed "Not available." - reported live
+    # on the Predictions panel for a player showing "Shortstop - College Jr"
+    # with both text sections empty.
+    seed_draft_slot(conn, pick_number=1, team_name="Team A")
+    prospect = seed_prospect(
+        conn, person_id=1, person_full_name="Enriched Player", rank=1,
+        blurb="A great blurb.", scouting_report="A great scouting report.",
+        school_name="Some University",
+    )
+    seed_prediction(
+        conn, pick_number=1, team_name="Team A", player_name="Enriched Player",
+        mlb_person_id=prospect["mlb_person_id"],
+    )
+
+    data = fetch_dashboard_data(conn, 2026)
+    row = data["predictions"][0]
+
+    assert row["full_name"] == "Enriched Player"
+    assert row["blurb"] == "A great blurb."
+    assert row["scouting_report"] == "A great scouting report."
+    assert row["school_name"] == "Some University"
+
+
+def test_predictions_full_name_falls_back_to_player_name_without_a_prospect_match(conn):
+    seed_draft_slot(conn, pick_number=1, team_name="Team A")
+    seed_prediction(conn, pick_number=1, team_name="Team A", player_name="Unmatched Player", mlb_person_id=None)
+
+    data = fetch_dashboard_data(conn, 2026)
+    row = data["predictions"][0]
+
+    assert row["full_name"] == "Unmatched Player"
+    assert row["blurb"] is None
+
+
 def test_draft_order_groups_by_round_in_first_pick_order(conn):
     # Pick numbers interleave rounds the way real MLB drafts do (comp picks
     # inserted between regular-round picks); the grouping should still come

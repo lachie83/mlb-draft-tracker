@@ -390,8 +390,8 @@ def signability_badge_html(row) -> str:
 def prospect_info_button_html(row):
     """A small info button opening the floating scouting-report card,
     rendered only when there's actually something to show - tables that
-    don't select these columns (Predictions, etc) naturally get nothing
-    here since row.get() just returns None."""
+    don't select any of these columns naturally get nothing here since
+    row.get() just returns None."""
     blurb = row.get("blurb") or ""
     scouting = row.get("scouting_report") or ""
     position = row.get("position_name") or ""
@@ -554,8 +554,11 @@ def fetch_dashboard_data(conn: sqlite3.Connection, year: int):
             conn,
             """
             SELECT pr.pick_number, pr.team_name, pr.player_name,
+                   COALESCE(p.full_name, pr.player_name) AS full_name,
                    ROUND(pr.predicted_probability, 4) AS predicted_probability,
-                   pr.model_version, p.position_name, p.school_class
+                   pr.model_version, p.position_name, p.school_name, p.school_class,
+                   p.blurb, p.scouting_report, p.bats, p.throws,
+                   p.home_city, p.home_state, p.headshot_link
             FROM predictions pr
             LEFT JOIN prospects p
                 ON pr.mlb_person_id = p.mlb_person_id AND pr.draft_year = p.draft_year
