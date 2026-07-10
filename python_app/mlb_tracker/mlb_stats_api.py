@@ -86,6 +86,35 @@ def _to_float(value: Any) -> float | None:
         return None
 
 
+def _build_cp1252_mojibake_table() -> dict[int, str]:
+    # Some prospects' blurb/scoutingReport text comes back from the API with
+    # smart punctuation (curly quotes, em dashes, ellipses) mangled into raw
+    # C1 control codepoints (U+0080-U+009F) - e.g. a right single quote
+    # showing up as U+0092 instead of U+2019. That's the standard fingerprint
+    # of Windows-1252 bytes having been decoded as Latin-1 upstream (each
+    # byte 0x80-0x9F maps 1:1 to the identical codepoint in Latin-1, but to a
+    # real punctuation mark in cp1252) - confirmed directly against the live
+    # API response (2026-07-09): byte value 0x92 sitting where an apostrophe
+    # belongs in ~100 of 2269 prospects' blurbs. Map those codepoints back to
+    # the character cp1252 actually assigns that byte.
+    table = {}
+    for byte in range(0x80, 0xA0):
+        try:
+            table[byte] = bytes([byte]).decode("cp1252")
+        except UnicodeDecodeError:
+            pass  # a handful of bytes (0x81, 0x8D, 0x8F, 0x90, 0x9D) are undefined in cp1252
+    return table
+
+
+_CP1252_MOJIBAKE_TABLE = str.maketrans(_build_cp1252_mojibake_table())
+
+
+def _fix_mojibake(text: str | None) -> str | None:
+    if text is None:
+        return None
+    return text.translate(_CP1252_MOJIBAKE_TABLE)
+
+
 def pick_to_draft_slot(pick: dict[str, Any], draft_year: int) -> dict[str, Any]:
     team = pick.get("team") or {}
     round_label = pick.get("pickRound") or ""
@@ -154,8 +183,8 @@ def pick_to_raw_prospect(pick: dict[str, Any]) -> dict[str, Any] | None:
         "person_weight": person.get("weight"),
         "person_active": person.get("active"),
         "headshot_link": pick.get("headshotLink"),
-        "scouting_report": pick.get("scoutingReport"),
-        "blurb": pick.get("blurb"),
+        "scouting_report": _fix_mojibake(pick.get("scoutingReport")),
+        "blurb": _fix_mojibake(pick.get("blurb")),
         "draft_type_code": draft_type.get("code"),
         "draft_type_description": draft_type.get("description"),
         "is_drafted": pick.get("isDrafted", False),

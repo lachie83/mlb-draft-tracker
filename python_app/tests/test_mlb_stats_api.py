@@ -7,6 +7,7 @@ import pytest
 
 from mlb_tracker.mlb_stats_api import (
     STATS_API_PROSPECTS_SOURCE,
+    _fix_mojibake,
     get_on_the_clock,
     iter_picks,
     pick_to_actual_pick,
@@ -91,6 +92,43 @@ def test_pick_to_raw_prospect_handles_isPass_pick():
 
     assert pick_to_raw_prospect(pick) is None
     assert pick_to_actual_pick(pick, draft_year=2025) is None
+
+
+def test_fix_mojibake_repairs_cp1252_as_latin1_smart_punctuation():
+    # confirmed against the live API (2026-07-09): the apostrophe in
+    # e.g. "he'll" comes back as raw codepoint U+0092 in ~100 of 2269
+    # prospects' blurbs - the fingerprint of cp1252 bytes decoded as
+    # latin-1 upstream. Renders as an invisible/tofu box, reported by a
+    # user as "apostrophes aren't rendering correctly".
+    mangled = "that he’s not Bobby Witt".replace("’", chr(0x92))
+    assert _fix_mojibake(mangled) == "that he’s not Bobby Witt"
+
+
+def test_fix_mojibake_repairs_smart_double_quotes_and_dashes():
+    mangled = chr(0x93) + "quoted" + chr(0x94) + " " + chr(0x96) + " " + chr(0x97)
+    assert _fix_mojibake(mangled) == "“quoted” – —"
+
+
+def test_fix_mojibake_leaves_clean_text_untouched():
+    clean = "Scouts love his bat speed and he's a plus runner."
+    assert _fix_mojibake(clean) == clean
+
+
+def test_fix_mojibake_handles_none():
+    assert _fix_mojibake(None) is None
+
+
+def test_pick_to_raw_prospect_repairs_mojibake_in_blurb_and_scouting_report():
+    payload = load_fixture("draft_complete_2025.json")
+    pick = next(p for p in iter_picks(payload) if p["pickNumber"] == 1)
+    pick = dict(pick)
+    pick["blurb"] = "a good athlete who" + chr(0x92) + "s a plus runner"
+    pick["scoutingReport"] = "he" + chr(0x92) + "s got a plus arm"
+
+    raw = pick_to_raw_prospect(pick)
+
+    assert raw["blurb"] == "a good athlete who’s a plus runner"
+    assert raw["scouting_report"] == "he’s got a plus arm"
 
 
 def test_pick_to_actual_pick_returns_none_for_undrafted_pick():
