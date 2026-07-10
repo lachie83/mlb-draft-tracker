@@ -383,7 +383,7 @@ def test_fetch_team_pool_data_computes_totals_used_and_remaining(conn):
     # toward the bonus pool - excluded by the WHERE pick_value > 0 clause.
     seed_draft_slot(conn, pick_number=400, team_name="Team A", pick_value=0)
 
-    seed_actual_pick(conn, pick_number=1, team_name="Team A", bonus_amount=8_500_000)
+    seed_actual_pick(conn, pick_number=1, team_name="Team A", bonus_amount=8_500_000, slot_value=10_000_000)
 
     rows = fetch_team_pool_data(conn, 2026)
     by_team = {r["team_name"]: r for r in rows}
@@ -400,7 +400,7 @@ def test_fetch_team_pool_data_computes_totals_used_and_remaining(conn):
 
 def test_fetch_team_pool_data_sorted_by_remaining_ascending(conn):
     seed_draft_slot(conn, pick_number=1, team_name="Committed Team", pick_value=10_000_000)
-    seed_actual_pick(conn, pick_number=1, team_name="Committed Team", bonus_amount=9_500_000)
+    seed_actual_pick(conn, pick_number=1, team_name="Committed Team", bonus_amount=9_500_000, slot_value=10_000_000)
     seed_draft_slot(conn, pick_number=2, team_name="Fresh Team", pick_value=10_000_000)
 
     rows = fetch_team_pool_data(conn, 2026)
@@ -410,6 +410,47 @@ def test_fetch_team_pool_data_sorted_by_remaining_ascending(conn):
 
 def test_fetch_team_pool_data_empty_when_no_draft_slots(conn):
     assert fetch_team_pool_data(conn, 2026) == []
+
+
+def test_fetch_team_pool_data_round_1_10_pick_counts_full_bonus_against_pool(conn):
+    seed_draft_slot(conn, pick_number=1, team_name="Team A", pick_value=10_000_000)
+    # a round 1-10 signing (slot_value > 0) counts in full, even though it's
+    # well under the $150k post-10th-round threshold - that threshold only
+    # applies to picks with no assigned slot value.
+    seed_actual_pick(conn, pick_number=1, team_name="Team A", bonus_amount=50_000, slot_value=10_000_000)
+
+    rows = fetch_team_pool_data(conn, 2026)
+
+    assert rows[0]["pool_used"] == 50_000
+
+
+def test_fetch_team_pool_data_round_11_plus_pick_under_threshold_does_not_count(conn):
+    seed_draft_slot(conn, pick_number=1, team_name="Team A", pick_value=10_000_000)
+    # a round 11+ pick has no assigned slot_value in the real API; bonuses
+    # up to $150k for those picks don't count against the pool at all.
+    seed_actual_pick(conn, pick_number=400, team_name="Team A", bonus_amount=100_000, slot_value=None)
+
+    rows = fetch_team_pool_data(conn, 2026)
+
+    assert rows[0]["pool_used"] == 0
+
+
+def test_fetch_team_pool_data_round_11_plus_pick_over_threshold_counts_the_excess(conn):
+    seed_draft_slot(conn, pick_number=1, team_name="Team A", pick_value=10_000_000)
+    seed_actual_pick(conn, pick_number=400, team_name="Team A", bonus_amount=200_000, slot_value=None)
+
+    rows = fetch_team_pool_data(conn, 2026)
+
+    assert rows[0]["pool_used"] == 50_000
+
+
+def test_fetch_team_pool_data_unsigned_pick_does_not_count(conn):
+    seed_draft_slot(conn, pick_number=1, team_name="Team A", pick_value=10_000_000)
+    seed_actual_pick(conn, pick_number=400, team_name="Team A", bonus_amount=None, slot_value=None)
+
+    rows = fetch_team_pool_data(conn, 2026)
+
+    assert rows[0]["pool_used"] == 0
 
 
 def test_picks_query_carries_rank_signed_status_and_signability_tag(conn):
