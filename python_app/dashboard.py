@@ -710,6 +710,7 @@ def fetch_dashboard_data(conn: sqlite3.Connection, year: int):
                 conn,
                 """
                 SELECT rank, full_name, position_name, school_name, school_class,
+                       blurb, scouting_report, bats, throws, home_city, home_state, headshot_link,
                        (? - rank) AS picks_fallen
                 FROM prospects
                 WHERE draft_year = ? AND rank IS NOT NULL AND rank <= ?
