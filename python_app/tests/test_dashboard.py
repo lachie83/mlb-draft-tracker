@@ -184,6 +184,53 @@ def test_draft_order_carries_pick_value(conn):
     assert pick["pick_value"] == 11_350_600
 
 
+def test_draft_order_carries_position_and_scouting_enrichment_once_drafted(conn):
+    seed_draft_slot(conn, pick_number=1, team_name="Team A", round_label="1")
+    prospect = seed_prospect(
+        conn, person_id=1, person_full_name="Drafted Player", rank=1,
+        person_primary_position_name="Shortstop", blurb="A great blurb.",
+        scouting_report="A great scouting report.", school_name="Some University",
+    )
+    seed_actual_pick(
+        conn, pick_number=1, team_name="Team A", player_name="Drafted Player",
+        mlb_person_id=prospect["mlb_person_id"],
+    )
+
+    data = fetch_dashboard_data(conn, 2026)
+    pick = data["draft_order"][0]["picks"][0]
+
+    assert pick["position_name"] == "Shortstop"
+    assert pick["full_name"] == "Drafted Player"
+    assert pick["blurb"] == "A great blurb."
+    assert pick["scouting_report"] == "A great scouting report."
+    assert pick["school_name"] == "Some University"
+
+
+def test_draft_order_position_falls_back_to_actual_pick_position_without_a_prospect_match(conn):
+    seed_draft_slot(conn, pick_number=1, team_name="Team A", round_label="1")
+    seed_actual_pick(
+        conn, pick_number=1, team_name="Team A", player_name="Unmatched Player",
+        player_position="Catcher", mlb_person_id=None,
+    )
+
+    data = fetch_dashboard_data(conn, 2026)
+    pick = data["draft_order"][0]["picks"][0]
+
+    assert pick["position_name"] == "Catcher"
+    assert pick["full_name"] == "Unmatched Player"
+    assert pick["blurb"] is None
+
+
+def test_draft_order_position_and_blurb_blank_for_undrafted_pick(conn):
+    seed_draft_slot(conn, pick_number=1, team_name="Team A", round_label="1")
+
+    data = fetch_dashboard_data(conn, 2026)
+    pick = data["draft_order"][0]["picks"][0]
+
+    assert pick["position_name"] is None
+    assert pick["blurb"] is None
+
+
 def test_on_the_clock_carries_pick_value(conn):
     seed_draft_slot(conn, pick_number=1, team_name="Team A", round_label="1", pick_value=11_350_600)
 
