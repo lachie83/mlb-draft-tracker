@@ -4,8 +4,9 @@
     {
       "name": "dashboard",
       "runtimeExecutable": "python3",
-      "runtimeArgs": ["python_app/dashboard.py", "--host", "127.0.0.1", "--port", "8791"],
-      "port": 8791
+      "runtimeArgs": ["python_app/dashboard.py", "--host", "127.0.0.1"],
+      "port": 8791,
+      "autoPort": true
     }
   ]
 }
