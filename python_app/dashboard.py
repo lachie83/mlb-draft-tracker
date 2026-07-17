@@ -771,10 +771,16 @@ def fetch_dashboard_data(conn: sqlite3.Connection, year: int):
         for r in q(
             conn,
             """
-            SELECT s.pick_number, s.round_label, s.team_name, s.pick_value, ap.player_name
+            SELECT s.pick_number, s.round_label, s.team_name, s.pick_value, ap.player_name,
+                   COALESCE(p.position_name, ap.player_position) AS position_name,
+                   COALESCE(p.full_name, ap.player_name) AS full_name,
+                   p.blurb, p.scouting_report, p.school_name, p.bats, p.throws,
+                   p.home_city, p.home_state, p.school_class, p.headshot_link
             FROM draft_slots s
             LEFT JOIN actual_picks ap
                 ON ap.draft_year = s.draft_year AND ap.pick_number = s.pick_number
+            LEFT JOIN prospects p
+                ON ap.mlb_person_id = p.mlb_person_id AND ap.draft_year = p.draft_year
             WHERE s.draft_year = ?
             ORDER BY s.pick_number
             """,
@@ -1084,7 +1090,8 @@ def render_draft_order(groups, on_the_clock_pick_number, teams):
             f"""<tr class="{'otc-row' if p['pick_number'] == on_the_clock_pick_number else ''}" data-team="{esc(slugify(p['team_name']))}">
                   <td data-label="Pick">{esc(p['pick_number'])}</td>
                   <td data-label="Team">{team_logo_html(p['team_name'])}{esc(p['team_name'])}</td>
-                  <td data-label="Player">{esc(p.get('player_name')) or ('<span class="badge badge-accent">On the Clock</span>' if p['pick_number'] == on_the_clock_pick_number else '<span class="muted">&mdash;</span>')}</td>
+                  <td data-label="Player">{esc(p.get('player_name')) or ('<span class="badge badge-accent">On the Clock</span>' if p['pick_number'] == on_the_clock_pick_number else '<span class="muted">&mdash;</span>')}{prospect_info_button_html(p)}</td>
+                  <td data-label="Position">{esc(p.get('position_name')) or ''}</td>
                   <td data-label="Slot Value">{esc(format_usd(p.get('pick_value')))}</td>
                 </tr>"""
             for p in group["picks"]
@@ -1095,7 +1102,7 @@ def render_draft_order(groups, on_the_clock_pick_number, teams):
               <h3 class="round-heading">{esc(group['round_name'])}</h3>
               <div class="table-wrap">
                 <table>
-                  <thead><tr><th>Pick</th><th>Team</th><th>Player</th><th>Slot Value</th></tr></thead>
+                  <thead><tr><th>Pick</th><th>Team</th><th>Player</th><th>Position</th><th>Slot Value</th></tr></thead>
                   <tbody>{pick_rows}</tbody>
                 </table>
               </div>
