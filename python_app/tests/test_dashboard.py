@@ -231,6 +231,31 @@ def test_draft_order_position_and_blurb_blank_for_undrafted_pick(conn):
     assert pick["blurb"] is None
 
 
+def test_fallers_carry_scouting_enrichment_for_the_info_card(conn):
+    # the Fallers query only selected rank/full_name/position_name/school_name
+    # /school_class - enough for prospect_info_button_html's guard to pass
+    # (position_name/school_name non-empty) but not blurb/scouting_report,
+    # so the button appeared but always showed "Not available." for both -
+    # same shape as the Predictions (#68) and Draft Order (#70) bugs.
+    seed_draft_slot(conn, pick_number=3, team_name="Team A")
+    seed_prospect(
+        conn, person_id=1, person_full_name="Faller Player", rank=1,
+        blurb="A great blurb.", scouting_report="A great scouting report.",
+        school_name="Some University",
+    )
+    # rank <= picks_made is the query's "should've already been picked by
+    # now" filter - picks_made=3 here so a rank-1 prospect qualifies.
+    seed_actual_pick(conn, pick_number=3, team_name="Team A", player_name="Someone Else")
+
+    data = fetch_dashboard_data(conn, 2026)
+    faller = next(r for r in data["fallers"] if r["full_name"] == "Faller Player")
+
+    assert faller["blurb"] == "A great blurb."
+    assert faller["scouting_report"] == "A great scouting report."
+    assert faller["school_name"] == "Some University"
+    assert faller["picks_fallen"] == 2
+
+
 def test_on_the_clock_carries_pick_value(conn):
     seed_draft_slot(conn, pick_number=1, team_name="Team A", round_label="1", pick_value=11_350_600)
 
