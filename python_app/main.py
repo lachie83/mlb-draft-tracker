@@ -32,7 +32,18 @@ from mlb_tracker.sources import (
     seed_prospects_from_csv,
     verify_baseballr_setup,
 )
-from mlb_tracker.telegram import TelegramNotifier, format_prospect_changes_message, send_milestone_notification_if_new
+from mlb_tracker.telegram import (
+    TelegramNotifier,
+    format_prospect_changes_message,
+    send_milestone_notification_if_new,
+    send_signing_notification_if_new,
+)
+
+# dashboard.py is a sibling script (not part of the mlb_tracker package) -
+# reused here rather than duplicated so a signing notification is built from
+# exactly the same enrichment (position/school/bonus/signability/tag) the
+# dashboard's Actual Picks section computes and displays.
+from dashboard import fetch_and_enrich_picks
 
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -168,7 +179,39 @@ def cmd_live_monitor_api(args):
     init_db(args.db)
     conn = get_connection(args.db)
     notifier = TelegramNotifier()
+
+    # Snapshot signed pick_numbers before/after reconciling so a signing
+    # (bonus_amount going from unset to set) is detected independently of
+    # a pick just being announced - those are two separate events, often
+    # far apart in time (a player can sit unsigned for weeks).
+    signed_before = {
+        row[0]
+        for row in conn.execute(
+            "SELECT pick_number FROM actual_picks WHERE draft_year = ? AND bonus_amount IS NOT NULL",
+            (args.year,),
+        ).fetchall()
+    }
+
     new_picks = reconcile_picks_from_api(conn, draft_year=args.year, notifier=notifier)
+
+    signed_after = {
+        row[0]
+        for row in conn.execute(
+            "SELECT pick_number FROM actual_picks WHERE draft_year = ? AND bonus_amount IS NOT NULL",
+            (args.year,),
+        ).fetchall()
+    }
+    newly_signed = signed_after - signed_before
+    if newly_signed:
+        # fetch_and_enrich_picks with explicit pick_numbers ignores the
+        # dashboard's normal top-100 display cap - a rounds 5-20 signing
+        # (pick_number > ~135) still needs to be found here.
+        for pick_row in fetch_and_enrich_picks(conn, args.year, pick_numbers=sorted(newly_signed)):
+            try:
+                send_signing_notification_if_new(conn, notifier, draft_year=args.year, pick_row=pick_row)
+            except Exception as exc:
+                print(f"Warning: failed to send Telegram signing alert for pick #{pick_row['pick_number']}: {exc}")
+
     # The milestone schedule is tied to the 2026 draft's real wall-clock
     # dates (see draft_schedule.py) - only meaningful when actually
     # monitoring that draft, not e.g. a rehearsal or a different year.
@@ -178,7 +221,10 @@ def cmd_live_monitor_api(args):
             send_milestone_notification_if_new(conn, notifier, draft_year=args.year, milestone=milestone)
     conn.commit()
     conn.close()
-    print(f"Observed {len(new_picks)} new picks via the MLB Stats API")
+    print(
+        f"Observed {len(new_picks)} new picks via the MLB Stats API"
+        + (f", {len(newly_signed)} newly signed" if newly_signed else "")
+    )
 
 
 def cmd_draft_poll_interval(args):

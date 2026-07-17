@@ -12,9 +12,11 @@ from mlb_tracker.telegram import (
     format_prospect_changes_message,
     make_milestone_message,
     make_pick_message,
+    make_signing_message,
     round_display_name,
     send_milestone_notification_if_new,
     send_pick_if_new,
+    send_signing_notification_if_new,
 )
 
 from .factories import seed_prospect
@@ -189,6 +191,94 @@ def test_send_milestone_notification_if_new_is_independent_per_milestone(conn, m
 
     assert get_sent_event(conn, "draft_milestone:2026:day1_preview") is not None
     assert get_sent_event(conn, "draft_milestone:2026:day1_early") is not None
+
+
+def _signed_pick_row(**overrides):
+    row = {
+        "pick_number": 5,
+        "team_name": "Seattle Mariners",
+        "full_name": "Signed Player",
+        "player_name": "Signed Player",
+        "position_name": "Shortstop",
+        "school_name": "Some University",
+        "bonus_amount": 3_200_000,
+        "slot_value": 3_500_000,
+        "signability_tag": "Steal",
+        "signability_delta": 20,
+        "signability": {"score": 82, "tier": "Likely Sign", "factors": ["College Sr eligibility"]},
+    }
+    row.update(overrides)
+    return row
+
+
+def test_make_signing_message_includes_bonus_slot_tag_and_signability():
+    message = make_signing_message(2026, _signed_pick_row())
+
+    assert "Signed Player has signed" in message
+    assert "Pick #5" in message
+    assert "Seattle Mariners" in message
+    assert "Shortstop" in message
+    assert "Some University" in message
+    assert "$3,200,000" in message
+    assert "slot value $3,500,000" in message
+    assert "$300,000 under slot" in message
+    assert "Tag: Steal (+20)" in message
+    assert "Signability: Likely Sign (82/100)" in message
+    assert "College Sr eligibility" in message
+
+
+def test_make_signing_message_over_slot_wording():
+    message = make_signing_message(2026, _signed_pick_row(bonus_amount=4_000_000, slot_value=3_500_000))
+
+    assert "$500,000 over slot" in message
+
+
+def test_make_signing_message_handles_missing_optional_fields():
+    row = _signed_pick_row(position_name=None, school_name=None, signability_tag=None, signability=None)
+
+    message = make_signing_message(2026, row)
+
+    assert "Tag:" not in message
+    assert "Signability:" not in message
+
+
+def test_send_signing_notification_if_new_marks_event_sent(conn, monkeypatch):
+    notifier = disabled_notifier(monkeypatch)
+
+    result = send_signing_notification_if_new(conn, notifier, draft_year=2026, pick_row=_signed_pick_row())
+
+    assert result["reason"] == "telegram not configured"
+    assert get_sent_event(conn, "draft_signing:2026:5") is not None
+
+
+def test_send_signing_notification_if_new_does_not_resend(conn, monkeypatch):
+    notifier = disabled_notifier(monkeypatch)
+    send_signing_notification_if_new(conn, notifier, draft_year=2026, pick_row=_signed_pick_row())
+
+    calls = []
+    notifier.send = lambda text: calls.append(text) or {"ok": True}
+    second = send_signing_notification_if_new(conn, notifier, draft_year=2026, pick_row=_signed_pick_row())
+
+    assert second == {"ok": True, "status": "already_sent", "event_key": "draft_signing:2026:5"}
+    assert calls == []
+
+
+def test_send_signing_notification_if_new_is_a_distinct_event_from_the_pick_alert(conn, monkeypatch):
+    # a pick being made and that same pick later signing are different real-
+    # world moments (often weeks apart) and must not share a dedup key.
+    notifier = disabled_notifier(monkeypatch)
+    pick_row = {
+        "pick_number": 5, "team_name": "Seattle Mariners", "player_name": "Signed Player",
+        "player_position": "SS", "school_name": "Some University",
+    }
+    send_pick_if_new(conn, notifier, draft_year=2026, pick_row=pick_row)
+
+    calls = []
+    notifier.send = lambda text: calls.append(text) or {"ok": True}
+    result = send_signing_notification_if_new(conn, notifier, draft_year=2026, pick_row=_signed_pick_row())
+
+    assert len(calls) == 1
+    assert result.get("status") != "already_sent"
 
 
 def test_send_raises_with_telegrams_error_description(monkeypatch):
