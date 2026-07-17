@@ -9,6 +9,7 @@ from dashboard import (
     describe_prospect_source,
     draft_milestone_payload,
     extract_commitment_school,
+    fetch_and_enrich_picks,
     fetch_dashboard_data,
     fetch_latest_picks,
     fetch_team_pool_data,
@@ -870,3 +871,46 @@ def test_render_draft_schedule_banner_shows_current_milestone():
     assert "draft-schedule-banner" in html
     assert "Live now" in html
     assert "Picks 41-135" in html
+
+
+def test_fetch_and_enrich_picks_default_matches_dashboard_data(conn):
+    seed_draft_slot(conn, pick_number=1, team_name="Team A")
+    prospect = seed_prospect(conn, person_id=1, person_full_name="Player One", rank=1)
+    seed_actual_pick(
+        conn, pick_number=1, team_name="Team A", player_name="Player One",
+        mlb_person_id=prospect["mlb_person_id"], bonus_amount=1_000_000, slot_value=1_200_000,
+    )
+
+    default_rows = fetch_and_enrich_picks(conn, 2026)
+    dashboard_picks = fetch_dashboard_data(conn, 2026)["picks"]
+
+    assert default_rows == dashboard_picks
+
+
+def test_fetch_and_enrich_picks_pick_numbers_bypasses_the_top_100_limit(conn):
+    # a rounds 5-20 signing (pick_number > ~135) must still be reachable -
+    # the dashboard's Actual Picks table caps at the first 100 picks, but a
+    # Telegram signing alert for a late-round pick needs that row too.
+    seed_draft_slot(conn, pick_number=1, team_name="Team A")
+    seed_draft_slot(conn, pick_number=200, team_name="Team B")
+    for n in range(1, 101):
+        seed_draft_slot(conn, pick_number=n, team_name="Filler Team")
+        seed_actual_pick(conn, pick_number=n, team_name="Filler Team", player_name=f"Filler {n}")
+    seed_actual_pick(conn, pick_number=200, team_name="Team B", player_name="Late Round Player", bonus_amount=150_000)
+
+    default_rows = fetch_and_enrich_picks(conn, 2026)
+    assert all(r["pick_number"] != 200 for r in default_rows)
+    assert len(default_rows) == 100
+
+    filtered = fetch_and_enrich_picks(conn, 2026, pick_numbers=[200])
+    assert len(filtered) == 1
+    assert filtered[0]["pick_number"] == 200
+    assert filtered[0]["full_name"] == "Late Round Player"
+    assert filtered[0]["bonus_amount"] == 150_000
+
+
+def test_fetch_and_enrich_picks_pick_numbers_empty_list_behaves_like_default(conn):
+    seed_draft_slot(conn, pick_number=1, team_name="Team A")
+    seed_actual_pick(conn, pick_number=1, team_name="Team A", player_name="Player One")
+
+    assert fetch_and_enrich_picks(conn, 2026, pick_numbers=[]) == fetch_and_enrich_picks(conn, 2026)

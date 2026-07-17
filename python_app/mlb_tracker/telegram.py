@@ -144,6 +144,63 @@ def send_milestone_notification_if_new(
     return result
 
 
+def _format_usd(value) -> str:
+    return f"${value:,.0f}" if value is not None else "unknown"
+
+
+def make_signing_message(draft_year: int, pick_row: dict[str, Any]) -> str:
+    """`pick_row` is one row from dashboard.fetch_and_enrich_picks() - the
+    exact same enriched shape (position/school/bonus/slot value/signability/
+    tag) the dashboard's Actual Picks section renders, computed by the same
+    code path so the message and the web page never disagree."""
+    name = pick_row.get("full_name") or pick_row.get("player_name") or "Unknown player"
+    lines = [
+        f"MLB Draft {draft_year} — {name} has signed",
+        f"Pick #{pick_row['pick_number']} · {pick_row['team_name']}",
+    ]
+    meta = " · ".join(p for p in (pick_row.get("position_name"), pick_row.get("school_name")) if p)
+    if meta:
+        lines.append(meta)
+
+    bonus, slot = pick_row.get("bonus_amount"), pick_row.get("slot_value")
+    bonus_line = f"Bonus: {_format_usd(bonus)}"
+    if slot is not None:
+        bonus_line += f" (slot value {_format_usd(slot)})"
+    lines.append(bonus_line)
+    if bonus is not None and slot is not None:
+        delta = bonus - slot
+        lines.append(f"{_format_usd(abs(delta))} {'over' if delta >= 0 else 'under'} slot")
+
+    tag, delta = pick_row.get("signability_tag"), pick_row.get("signability_delta")
+    if tag:
+        lines.append(f"Tag: {tag} ({'+' if delta >= 0 else ''}{delta})")
+
+    signability = pick_row.get("signability")
+    if signability:
+        lines.append(f"Signability: {signability['tier']} ({signability['score']}/100)")
+        for factor in signability.get("factors", []):
+            lines.append(f"  - {factor}")
+
+    return "\n".join(lines)
+
+
+def send_signing_notification_if_new(conn, notifier: TelegramNotifier, draft_year: int, pick_row: dict[str, Any]) -> dict[str, Any]:
+    """Same dedup shape as send_pick_if_new/send_milestone_notification_if_new
+    (telegram_events_sent, keyed by event_key + payload_hash) - distinct
+    event_key from draft_pick:* since a pick being made and that same pick
+    later signing are two separate, independently-dedup'd events."""
+    event_key = f"draft_signing:{draft_year}:{pick_row['pick_number']}"
+    message = make_signing_message(draft_year, pick_row)
+    payload_hash = hashlib.sha256(message.encode("utf-8")).hexdigest()
+    existing = get_sent_event(conn, event_key)
+    if existing and existing["payload_hash"] == payload_hash:
+        return {"ok": True, "status": "already_sent", "event_key": event_key}
+    result = notifier.send(message)
+    if result.get("ok", True) or result.get("reason") == "telegram not configured":
+        mark_event_sent(conn, event_key, payload_hash, pick_row["pick_number"], message)
+    return result
+
+
 def send_pick_if_new(conn, notifier: TelegramNotifier, draft_year: int, pick_row: dict[str, Any]) -> dict[str, Any]:
     event_key = f"draft_pick:{draft_year}:{pick_row['pick_number']}"
     message = make_pick_message(conn, draft_year, pick_row)

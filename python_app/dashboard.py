@@ -552,6 +552,67 @@ def get_selected_theme(environ):
     return theme if theme in THEME_BG else None
 
 
+def fetch_and_enrich_picks(conn: sqlite3.Connection, year: int, pick_numbers: list[int] | None = None) -> list[dict]:
+    """Actual Picks rows with prospect enrichment (position/school/rank/
+    blurb/etc.) plus computed signability/tag - exactly what the dashboard's
+    Actual Picks section shows and computes. Defaults to the same top-100-by-
+    pick-number set the dashboard displays; pass pick_numbers to fetch
+    specific picks regardless of that limit (e.g. a late-round signing in
+    rounds 5+ that the display cap would otherwise exclude - used by the
+    Telegram signing notification in main.py)."""
+    where_extra = ""
+    params: list = [year]
+    limit_clause = "LIMIT 100"
+    if pick_numbers:
+        placeholders = ",".join("?" for _ in pick_numbers)
+        where_extra = f" AND a.pick_number IN ({placeholders})"
+        params.extend(pick_numbers)
+        limit_clause = ""
+    picks = [
+        dict(r)
+        for r in q(
+            conn,
+            f"""
+            SELECT a.pick_number, a.team_name, a.player_name, a.player_position,
+                   COALESCE(p.school_name, a.school_name) AS school_name,
+                   a.bonus_amount, a.slot_value, a.mlb_person_id,
+                   COALESCE(p.full_name, a.player_name) AS full_name,
+                   COALESCE(p.position_name, a.player_position) AS position_name,
+                   p.rank, p.blurb, p.scouting_report, p.bats, p.throws,
+                   p.home_city, p.home_state, p.school_class, p.headshot_link
+            FROM actual_picks a
+            LEFT JOIN prospects p ON a.mlb_person_id = p.mlb_person_id AND a.draft_year = p.draft_year
+            WHERE a.draft_year = ?{where_extra}
+            ORDER BY a.pick_number
+            {limit_clause}
+            """,
+            tuple(params),
+        )
+    ]
+    pool_pct_used_by_team = {r["team_name"]: r["pct_used"] for r in fetch_team_pool_data(conn, year)}
+    for row in picks:
+        row["signed_status"] = "Signed" if row.get("bonus_amount") is not None else "Unsigned"
+        row["signability_tag"], row["signability_delta"] = signability_tag(row.get("rank"), row["pick_number"])
+        eligibility = class_label(row.get("school_class"))
+        # Commitment tier only means anything for a current HS player -
+        # college prospects' blurbs often reminisce about their *original*
+        # HS commitment (e.g. Roch Cholowsky's blurb mentions his HS-era
+        # commitment to UCLA, where he's since actually enrolled and become
+        # a junior) - that's history, not a live decision, so applying it
+        # here would misread a backward-looking fact as current leverage.
+        commitment_tier = commitment_tier_for_school(extract_commitment_school(row.get("blurb"))) if eligibility == "High School" else None
+        reported = REPORTED_BONUS_DEMANDS.get(row.get("mlb_person_id"))
+        row["signability"] = compute_signability(
+            rank=row.get("rank"), pick_number=row["pick_number"],
+            class_label_value=eligibility,
+            commitment_tier=commitment_tier,
+            pool_pct_used=pool_pct_used_by_team.get(row["team_name"]),
+            prior_return=prior_draft_return(conn, row.get("mlb_person_id"), year),
+            reported_bonus_tier=reported["tier"] if reported else None,
+        )
+    return picks
+
+
 def fetch_dashboard_data(conn: sqlite3.Connection, year: int):
     top_250 = [
         dict(r)
@@ -600,48 +661,7 @@ def fetch_dashboard_data(conn: sqlite3.Connection, year: int):
             f"{row['bats']}/{row['throws']}" if row.get("bats") and row.get("throws") else ""
         )
 
-    picks = [
-        dict(r)
-        for r in q(
-            conn,
-            """
-            SELECT a.pick_number, a.team_name, a.player_name, a.player_position,
-                   COALESCE(p.school_name, a.school_name) AS school_name,
-                   a.bonus_amount, a.slot_value, a.mlb_person_id,
-                   COALESCE(p.full_name, a.player_name) AS full_name,
-                   COALESCE(p.position_name, a.player_position) AS position_name,
-                   p.rank, p.blurb, p.scouting_report, p.bats, p.throws,
-                   p.home_city, p.home_state, p.school_class, p.headshot_link
-            FROM actual_picks a
-            LEFT JOIN prospects p ON a.mlb_person_id = p.mlb_person_id AND a.draft_year = p.draft_year
-            WHERE a.draft_year = ?
-            ORDER BY a.pick_number
-            LIMIT 100
-            """,
-            (year,),
-        )
-    ]
-    pool_pct_used_by_team = {r["team_name"]: r["pct_used"] for r in fetch_team_pool_data(conn, year)}
-    for row in picks:
-        row["signed_status"] = "Signed" if row.get("bonus_amount") is not None else "Unsigned"
-        row["signability_tag"], row["signability_delta"] = signability_tag(row.get("rank"), row["pick_number"])
-        eligibility = class_label(row.get("school_class"))
-        # Commitment tier only means anything for a current HS player -
-        # college prospects' blurbs often reminisce about their *original*
-        # HS commitment (e.g. Roch Cholowsky's blurb mentions his HS-era
-        # commitment to UCLA, where he's since actually enrolled and become
-        # a junior) - that's history, not a live decision, so applying it
-        # here would misread a backward-looking fact as current leverage.
-        commitment_tier = commitment_tier_for_school(extract_commitment_school(row.get("blurb"))) if eligibility == "High School" else None
-        reported = REPORTED_BONUS_DEMANDS.get(row.get("mlb_person_id"))
-        row["signability"] = compute_signability(
-            rank=row.get("rank"), pick_number=row["pick_number"],
-            class_label_value=eligibility,
-            commitment_tier=commitment_tier,
-            pool_pct_used=pool_pct_used_by_team.get(row["team_name"]),
-            prior_return=prior_draft_return(conn, row.get("mlb_person_id"), year),
-            reported_bonus_tier=reported["tier"] if reported else None,
-        )
+    picks = fetch_and_enrich_picks(conn, year)
 
     predictions = [
         dict(r)
