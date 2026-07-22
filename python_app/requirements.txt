@@ -1,4 +1,4 @@
-pandas>=3.0.3
+pandas>=3.0.5
 requests>=2.34.2
 beautifulsoup4>=4.15.0
 lxml>=6.1.1
